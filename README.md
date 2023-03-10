@@ -2,9 +2,10 @@
 代码位置:`/SDK/c++/main.cpp`
 
 #### 1. 生成可执行文件 `./main`
->cd /SDK/c++  
+>cd SDK/c++  
 >rm -rf build  
 >mkdir build  
+>cd build
 >cmake ..  
 >make
 
@@ -22,5 +23,3 @@
 
 `可选参数`  
 -c 指定选手程序的当前目录
-
-111
