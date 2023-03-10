@@ -39,15 +39,15 @@ int main() {
         int K;
         scanf("%d",&K);
         for(int i = 1; i <= K; ++i) {
-            size_t type_id, frame_remain, materials_status, product_status;
+            int type_id, frame_remain, materials_status, product_status;
             double x0, y0;
-            scanf("%zd%lf%lf%zd%zd%zd",&type_id, &x0, &y0, &frame_remain, &materials_status, &product_status);
+            scanf("%d%lf%lf%d%d%d",&type_id, &x0, &y0, &frame_remain, &materials_status, &product_status);
             workbench[i] = make_shared<Workbench>(type_id, x0, y0, frame_remain, materials_status, product_status);
         }
-        for(size_t id = 0; id < 4; ++id) {
-            size_t workbench, carry_id;
+        for(int id = 0; id < 4; ++id) {
+            int workbench, carry_id;
             double time_coefficient, collide_coefficient, angular_velocity, linear_velocity, orient, x0, y0;
-            scanf("%zd%zd%lf%lf%lf%lf%lf%lf%lf",&workbench, &carry_id, &time_coefficient, &collide_coefficient, &angular_velocity, &linear_velocity,
+            scanf("%d%d%lf%lf%lf%lf%lf%lf%lf",&workbench, &carry_id, &time_coefficient, &collide_coefficient, &angular_velocity, &linear_velocity,
                   &orient, &x0, &y0);
             robot[id] = make_shared<Robot>(id, workbench, carry_id, time_coefficient, collide_coefficient, angular_velocity, linear_velocity, orient, x0, y0);
         }
