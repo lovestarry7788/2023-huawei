@@ -23,4 +23,4 @@ public:
     void Print();
 };
 
-#endif //HW2023_OUTPUT_H
+#endif // HW2023_OUTPUT_H
