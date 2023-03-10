@@ -25,7 +25,6 @@ public:
     Robot(size_t id, size_t workbench_, size_t carry_id, double time_coefficient, double collide_coefficient,
           double angular_velocity, double linear_velocity, double orient, double x0, double y0);
 
-    ~Robot();
 };
 
 #endif //HW2023_ROBOT_H

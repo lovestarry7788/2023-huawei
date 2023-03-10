@@ -17,8 +17,6 @@ public:
     Workbench(size_t type_id, double x0, double y0, size_t frame_remain, size_t materials_status,
               size_t product_status);
 
-    ~Workbench();
-
     friend class Robot;
 };
 
