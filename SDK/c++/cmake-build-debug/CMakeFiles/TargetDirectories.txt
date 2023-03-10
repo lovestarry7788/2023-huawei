@@ -1,0 +1,3 @@
+/Users/liuzhijie/Desktop/2023-huawei/MacOSRelease/SDK/c++/cmake-build-debug/CMakeFiles/main.dir
+/Users/liuzhijie/Desktop/2023-huawei/MacOSRelease/SDK/c++/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/liuzhijie/Desktop/2023-huawei/MacOSRelease/SDK/c++/cmake-build-debug/CMakeFiles/rebuild_cache.dir
