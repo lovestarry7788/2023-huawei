@@ -10,7 +10,7 @@
 >make
 
 #### 2. 判题器使用 simple
-> ./Robot -m maps/1.txt -c ./SDK/c++/build "./main"
+> ./Robot -m maps/1.txt -f ./SDK/c++/build/main
 
 #### 2.1 参数解释
 

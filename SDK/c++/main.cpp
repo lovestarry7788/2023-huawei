@@ -29,6 +29,7 @@ int main() {
     readUntilOK();
 
     puts("OK");
+    fflush(stdout);
     // 地图输入结束
 
     shared_ptr<Workbench> workbench[51];
@@ -54,10 +55,8 @@ int main() {
         readUntilOK();
 
         /* Solution */
+        printf("%d\n", frameID);
         puts("OK");
-
-
-        /* Solution */
         fflush(stdout);
     }
     return 0;
