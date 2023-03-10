@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/echo/Project/2023-huawei/SDK/c++/main.cpp
+workbench.h
+/home/echo/Project/2023-huawei/SDK/c++/workbench.h
+robot.h
+/home/echo/Project/2023-huawei/SDK/c++/robot.h
+iostream
+-
+algorithm
+-
+memory
+-
+
+/home/echo/Project/2023-huawei/SDK/c++/robot.cpp
+robot.h
+/home/echo/Project/2023-huawei/SDK/c++/robot.h
+iostream
+-
+algorithm
+-
+
+/home/echo/Project/2023-huawei/SDK/c++/robot.h
+iostream
+-
+cmath
+-
+
+/home/echo/Project/2023-huawei/SDK/c++/workbench.cpp
+workbench.h
+/home/echo/Project/2023-huawei/SDK/c++/workbench.h
+iostream
+-
+
+/home/echo/Project/2023-huawei/SDK/c++/workbench.h
+robot.h
+/home/echo/Project/2023-huawei/SDK/c++/robot.h
+iostream
+-
+

@@ -1,0 +1,3 @@
+/home/echo/Project/2023-huawei/SDK/c++/build/CMakeFiles/rebuild_cache.dir
+/home/echo/Project/2023-huawei/SDK/c++/build/CMakeFiles/main.dir
+/home/echo/Project/2023-huawei/SDK/c++/build/CMakeFiles/edit_cache.dir
