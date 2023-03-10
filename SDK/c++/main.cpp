@@ -15,22 +15,33 @@ bool readUntilOK() {
     return false;
 }
 
+char map_[101][101];
+
 int main() {
-    shared_ptr<Robot> robot0, robot1, robot2, robot3;
-    readUntilOK();
-    puts("OK");
-    fflush(stdout);
-    int frameID;
-    while (scanf("%d", &frameID) != EOF) {
-        readUntilOK();
-        printf("%d\n", frameID);
-        int lineSpeed = 3;
-        double angleSpeed = 1.5;
-        for(int robotId = 0; robotId < 4; robotId++){
-            printf("forward %d %d\n", robotId, lineSpeed);
-            printf("rotate %d %f\n", robotId, angleSpeed);
+    for(int i = 0; i < 100; ++i) {
+        for(int j = 0; j < 100; ++j) {
+            scanf("\n%c",&map_[i][j]);
         }
-        printf("OK\n", frameID);
+    }
+    readUntilOK();
+
+    shared_ptr<Robot> robot[4];
+    int frameID, coins;
+    while (scanf("%d%d", &frameID, &coins) != EOF) {
+        int K;
+        scanf("%d",&K);
+        for(int i = 1; i <= K; ++i) {
+
+        }
+        for(size_t id = 0; id < 4; ++id) {
+            size_t workbench, carry_id;
+            double time_coefficient, collide_coefficient, angular_velocity, linear_velocity, orient, x0, y0;
+            scanf("%zd%zd%lf%lf%lf%lf%lf%lf%lf",&workbench, &carry_id, &time_coefficient, &collide_coefficient, &angular_velocity, &linear_velocity,
+                  &orient, &x0, &y0);
+            robot[id] = new Robot{id, workbench, carry_id, time_coefficient, collide_coefficient, angular_velocity, linear_velocity, orient, x0, y0};
+        }
+
+        readUntilOK();
         fflush(stdout);
     }
     return 0;
