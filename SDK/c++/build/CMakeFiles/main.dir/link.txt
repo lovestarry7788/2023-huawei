@@ -1,0 +1,1 @@
+/usr/bin/c++     CMakeFiles/main.dir/main.cpp.o CMakeFiles/main.dir/robot.cpp.o CMakeFiles/main.dir/workbench.cpp.o  -o main 
