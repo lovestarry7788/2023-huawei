@@ -1,4 +1,7 @@
+#include "robot.h"
 #include <iostream>
+#include <algorithm>
+
 using namespace std;
 
 bool readUntilOK() {
@@ -13,6 +16,7 @@ bool readUntilOK() {
 }
 
 int main() {
+    shared_ptr<Robot> robot0, robot1, robot2, robot3;
     readUntilOK();
     puts("OK");
     fflush(stdout);
