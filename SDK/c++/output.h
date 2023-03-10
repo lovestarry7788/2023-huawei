@@ -5,9 +5,13 @@
 #ifndef HW2023_OUTPUT_H
 #define HW2023_OUTPUT_H
 
+#include <vector>
+#include <string_view>
+
 class Output {
 private:
     int frame_id_;
+    std::vector<std::string_view> Operation;
 
 public:
     void SetFrame(int frame_id);
@@ -16,8 +20,7 @@ public:
     void Buy(int robot_id);
     void Sell(int robot_id);
     void Destroy(int robot_id);
-    void Output();
-    void Flush();
+    void Print();
 };
 
 #endif //HW2023_OUTPUT_H
