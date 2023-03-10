@@ -1,5 +1,6 @@
 
->src: /SDK/c++/main.cpp
+代码位置；
+>/SDK/c++/main.cpp
 
 #### 1. 生成可执行文件 `./main`
 >cd /SDK/c++
