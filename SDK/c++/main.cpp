@@ -19,12 +19,18 @@ bool readUntilOK() {
 char map_[101][101];
 
 int main() {
+
+    // 地图输入开始
     for(int i = 0; i < 100; ++i) {
         for(int j = 0; j < 100; ++j) {
             scanf("\n%c",&map_[i][j]);
         }
     }
     readUntilOK();
+
+    puts("OK");
+    // 地图输入结束
+
     shared_ptr<Workbench> workbench[51];
     shared_ptr<Robot> robot[4];
     int frameID, coins;
@@ -46,6 +52,12 @@ int main() {
         }
 
         readUntilOK();
+
+        /* Solution */
+        puts("OK");
+
+
+        /* Solution */
         fflush(stdout);
     }
     return 0;

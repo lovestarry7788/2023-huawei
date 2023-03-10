@@ -1,14 +1,15 @@
 
-代码位置；
->/SDK/c++/main.cpp
+代码位置:`/SDK/c++/main.cpp`
 
 #### 1. 生成可执行文件 `./main`
 >cd /SDK/c++  
->cmake .  
+>rm -rf build  
+>mkdir build  
+>cmake ..  
 >make
 
-#### 2. 判题器使用样例
-> ./Robot -m maps/1.txt -c ./SDK/c++ "./main"
+#### 2. 判题器使用 simple
+> ./Robot -m maps/1.txt -c ./SDK/c++/build "./main"
 
 #### 2.1 参数解释
 
