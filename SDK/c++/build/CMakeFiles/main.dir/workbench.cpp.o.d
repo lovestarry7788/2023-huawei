@@ -1,5 +1,5 @@
-CMakeFiles/main.dir/main.cpp.o: \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/main.cpp \
+CMakeFiles/main.dir/workbench.cpp.o: \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/workbench.cpp \
   /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/workbench.h \
   /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/robot.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/iostream \

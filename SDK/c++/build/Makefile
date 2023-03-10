@@ -177,6 +177,30 @@ robot.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/robot.cpp.s
 .PHONY : robot.cpp.s
 
+workbench.o: workbench.cpp.o
+.PHONY : workbench.o
+
+# target to build an object file
+workbench.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/workbench.cpp.o
+.PHONY : workbench.cpp.o
+
+workbench.i: workbench.cpp.i
+.PHONY : workbench.i
+
+# target to preprocess a source file
+workbench.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/workbench.cpp.i
+.PHONY : workbench.cpp.i
+
+workbench.s: workbench.cpp.s
+.PHONY : workbench.s
+
+# target to generate assembly for a file
+workbench.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/workbench.cpp.s
+.PHONY : workbench.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -192,6 +216,9 @@ help:
 	@echo "... robot.o"
 	@echo "... robot.i"
 	@echo "... robot.s"
+	@echo "... workbench.o"
+	@echo "... workbench.i"
+	@echo "... workbench.s"
 .PHONY : help
 
 

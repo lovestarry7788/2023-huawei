@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/main.cpp" "CMakeFiles/main.dir/main.cpp.o" "gcc" "CMakeFiles/main.dir/main.cpp.o.d"
   "/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/robot.cpp" "CMakeFiles/main.dir/robot.cpp.o" "gcc" "CMakeFiles/main.dir/robot.cpp.o.d"
+  "/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/workbench.cpp" "CMakeFiles/main.dir/workbench.cpp.o" "gcc" "CMakeFiles/main.dir/workbench.cpp.o.d"
   )
 
 # Targets to which this target links.
