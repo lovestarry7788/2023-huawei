@@ -8,7 +8,7 @@
 #include "robot.h"
 #include <iostream>
 
-class Workbench {
+struct Workbench {
 
 public:
     int type_id_, frame_remain_, materials_status_, product_status_; // 工作台类型，剩余帧数，材料状态，产品状态。
