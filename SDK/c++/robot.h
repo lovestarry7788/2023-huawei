@@ -6,6 +6,8 @@
 #define HW2023_ROBOT_H
 
 #pragma once
+#include "Init.h"
+#include "output.h"
 #include <iostream>
 #include <cmath>
 
@@ -24,7 +26,13 @@ public:
 
     Robot(size_t id, size_t workbench_, size_t carry_id, double time_coefficient, double collide_coefficient,
           double angular_velocity, double linear_velocity, double orient, double x0, double y0);
+    inline void init(int id_) {//机器人信息读入
+        scanf("%zd%zd%lf%lf%lf%lf%lf%lf%lf",&workbench_, &carry_id_, &time_coefficient_, &collide_coefficient_, &angular_velocity_, &linear_velocity_,
+              &orient_, &x0_, &y0_);
+    }
+    inline void rotate(double theta){//旋转角度
 
+    }
 };
 
 #endif //HW2023_ROBOT_H
