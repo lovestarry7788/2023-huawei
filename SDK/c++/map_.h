@@ -5,6 +5,7 @@
 #ifndef CODECRAFTSDK_MAP__H
 #define CODECRAFTSDK_MAP__H
 #include "Init.h"
+#include "output.h"
 #include <cstdio>
 
 class map_{

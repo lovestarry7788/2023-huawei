@@ -18,7 +18,7 @@ public:
               size_t product_status);
 
     inline void init() {
-        scanf("%d%lf%lf%zd%zd%zd",&type_id_, &x0_, &y0_, &frame_remain_, &materials_status_, &product_status_);
+        scanf("%zd%lf%lf%zd%zd%zd",&type_id_, &x0_, &y0_, &frame_remain_, &materials_status_, &product_status_);
         //workbench[i] = std::make_shared<Workbench>(type_id, x0, y0, frame_remain, materials_status, product_status);
     }
 
