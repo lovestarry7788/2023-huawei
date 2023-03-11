@@ -8,6 +8,6 @@ Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, doubl
              id_(id), workbench_(workbench), carry_id_(carry_id), time_coefficient_(time_coefficient), collide_coefficient_(collide_coefficient),
              angular_velocity_(angular_velocity), linear_velocity_(linear_velocity), orient_(orient), x0_(x0), y0_(y0){}
 
-void ToPoint(double dx, double dy, double &forward, double &rotate) {
+void ToPoint(double dx, double dy, double& forward, double& rotate) {
 
 }

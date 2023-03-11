@@ -29,7 +29,7 @@ public:
           double angular_velocity, double linear_velocity, double orient, double x0, double y0);
 
     // 通过调整当前帧的姿态 (forward, rotate) 使机器人去到 (dx, dy)
-    void ToPoint(double dx, double dy, double &forward, double &rotate);
+    void ToPoint(double dx, double dy, double& forward, double& rotate);
 
     friend class Workbench;
 };
