@@ -8,6 +8,7 @@
 #pragma once
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 class Robot {
 private:

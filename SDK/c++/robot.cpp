@@ -2,8 +2,6 @@
 // Created by 刘智杰 on 2023/3/10.
 //
 #include "robot.h"
-#include <iostream>
-#include <algorithm>
 
 Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, double collide_coefficient,
              double angular_velocity, double linear_velocity, double orient, double x0, double y0) :

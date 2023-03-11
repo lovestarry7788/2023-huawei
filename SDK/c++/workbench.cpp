@@ -2,7 +2,6 @@
 // Created by 刘智杰 on 2023/3/10.
 //
 #include "workbench.h"
-#include <iostream>
 
 
 Workbench::Workbench(int type_id, double x0, double y0, int frame_remain, int materials_status,
