@@ -29,10 +29,10 @@ public:
 
     int id_, workbench_, carry_id_; // 机器人的 id, 所携带的物品 id(0没有带物品)
     double time_coefficient_, collide_coefficient_; // 机器人的坐标, 时间系数, 碰撞系数
-    double angular_velocity_, linear_velocity_, orient_, x0_, y0_; // 角速度, 线速度, 朝向, x坐标, y坐标
+    double angular_velocity_, linear_velocity_x_, linear_velocity_y_, orient_, x0_, y0_; // 角速度, 线速度, 朝向, x坐标, y坐标
 
     Robot(int id, int workbench_, int carry_id, double time_coefficient, double collide_coefficient,
-          double angular_velocity, double linear_velocity, double orient, double x0, double y0);
+          double angular_velocity, double linear_velocity_x, double linear_velocity_y, double orient, double x0, double y0);
 
     // 通过调整当前帧的姿态 (forward, rotate) 使机器人去到 (dx, dy)
     void ToPoint(double dx, double dy, double& forward, double& rotate);
