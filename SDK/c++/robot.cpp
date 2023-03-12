@@ -2,6 +2,7 @@
 // Created by 刘智杰 on 2023/3/10.
 //
 #include "robot.h"
+#include "geometry.h"
 
 // using namespace Geometry;
 
@@ -11,12 +12,11 @@ Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, doubl
              angular_velocity_(angular_velocity), linear_velocity_(linear_velocity), orient_(orient), x0_(x0), y0_(y0){}
 
 void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
-    
     double aim_rot = atan2(dy-y0_, dx-x0_);
     double dif_rot = orient_ - aim_rot;
     if (abs(dif_rot) > max_orient_diff_) {
         forward = 0;
-        double limit = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0);
+        double limit = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
         if (dif_rot < limit) rotate = 0;
         else rotate = dif_rot > 0 ? max_rotate_velocity_ : -max_rotate_velocity_;
     } else {

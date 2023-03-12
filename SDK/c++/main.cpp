@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <string_view>
+#include <fstream>
 
 namespace Input {
     int frameID, coins, K;
@@ -61,26 +62,26 @@ namespace Input {
 };
 
 namespace Output {
-    std::vector<std::string_view> Operation;
+    std::vector<std::string> Operation; // string_view会乱码，故换成string --WY
 
     void Forward(int robot_id, double velocity) {
-        Operation.emplace_back(std::string_view{"forward " + std::to_string(robot_id) + " " + std::to_string(velocity)});
+        Operation.emplace_back(std::string{"forward " + std::to_string(robot_id) + " " + std::to_string(velocity)});
     }
 
     void Rotate(int robot_id, double radius) {
-        Operation.emplace_back(std::string_view{"rotate " + std::to_string(robot_id) + " " + std::to_string(radius)});
+        Operation.emplace_back(std::string{"rotate " + std::to_string(robot_id) + " " + std::to_string(radius)});
     }
 
     void Buy(int robot_id) {
-        Operation.emplace_back(std::string_view{"buy " + std::to_string(robot_id)});
+        Operation.emplace_back(std::string{"buy " + std::to_string(robot_id)});
     }
 
     void Sell(int robot_id) {
-        Operation.emplace_back(std::string_view{"sell " + std::to_string(robot_id)});
+        Operation.emplace_back(std::string{"sell " + std::to_string(robot_id)});
     }
 
     void Destroy(int robot_id) {
-        Operation.emplace_back(std::string_view{"destory " + std::to_string(robot_id)});
+        Operation.emplace_back(std::string{"destory " + std::to_string(robot_id)});
     }
 
     void Print(int frame_id) {
@@ -90,8 +91,17 @@ namespace Output {
         }
         puts("OK\n");
         fflush(stdout);
+        Operation.clear();
     }
 };
+
+struct DebugLog {
+    std::ofstream ofs;
+    DebugLog(): ofs("main.log") {}
+    template<class T, class... A> void print(T&& x, A&&... a) { 
+        ofs<<x; (int[]){(ofs<< ' '<< a,0)...}; ofs<<'\n'; 
+    }
+} Log;
 
 namespace Solution1 {
     using namespace Input;
@@ -100,6 +110,17 @@ namespace Solution1 {
         Input::ScanMap();
         while(Input::ScanFrame()) {
             // Solution
+            double forward, rotate;
+            robot[0]->ToPoint(10, 10, forward, rotate);
+
+            Output::Forward(0, forward);
+            Output::Rotate(0, rotate);
+
+            Log.print(Input::frameID);
+            for (auto i : Output::Operation)
+                Log.print(i);
+            // Log.print(forward, rotate);
+
             Output::Print(Input::frameID);
         }
     }
