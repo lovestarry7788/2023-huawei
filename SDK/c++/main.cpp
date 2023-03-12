@@ -139,9 +139,9 @@ namespace Solution2 {
         using namespace Geometry;
         std::queue<Geometry::Point> route;
         // Geometry::Point{10,10}, Geometry::Point{40, 10}, Geometry::Point{40, 40}, Geometry::Point{10, 40}
-        route.push(Geometry::Point{10,10});
-        route.push(Geometry::Point{40,10});
-        route.push(Geometry::Point{40,40});
+        route.push(Geometry::Point{20,20});
+        route.push(Geometry::Point{25,25});
+        route.push(Geometry::Point{40,30});
         route.push(Geometry::Point{10,40});
         while(Input::ScanFrame()) {
             // Solution
@@ -182,13 +182,6 @@ namespace Solution1 {
 
     void Solve() {
         Input::ScanMap();
-        using namespace Geometry;
-        std::queue<Geometry::Point> route;
-        // Geometry::Point{10,10}, Geometry::Point{40, 10}, Geometry::Point{40, 40}, Geometry::Point{10, 40}
-        route.push(Geometry::Point{10,10});
-        route.push(Geometry::Point{40,10});
-        route.push(Geometry::Point{40,40});
-        route.push(Geometry::Point{10,40});
         while(Input::ScanFrame()) {
 
             for(int idx = 0; idx < robot_num_ + K; ++idx) {
@@ -292,6 +285,6 @@ namespace Solution1 {
 }
 
 int main() {
-    Solution1::Solve();
+    Solution2::Solve();
     return 0;
 }

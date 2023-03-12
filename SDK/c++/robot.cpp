@@ -19,6 +19,7 @@ Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, doubl
              id_(id), workbench_(workbench), carry_id_(carry_id), time_coefficient_(time_coefficient), collide_coefficient_(collide_coefficient),
              angular_velocity_(angular_velocity), linear_velocity_x_(linear_velocity_x), linear_velocity_y_(linear_velocity_y), orient_(orient), x0_(x0), y0_(y0){}
 
+// 从当前点到某点，到达时速度为0（防止走过头，更容易控制）。
 void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
     double dif_rot = orient_ - aim_rot;
@@ -56,23 +57,23 @@ double Robot::GetMass() {
     double r = GetRadius();
     return Robot::density_ * r * r;
 }
-//
-void Robot::ToPoint(double x0, double y0, double& forward, double& rotate) {
-    double angle = atan2((y0 - y0_) , (x0 - x0_)); // 计算到目标点的弧度
-    /*
-     * orient_, angle [-pi, pi]
-     * 20ms, pi / s
-    */
-    double delta_angle = (angle - orient_);
-    if(fabs(delta_angle) > acos(-1)) {
-        delta_angle = (2 * acos(-1) - fabs(delta_angle)) * (-1);
-    }
+// zhijie
+// void Robot::ToPoint(double x0, double y0, double& forward, double& rotate) {
+//     double angle = atan2((y0 - y0_) , (x0 - x0_)); // 计算到目标点的弧度
+//     /*
+//      * orient_, angle [-pi, pi]
+//      * 20ms, pi / s
+//     */
+//     double delta_angle = (angle - orient_);
+//     if(fabs(delta_angle) > acos(-1)) {
+//         delta_angle = (2 * acos(-1) - fabs(delta_angle)) * (-1);
+//     }
 
-    if(fabs(delta_angle) >= 0.02 * max_rotate_velocity_) {
-        rotate = max_rotate_velocity_;
-    } else {
-        rotate = delta_angle / 0.02;
-    }
+//     if(fabs(delta_angle) >= 0.02 * max_rotate_velocity_) {
+//         rotate = max_rotate_velocity_;
+//     } else {
+//         rotate = delta_angle / 0.02;
+//     }
 
 double Robot::GetRotInerta() {
     // L = R^2 * M / 2
