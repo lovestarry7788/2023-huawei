@@ -1,3 +1,0 @@
-/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/CMakeFiles/main.dir
-/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/CMakeFiles/edit_cache.dir
-/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/CMakeFiles/rebuild_cache.dir
