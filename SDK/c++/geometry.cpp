@@ -9,12 +9,12 @@ using namespace Geometry;
 
 
 int Geometry::dcmp(double x) { if (fabs(x) < eps) return 0; return x < 0 ? -1 : 1; }
-Vector operator+(const Vector& A, const Vector& B) { return Vector{A.x + B.x, A.y + B.y}; }
-Vector operator-(const Point& A, const Point& B) { return Vector{A.x - B.x, A.y - B.y}; }
-Vector operator*(const Vector& A, double p) { return Vector{A.x * p, A.y * p}; }
-Vector operator/(const Vector& A, double p) { return Vector{A.x / p, A.y / p}; }
-bool operator==(const Point& a, const Point& b) { return a.x == b.x && a.y == b.y; }
-bool operator<(const Point& p1, const Point& p2) {
+Vector Geometry::operator+(const Vector& A, const Vector& B) { return Vector{A.x + B.x, A.y + B.y}; }
+Vector Geometry::operator-(const Point& A, const Point& B) { return Vector{A.x - B.x, A.y - B.y}; }
+Vector Geometry::operator*(const Vector& A, double p) { return Vector{A.x * p, A.y * p}; }
+Vector Geometry::operator/(const Vector& A, double p) { return Vector{A.x / p, A.y / p}; }
+bool Geometry::operator==(const Point& a, const Point& b) { return a.x == b.x && a.y == b.y; }
+bool Geometry::operator<(const Point& p1, const Point& p2) {
     if (p1.x != p2.x) return p1.x < p2.x;
     return p1.y < p2.y;
 }

@@ -1,10 +1,12 @@
 #include "robot.h"
 #include "workbench.h"
 #include "log.h"
+#include "geometry.h"
 #include <iostream>
 #include <vector>
 #include <string_view>
 #include <fstream>
+#include <queue>
 
 namespace MLog {
     std::ofstream ofs("main.log");
@@ -131,13 +133,25 @@ namespace Solution1 {
     using namespace Output;
     void Solve() {
         Input::ScanMap();
+        using namespace Geometry;
+        std::queue<Geometry::Point> route;
+        // Geometry::Point{10,10}, Geometry::Point{40, 10}, Geometry::Point{40, 40}, Geometry::Point{10, 40}
+        route.push(Geometry::Point{10,10});
+        route.push(Geometry::Point{40,10});
+        route.push(Geometry::Point{40,40});
+        route.push(Geometry::Point{10,40});
         while(Input::ScanFrame()) {
             // Solution
-            double forward, rotate;
-            robot[0]->ToPoint(10, 10, forward, rotate);
+            Geometry::Point loc{robot[0]->x0_, robot[0]->y0_};
+            while (Geometry::Length(loc - route.front()) < 1e-1)
+                route.pop();
+            if (route.size()) {
+                double forward = 0, rotate = 0;
+                robot[0]->ToPoint(route.front().x, route.front().y, forward, rotate);
 
-            Output::Forward(0, forward);
-            Output::Rotate(0, rotate);
+                Output::Forward(0, forward);
+                Output::Rotate(0, rotate);
+            }
 
             // Log::print(Input::frameID);
             // for (auto i : Output::Operation)

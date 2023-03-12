@@ -22,17 +22,22 @@ Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, doubl
 void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
     double dif_rot = orient_ - aim_rot;
+    // TODO: 写个类处理角度的模
+    if (dif_rot > Geometry::pi) dif_rot -= 2 * Geometry::pi;
+    else if (dif_rot < -Geometry::pi) dif_rot += 2 * Geometry::pi;
+
     static int frame = 0;
     Log::print("frame", ++frame);
     if (fabs(dif_rot) > max_orient_diff_) {
-        forward = 0;
-        Log::print("change rot");
+        if (fabs(dif_rot) > 1) forward = 0; // 角度太大就停下再转，防止绕圈圈
+        // Log::print("change rot");
         double limit = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
-        if (dif_rot < limit) rotate = 0;
-        else rotate = dif_rot > 0 ? max_rotate_velocity_ : -max_rotate_velocity_;
+        // Log::print("rot limit", limit);
+        if (fabs(dif_rot) < limit) rotate = 0; // 开始减速
+        else rotate = dif_rot > 0 ? -max_rotate_velocity_ : max_rotate_velocity_;
     } else {
         rotate = 0;
-        Log::print("change forward");
+        // Log::print("change forward");
         double vel = Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
         double limit = Geometry::UniformVariableDist(max_force_ / GetMass(), vel, 0);
         double d = Geometry::Dist(x0_, y0_, dx, dy);
@@ -40,7 +45,7 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
         else forward = Robot::max_forward_velocity_;
     }
     Log::print(dx, dy, x0_, y0_, forward);
-    Log::print(orient_, aim_rot, rotate);
+    Log::print(orient_, aim_rot, dif_rot, rotate);
 }
 
 double Robot::GetRadius() {
