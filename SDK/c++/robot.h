@@ -23,7 +23,7 @@ public:
     static constexpr double max_force_ = 250;
     static constexpr double max_rot_force_ = 50;
     static constexpr double max_orient_diff_ = 3e-2; // 最大角度偏差
-    static constexpr double max_rotate_velocity_ = Geometry::pi;
+    const double max_rotate_velocity_ = Geometry::pi;
 
     int id_, workbench_, carry_id_; // 机器人的 id, 所携带的物品 id(0没有带物品)
     double time_coefficient_, collide_coefficient_; // 机器人的坐标, 时间系数, 碰撞系数

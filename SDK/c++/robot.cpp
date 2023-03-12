@@ -88,6 +88,7 @@ double Robot::GetMass() {
     double r = GetRadius();
     return Robot::density_ * r * r;
 }
+
 // zhijie
 // void Robot::ToPoint(double x0, double y0, double& forward, double& rotate) {
 //     double angle = atan2((y0 - y0_) , (x0 - x0_)); // 计算到目标点的弧度

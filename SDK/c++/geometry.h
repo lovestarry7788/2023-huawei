@@ -2,12 +2,13 @@
 #define HW2023_GEOMETRY_H
 
 #include <cmath>
+#include <algorithm>
 
 // double UniformVariableDist(double a, double v, double aim_v);
 
 namespace Geometry {
-    constexpr double pi = acos(-1);
-    constexpr double eps = 1e-10;
+    const double pi = acos(-1);
+    static constexpr double eps = 1e-10;
 
     struct Point { double x, y;};
     using Vector = Point;
