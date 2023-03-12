@@ -5,7 +5,6 @@
 #ifndef HW2023_ROBOT_H
 #define HW2023_ROBOT_H
 
-#pragma once
 #include "workbench.h"
 #include <iostream>
 #include <cmath>
@@ -14,7 +13,6 @@
 struct Robot {
 
 public:
-
     static constexpr double radius_ = 0.45;
     static constexpr double radius_with_thing_ = 0.53;
     static constexpr double max_forward_velocity_ = 6;
