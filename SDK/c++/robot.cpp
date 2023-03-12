@@ -5,13 +5,6 @@
 #include "geometry.h"
 #include "log.h"
 
-namespace Log {
-    std::ofstream ofs("debug.log");
-    template<class T, class... A> void print(T&& x, A&&... a){ 
-        ofs<<x; (int[]){(ofs<< ' '<< a,0)...}; ofs<<'\n'; 
-    }
-}
-
 // using namespace Geometry;
 
 Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, double collide_coefficient,
@@ -88,23 +81,6 @@ double Robot::GetMass() {
     double r = GetRadius();
     return Robot::density_ * r * r;
 }
-// zhijie
-// void Robot::ToPoint(double x0, double y0, double& forward, double& rotate) {
-//     double angle = atan2((y0 - y0_) , (x0 - x0_)); // 计算到目标点的弧度
-//     /*
-//      * orient_, angle [-pi, pi]
-//      * 20ms, pi / s
-//     */
-//     double delta_angle = (angle - orient_);
-//     if(fabs(delta_angle) > acos(-1)) {
-//         delta_angle = (2 * acos(-1) - fabs(delta_angle)) * (-1);
-//     }
-
-//     if(fabs(delta_angle) >= 0.02 * max_rotate_velocity_) {
-//         rotate = max_rotate_velocity_;
-//     } else {
-//         rotate = delta_angle / 0.02;
-//     }
 
 double Robot::GetRotInerta() {
     // L = R^2 * M / 2
