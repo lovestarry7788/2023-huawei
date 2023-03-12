@@ -24,7 +24,7 @@ public:
     double angular_velocity_, linear_velocity_, orient_, x0_, y0_; // 角速度, 线速度, 朝向, x坐标, y坐标
 
     Robot(int id, int workbench_, int carry_id, double time_coefficient, double collide_coefficient,
-          double angular_velocity, double linear_velocity, double orient, double x0, double y0);
+          double angular_velocity, double x_velocity, double y_velocity, double orient, double x0, double y0);
 
     // 通过调整当前帧的姿态 (forward, rotate) 使机器人去到 (dx, dy)
     void ToPoint(double dx, double dy, double& forward, double& rotate);

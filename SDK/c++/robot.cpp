@@ -4,9 +4,9 @@
 #include "robot.h"
 
 Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, double collide_coefficient,
-             double angular_velocity, double linear_velocity, double orient, double x0, double y0) :
+             double angular_velocity, double x_velocity, double y_velocity, double orient, double x0, double y0) :
              id_(id), workbench_(workbench), carry_id_(carry_id), time_coefficient_(time_coefficient), collide_coefficient_(collide_coefficient),
-             angular_velocity_(angular_velocity), linear_velocity_(linear_velocity), orient_(orient), x0_(x0), y0_(y0){}
+             angular_velocity_(angular_velocity), linear_velocity_(sqrt(x_velocity * x_velocity + y_velocity * y_velocity)), orient_(orient), x0_(x0), y0_(y0){}
 
 void Robot::ToPoint(double x0, double y0, double& forward, double& rotate) {
     double angle = atan2((y0 - y0_) , (x0 - x0_)); // 计算到目标点的弧度

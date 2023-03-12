@@ -26,9 +26,7 @@ namespace Input {
     void ScanMap() {
         // 地图输入开始
         for(int i = 0; i < 100; ++i) {
-            for(int j = 0; j < 100; ++j) {
-                scanf("\n%c",&map_[i][j]);
-            }
+            scanf("%s", map_[i]);
         }
         readUntilOK();
         puts("OK");
@@ -49,10 +47,10 @@ namespace Input {
             robot.resize(4);
             for(int id = 0; id < 4; ++id) {
                 int workbench_id, carry_id;
-                double time_coefficient, collide_coefficient, angular_velocity, linear_velocity, orient, x0, y0;
-                scanf("%d%d%lf%lf%lf%lf%lf%lf%lf",&workbench_id, &carry_id, &time_coefficient, &collide_coefficient, &angular_velocity, &linear_velocity,
-                      &orient, &x0, &y0);
-                robot[id] = std::make_shared<Robot>(id, workbench_id, carry_id, time_coefficient, collide_coefficient, angular_velocity, linear_velocity, orient, x0, y0);
+                double time_coefficient, collide_coefficient, angular_velocity, x_velocity, y_velocity, orient, x0, y0;
+                scanf("%d%d%lf%lf%lf%lf%lf%lf%lf%lf",&workbench_id, &carry_id, &time_coefficient, &collide_coefficient, &angular_velocity,
+                      &x_velocity, &y_velocity, &orient, &x0, &y0);
+                robot[id] = std::make_shared<Robot>(id, workbench_id, carry_id, time_coefficient, collide_coefficient, angular_velocity, x_velocity, y_velocity, orient, x0, y0);
             }
 
             readUntilOK();
@@ -111,7 +109,6 @@ namespace Solution1 {
     void Solve() {
         Input::ScanMap();
         while(Input::ScanFrame()) {
-
             for(int idx = 0; idx < robot_num_ + K; ++idx) {
                 for(int idy = 0; idy < robot_num_ + K; ++idy) {
                     double sx, sy, dx, dy;
@@ -158,12 +155,12 @@ namespace Solution1 {
                     } else { // 否则销毁手上的物件
                         double forward, rotate;
                         robot[id] -> ToPoint(workbench[workbench_id] -> x0_, workbench[workbench_id] -> y0_, forward, rotate);
-                        Output::Forward(forward, rotate);
+                        Output::Forward(id, forward);
+                        Output::Rotate(id, rotate);
                     }
                 } else { // 未携带物品
-                    for(int id = 0; id < 4; ++id) {
                         // 身边有 workbench
-                        if(robot[id] -> workbench_) {
+                        if(robot[id] -> workbench_ != -1) {
                             int carry_id = robot[id] -> workbench_;
                             if(workbench[robot[id] -> workbench_] -> TryToBuy(carry_id)) { // 看看能不能买到物品
                                 // 买之前先 check 有没有地方卖
@@ -201,9 +198,9 @@ namespace Solution1 {
                         if(mn < 1e9) { // 如果有则找到最优的策略，跑去买。
                             double forward, rotate;
                             robot[id] -> ToPoint(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
-                            Output::Forward(forward, rotate);
+                            Output::Forward(id, forward);
+                            Output::Rotate(id, rotate);
                         }
-                    }
                 }
             }
 
