@@ -26,12 +26,14 @@ namespace Geometry {
     // 匀变速运动距离/角度
     double UniformVariableDist(double a, double v, double aim_v);
 
+    // 圆周运动最小半径。
+    double MinRadius(double dist, double theta);
+
     double Dot(const Vector& A, const Vector& B) ;
 
     double Length(const Vector& A);
 
     double Angle(const Vector& A, const Vector& B);
-
 }
 
 #endif

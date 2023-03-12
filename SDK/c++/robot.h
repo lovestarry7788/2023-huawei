@@ -35,6 +35,8 @@ public:
     // 通过调整当前帧的姿态 (forward, rotate) 使机器人去到 (dx, dy)
     void ToPoint(double dx, double dy, double& forward, double& rotate);
 
+    void ToPoint_1(double dx, double dy, double& forward, double& rotate);
+
     // 获取当前半径
     double GetRadius();
 
@@ -43,6 +45,8 @@ public:
 
     // 获取转动惯量
     double GetRotInerta();
+
+    double GetMaxSpeedOnCir(double r);
 
     friend class Workbench;
 };
