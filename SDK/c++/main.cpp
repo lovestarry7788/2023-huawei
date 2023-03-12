@@ -180,9 +180,9 @@ namespace Solution2 {
 //         return sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
 //     }
 
-//     void Solve() {
-//         Input::ScanMap();
-//         while(Input::ScanFrame()) {
+    void Solve() {
+        Input::ScanMap();
+        while(Input::ScanFrame()) {
 
 //             for(int idx = 0; idx < robot_num_ + K; ++idx) {
 //                 for(int idy = 0; idy < robot_num_ + K; ++idy) {
