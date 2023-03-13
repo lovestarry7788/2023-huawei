@@ -85,7 +85,7 @@ namespace Solution1 {
              for(int id = 0; id < 4; ++id) { // 枚举机器人
                  if(robot[id] -> carry_id_) { // 携带物品
                      // 身边有 workbench
-                     if(robot[id] -> workbench_) {
+                     if(robot[id] -> workbench_ != -1) {
                          if(workbench[robot[id] -> workbench_] -> TryToSell(robot[id] -> carry_id_)) { // 可以卖出去手上的物品
                              Output::Sell(id);
                              continue ;
@@ -127,8 +127,11 @@ namespace Solution1 {
 
 //                             // 检测会不会和其它机器人碰撞
 //                             bool crashed = false;
-//                             for(int i = 0; i < 4; ++i) {
-//                                 double dis = (robot[i] -> carry_id_ > 0) ? robot[i] ->
+//                             for(int i = 0; i < 4; ++i) if(i != id) {
+//                                 double dis = (robot[i] -> carry_id_ > 0) ? 0.53 : 0.45;
+//                                 double x_ = robot[id] -> x0_ - robot[i] -> x0_;
+//                                 double y_ = robot[id] -> y0_ - robot[i] -> y0_;
+//                                 if(dis + 0.53 >= sqrt(x_ * x_ + y_ * y_)) crashed = true;
 //                             }
 
                              if(can_sell) { // 以后可以卖的出去，买。
