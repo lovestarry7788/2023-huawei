@@ -118,10 +118,10 @@ namespace Output {
 
     void Print(int frame_id) {
         printf("%d\n", frame_id);
-        // MLog::print(frame_id);
+        MLog::print(frame_id);
         for(const auto& u: Operation) {
             printf("%s\n", u.data()); // 记得换行
-            // MLog::print(u.data());
+            MLog::print(u.data());
         }
         puts("OK\n");
         fflush(stdout);
