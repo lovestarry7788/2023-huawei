@@ -1,4 +1,8 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/main.dir/geometry.cpp.o"
+  "CMakeFiles/main.dir/geometry.cpp.o.d"
+  "CMakeFiles/main.dir/log.cpp.o"
+  "CMakeFiles/main.dir/log.cpp.o.d"
   "CMakeFiles/main.dir/main.cpp.o"
   "CMakeFiles/main.dir/main.cpp.o.d"
   "CMakeFiles/main.dir/robot.cpp.o"

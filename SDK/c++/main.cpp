@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
-#include <string_view>
 #include <fstream>
 #include <queue>
 
@@ -225,18 +224,21 @@ namespace Solution1 {
                              }
                          }
                      }
+
+                     Log::print("try to sell, robot ", id, " carry_id ", robot[id] -> carry_id_, " sell_workbench: ", workbench_id, " sell_workbench_type_id: ", workbench[workbench_id] -> type_id_);
                      if(workbench_id == -1) { // 找到有工作台
                          Output::Destroy(id);
                      } else { // 否则销毁手上的物件
                          double forward, rotate;
-                         robot[id] -> ToPoint(workbench[workbench_id] -> x0_, workbench[workbench_id] -> y0_, forward, rotate);
+                         robot[id] -> ToPoint_1(workbench[workbench_id] -> x0_, workbench[workbench_id] -> y0_, forward, rotate);
                          Output::Forward(id, forward);
                          Output::Rotate(id, rotate);
                      }
                  } else { // 未携带物品
                      // 身边有 workbench
                      if(robot[id] -> workbench_ != -1) {
-                         int carry_id = robot[id] -> workbench_;
+                         int carry_id = workbench[robot[id] -> workbench_] -> type_id_;
+                         // Log::print("Can buy, id: ", id, " workbench : ", robot[id] -> workbench_, " type_id: ", workbench[robot[id] -> workbench_] -> type_id_);
                          if(workbench[robot[id] -> workbench_] -> TryToBuy(carry_id)) { // 看看能不能买到物品
                              // 买之前先 check 有没有地方卖
                              bool can_sell = false;
@@ -245,6 +247,7 @@ namespace Solution1 {
                                  if(can_sell) break;
                              }
                              if(can_sell) { // 以后可以卖的出去，买。
+                                 Log::print("buy!, id: ", id, " workbench : ", robot[id] -> workbench_, " can_sell : ", can_sell);
                                  Output::Buy(id);
                                  continue;
                              }
@@ -252,14 +255,15 @@ namespace Solution1 {
                      }
 
                      // 根据策略，选一个东西去买
-                     double mn = 1e9; // 物品获利 / 距离
+                     double mn = 0.0; // 物品获利 / 距离
                      int carry_id = -1, workbench_buy, workbench_sell;
                      for(int k = 1; k <= 9; ++k) { // 枚举要买的物品
                          for(int i = 0; i < K; ++i) { // 从哪个工作站买
                              for(int j = 0; j < K; ++j) { // 从哪个工作站卖
                                  if(workbench[i] -> TryToBuy(k) && workbench[j] -> TryToSell(k)) {
                                      double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
-                                     if(money_per_distance < mn) {
+                                     // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
+                                     if(money_per_distance > mn) {
                                          mn = money_per_distance;
                                          carry_id = k;
                                          workbench_buy = i;
@@ -270,9 +274,11 @@ namespace Solution1 {
                          }
                      }
 
+                     Log::print("choose to buy, Robot ", id, " : ", carry_id, workbench_buy, workbench_sell);
+
                      if(mn < 1e9) { // 如果有则找到最优的策略，跑去买。
                          double forward, rotate;
-                         robot[id] -> ToPoint(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
+                         robot[id] -> ToPoint_1(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
                          Output::Forward(id, forward);
                          Output::Rotate(id, rotate);
                      }
@@ -280,11 +286,12 @@ namespace Solution1 {
              }
 
              Output::Print(Input::frameID);
+             Log::print("frame_id: ", frameID, " OK! ");
          }
      }
  }
 
 int main() {
-    Solution2::Solve();
+    Solution1::Solve();
     return 0;
 }

@@ -69,10 +69,38 @@ include CMakeFiles/main.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/main.dir/flags.make
 
+CMakeFiles/main.dir/geometry.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/geometry.cpp.o: /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/geometry.cpp
+CMakeFiles/main.dir/geometry.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/geometry.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/geometry.cpp.o -MF CMakeFiles/main.dir/geometry.cpp.o.d -o CMakeFiles/main.dir/geometry.cpp.o -c /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/geometry.cpp
+
+CMakeFiles/main.dir/geometry.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/geometry.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/geometry.cpp > CMakeFiles/main.dir/geometry.cpp.i
+
+CMakeFiles/main.dir/geometry.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/geometry.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/geometry.cpp -o CMakeFiles/main.dir/geometry.cpp.s
+
+CMakeFiles/main.dir/log.cpp.o: CMakeFiles/main.dir/flags.make
+CMakeFiles/main.dir/log.cpp.o: /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/log.cpp
+CMakeFiles/main.dir/log.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/log.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/log.cpp.o -MF CMakeFiles/main.dir/log.cpp.o.d -o CMakeFiles/main.dir/log.cpp.o -c /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/log.cpp
+
+CMakeFiles/main.dir/log.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/main.dir/log.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/log.cpp > CMakeFiles/main.dir/log.cpp.i
+
+CMakeFiles/main.dir/log.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/main.dir/log.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/log.cpp -o CMakeFiles/main.dir/log.cpp.s
+
 CMakeFiles/main.dir/main.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/main.cpp.o: /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/main.cpp
 CMakeFiles/main.dir/main.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/main.dir/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/main.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/main.cpp.o -MF CMakeFiles/main.dir/main.cpp.o.d -o CMakeFiles/main.dir/main.cpp.o -c /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/main.cpp
 
 CMakeFiles/main.dir/main.cpp.i: cmake_force
@@ -86,7 +114,7 @@ CMakeFiles/main.dir/main.cpp.s: cmake_force
 CMakeFiles/main.dir/robot.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/robot.cpp.o: /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/robot.cpp
 CMakeFiles/main.dir/robot.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/main.dir/robot.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/main.dir/robot.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/robot.cpp.o -MF CMakeFiles/main.dir/robot.cpp.o.d -o CMakeFiles/main.dir/robot.cpp.o -c /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/robot.cpp
 
 CMakeFiles/main.dir/robot.cpp.i: cmake_force
@@ -100,7 +128,7 @@ CMakeFiles/main.dir/robot.cpp.s: cmake_force
 CMakeFiles/main.dir/workbench.cpp.o: CMakeFiles/main.dir/flags.make
 CMakeFiles/main.dir/workbench.cpp.o: /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/workbench.cpp
 CMakeFiles/main.dir/workbench.cpp.o: CMakeFiles/main.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/main.dir/workbench.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/main.dir/workbench.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/main.dir/workbench.cpp.o -MF CMakeFiles/main.dir/workbench.cpp.o.d -o CMakeFiles/main.dir/workbench.cpp.o -c /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/workbench.cpp
 
 CMakeFiles/main.dir/workbench.cpp.i: cmake_force
@@ -113,6 +141,8 @@ CMakeFiles/main.dir/workbench.cpp.s: cmake_force
 
 # Object files for target main
 main_OBJECTS = \
+"CMakeFiles/main.dir/geometry.cpp.o" \
+"CMakeFiles/main.dir/log.cpp.o" \
 "CMakeFiles/main.dir/main.cpp.o" \
 "CMakeFiles/main.dir/robot.cpp.o" \
 "CMakeFiles/main.dir/workbench.cpp.o"
@@ -120,12 +150,14 @@ main_OBJECTS = \
 # External object files for target main
 main_EXTERNAL_OBJECTS =
 
+main: CMakeFiles/main.dir/geometry.cpp.o
+main: CMakeFiles/main.dir/log.cpp.o
 main: CMakeFiles/main.dir/main.cpp.o
 main: CMakeFiles/main.dir/robot.cpp.o
 main: CMakeFiles/main.dir/workbench.cpp.o
 main: CMakeFiles/main.dir/build.make
 main: CMakeFiles/main.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable main"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable main"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/main.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -5,13 +5,6 @@
 #include "geometry.h"
 #include "log.h"
 
-namespace Log {
-    std::ofstream ofs("debug.log");
-    template<class T, class... A> void print(T&& x, A&&... a){
-        ofs<<x; (int[]){(ofs<< ' '<< a,0)...}; ofs<<'\n';
-    }
-}
-
 // using namespace Geometry;
 
 Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, double collide_coefficient,
@@ -27,8 +20,8 @@ void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
     if (dif_rot > Geometry::pi) dif_rot -= 2 * Geometry::pi;
     else if (dif_rot < -Geometry::pi) dif_rot += 2 * Geometry::pi;
 
-    static int frame = 0;
-    Log::print("frame", ++frame);
+    // static int frame = 0;
+    // Log::print("frame", ++frame);
     if (fabs(dif_rot) > max_orient_diff_) {
         if (fabs(dif_rot) > 1) forward = 0; // 角度太大就停下再转，防止绕圈圈
         // Log::print("change rot");
@@ -45,8 +38,8 @@ void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
         if (limit > d) forward = 0;
         else forward = Robot::max_forward_velocity_;
     }
-    Log::print(dx, dy, x0_, y0_, forward);
-    Log::print(orient_, aim_rot, dif_rot, rotate);
+    // Log::print(dx, dy, x0_, y0_, forward);
+    // Log::print(orient_, aim_rot, dif_rot, rotate);
 }
 
 // 方案2：控制通过转向圆周控制速度，除了圆周不够，都不减速
@@ -74,10 +67,10 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
 
     forward = std::min(forward, max_forward_velocity_);
 
-    static int frame = 0;
-    Log::print("frame", ++frame);
-    Log::print(dx, dy, x0_, y0_, forward);
-    Log::print(orient_, aim_rot, dif_rot, rotate);
+    // static int frame = 0;
+    // Log::print("frame", ++frame);
+    // Log::print(dx, dy, x0_, y0_, forward);
+    // Log::print(orient_, aim_rot, dif_rot, rotate);
 }
 
 double Robot::GetRadius() {
@@ -88,24 +81,6 @@ double Robot::GetMass() {
     double r = GetRadius();
     return Robot::density_ * r * r;
 }
-
-// zhijie
-// void Robot::ToPoint(double x0, double y0, double& forward, double& rotate) {
-//     double angle = atan2((y0 - y0_) , (x0 - x0_)); // 计算到目标点的弧度
-//     /*
-//      * orient_, angle [-pi, pi]
-//      * 20ms, pi / s
-//     */
-//     double delta_angle = (angle - orient_);
-//     if(fabs(delta_angle) > acos(-1)) {
-//         delta_angle = (2 * acos(-1) - fabs(delta_angle)) * (-1);
-//     }
-
-//     if(fabs(delta_angle) >= 0.02 * max_rotate_velocity_) {
-//         rotate = max_rotate_velocity_;
-//     } else {
-//         rotate = delta_angle / 0.02;
-//     }
 
 double Robot::GetRotInerta() {
     // L = R^2 * M / 2
