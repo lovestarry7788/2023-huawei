@@ -1,6 +1,6 @@
 CMakeFiles/main.dir/log.cpp.o: \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/log.cpp \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/log.h \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/log.cpp \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/log.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/fstream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__availability \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__config \

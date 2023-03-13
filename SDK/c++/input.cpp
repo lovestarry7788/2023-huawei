@@ -1,4 +1,5 @@
 #include "input.h"
+#include "log.h"
 
 int Input::frameID, Input::coins, Input::K;
 char Input::map_[101][101];
@@ -36,6 +37,7 @@ bool Input::ScanFrame() {
             int type_id, frame_remain, materials_status, product_status;
             double x0, y0;
             scanf("%d%lf%lf%d%d%d",&type_id, &x0, &y0, &frame_remain, &materials_status, &product_status);
+            Log::print(frameID, coins, type_id, x0, y0, frame_remain, materials_status, product_status);
             if (!workbench[i])
                 workbench[i] = std::make_shared<Workbench>(type_id, x0, y0, frame_remain, materials_status, product_status);
             else {
@@ -54,6 +56,7 @@ bool Input::ScanFrame() {
             double time_coefficient, collide_coefficient, angular_velocity, linear_velocity_x, linear_velocity_y, orient, x0, y0;
             scanf("%d%d%lf%lf%lf%lf%lf%lf%lf%lf",&workbench, &carry_id, &time_coefficient, &collide_coefficient, &angular_velocity, &linear_velocity_x, &linear_velocity_y, 
                     &orient, &x0, &y0);
+            Log::print(workbench, carry_id, time_coefficient, collide_coefficient, angular_velocity, linear_velocity_x, linear_velocity_y, orient, x0, y0);
             if (!robot[id]) 
                 robot[id] = std::make_shared<Robot>(id, workbench, carry_id, time_coefficient, collide_coefficient, angular_velocity, linear_velocity_x, linear_velocity_y, orient, x0, y0);
             else {

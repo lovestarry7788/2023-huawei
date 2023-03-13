@@ -57,10 +57,10 @@ RM = /opt/homebrew/Cellar/cmake/3.25.2/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++
+CMAKE_SOURCE_DIR = /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build
+CMAKE_BINARY_DIR = /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build/CMakeFiles /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
