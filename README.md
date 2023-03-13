@@ -11,6 +11,7 @@
 
 #### 2. 判题器使用 simple
 > ./Robot_GUI -m maps/1.txt ./SDK/c++/build/main
+> ./Robot_linux -m maps/1.txt ./build/main -f
 
 #### 2.1 参数解释
 
