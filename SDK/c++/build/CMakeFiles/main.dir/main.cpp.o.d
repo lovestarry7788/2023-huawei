@@ -1,6 +1,6 @@
 CMakeFiles/main.dir/main.cpp.o: \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/main.cpp \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/log.h \
+  /Users/gllonkxc/Desktop/2023-huawei/SDK/c++/main.cpp \
+  /Users/gllonkxc/Desktop/2023-huawei/SDK/c++/log.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/fstream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__availability \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__config \
@@ -422,12 +422,12 @@ CMakeFiles/main.dir/main.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/iomanip \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/vector \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/iostream \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/geometry.h \
+  /Users/gllonkxc/Desktop/2023-huawei/SDK/c++/geometry.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/cmath \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/math.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/math.h \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/input.h \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/workbench.h \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/robot.h \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/output.h \
+  /Users/gllonkxc/Desktop/2023-huawei/SDK/c++/input.h \
+  /Users/gllonkxc/Desktop/2023-huawei/SDK/c++/workbench.h \
+  /Users/gllonkxc/Desktop/2023-huawei/SDK/c++/robot.h \
+  /Users/gllonkxc/Desktop/2023-huawei/SDK/c++/output.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/queue
