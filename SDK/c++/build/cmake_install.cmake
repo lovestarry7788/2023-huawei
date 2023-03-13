@@ -1,4 +1,4 @@
-# Install script for directory: /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++
+# Install script for directory: /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

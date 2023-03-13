@@ -57,10 +57,10 @@ RM = /opt/homebrew/Cellar/cmake/3.25.2/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++
+CMAKE_SOURCE_DIR = /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build
+CMAKE_BINARY_DIR = /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build/CMakeFiles /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -129,6 +129,30 @@ main/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+dispatch.o: dispatch.cpp.o
+.PHONY : dispatch.o
+
+# target to build an object file
+dispatch.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/dispatch.cpp.o
+.PHONY : dispatch.cpp.o
+
+dispatch.i: dispatch.cpp.i
+.PHONY : dispatch.i
+
+# target to preprocess a source file
+dispatch.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/dispatch.cpp.i
+.PHONY : dispatch.cpp.i
+
+dispatch.s: dispatch.cpp.s
+.PHONY : dispatch.s
+
+# target to generate assembly for a file
+dispatch.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/dispatch.cpp.s
+.PHONY : dispatch.cpp.s
+
 geometry.o: geometry.cpp.o
 .PHONY : geometry.o
 
@@ -152,6 +176,30 @@ geometry.s: geometry.cpp.s
 geometry.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/geometry.cpp.s
 .PHONY : geometry.cpp.s
+
+input.o: input.cpp.o
+.PHONY : input.o
+
+# target to build an object file
+input.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input.cpp.o
+.PHONY : input.cpp.o
+
+input.i: input.cpp.i
+.PHONY : input.i
+
+# target to preprocess a source file
+input.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input.cpp.i
+.PHONY : input.cpp.i
+
+input.s: input.cpp.s
+.PHONY : input.s
+
+# target to generate assembly for a file
+input.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/input.cpp.s
+.PHONY : input.cpp.s
 
 log.o: log.cpp.o
 .PHONY : log.o
@@ -200,6 +248,30 @@ main.s: main.cpp.s
 main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.s
 .PHONY : main.cpp.s
+
+output.o: output.cpp.o
+.PHONY : output.o
+
+# target to build an object file
+output.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/output.cpp.o
+.PHONY : output.cpp.o
+
+output.i: output.cpp.i
+.PHONY : output.i
+
+# target to preprocess a source file
+output.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/output.cpp.i
+.PHONY : output.cpp.i
+
+output.s: output.cpp.s
+.PHONY : output.s
+
+# target to generate assembly for a file
+output.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/output.cpp.s
+.PHONY : output.cpp.s
 
 robot.o: robot.cpp.o
 .PHONY : robot.o
@@ -258,15 +330,24 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... main"
+	@echo "... dispatch.o"
+	@echo "... dispatch.i"
+	@echo "... dispatch.s"
 	@echo "... geometry.o"
 	@echo "... geometry.i"
 	@echo "... geometry.s"
+	@echo "... input.o"
+	@echo "... input.i"
+	@echo "... input.s"
 	@echo "... log.o"
 	@echo "... log.i"
 	@echo "... log.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... output.o"
+	@echo "... output.i"
+	@echo "... output.s"
 	@echo "... robot.o"
 	@echo "... robot.i"
 	@echo "... robot.s"

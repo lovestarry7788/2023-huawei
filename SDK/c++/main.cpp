@@ -84,34 +84,34 @@ namespace Solution1 {
 
              for(int id = 0; id < 4; ++id) { // 枚举机器人
                  if(robot[id] -> carry_id_) { // 携带物品
-                     // 身边有 workbench
-                     if(robot[id] -> workbench_) {
-                         if(workbench[robot[id] -> workbench_] -> TryToSell(robot[id] -> carry_id_)) { // 可以卖出去手上的物品
-                             Output::Sell(id);
-                             continue ;
-                         }
-                     }
-
-                     // 跑去卖手上的东西
-                     int workbench_id = -1; double mn = 1e9;
-                     for(int i = 0; i < K; ++i) { // 找一个最近的工作台
-                         if(workbench[i] -> TryToSell(robot[id] -> carry_id_)) {
-                             if(workbench_id == -1 || mn > dis_[id][i + robot_num_]) {
-                                 mn = dis_[id][i + robot_num_];
-                                 workbench_id = i;
-                             }
-                         }
-                     }
-
-                     Log::print("try to sell, robot ", id, " carry_id ", robot[id] -> carry_id_, " sell_workbench: ", workbench_id, " sell_workbench_type_id: ", workbench[workbench_id] -> type_id_);
-                     if(workbench_id == -1) { // 找到有工作台
-                         Output::Destroy(id);
-                     } else { // 否则销毁手上的物件
-                         double forward, rotate;
-                         robot[id] -> ToPoint_1(workbench[workbench_id] -> x0_, workbench[workbench_id] -> y0_, forward, rotate);
-                         Output::Forward(id, forward);
-                         Output::Rotate(id, rotate);
-                     }
+//                     // 身边有 workbench
+//                     if(robot[id] -> workbench_) {
+//                         if(workbench[robot[id] -> workbench_] -> TryToSell(robot[id] -> carry_id_)) { // 可以卖出去手上的物品
+//                             Output::Sell(id);
+//                             continue ;
+//                         }
+//                     }
+//
+//                     // 跑去卖手上的东西
+//                     int workbench_id = -1; double mn = 1e9;
+//                     for(int i = 0; i < K; ++i) { // 找一个最近的工作台
+//                         if(workbench[i] -> TryToSell(robot[id] -> carry_id_)) {
+//                             if(workbench_id == -1 || mn > dis_[id][i + robot_num_]) {
+//                                 mn = dis_[id][i + robot_num_];
+//                                 workbench_id = i;
+//                             }
+//                         }
+//                     }
+//
+//                     Log::print("try to sell, robot ", id, " carry_id ", robot[id] -> carry_id_, " sell_workbench: ", workbench_id, " sell_workbench_type_id: ", workbench[workbench_id] -> type_id_);
+//                     if(workbench_id == -1) { // 找到有工作台
+//                         Output::Destroy(id);
+//                     } else { // 否则销毁手上的物件
+//                         double forward, rotate;
+//                         robot[id] -> ToPoint_1(workbench[workbench_id] -> x0_, workbench[workbench_id] -> y0_, forward, rotate);
+//                         Output::Forward(id, forward);
+//                         Output::Rotate(id, rotate);
+//                     }
                  } else { // 未携带物品
                      // 身边有 workbench
                      if(robot[id] -> workbench_ != -1) {
