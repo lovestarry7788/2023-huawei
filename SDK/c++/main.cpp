@@ -85,7 +85,7 @@ namespace Solution1 {
              for(int id = 0; id < 4; ++id) { // 枚举机器人
                  if(robot[id] -> carry_id_) { // 携带物品
                      // 身边有 workbench
-                     if(robot[id] -> workbench_) {
+                     if(robot[id] -> workbench_ != -1) {
                          if(workbench[robot[id] -> workbench_] -> TryToSell(robot[id] -> carry_id_)) { // 可以卖出去手上的物品
                              Output::Sell(id);
                              continue ;
@@ -161,7 +161,7 @@ namespace Solution1 {
 
                      Log::print("choose to buy, Robot ", id, " : ", carry_id, workbench_buy, workbench_sell);
 
-                     if(mn < 1e9) { // 如果有则找到最优的策略，跑去买。
+                     if(fabs(mn - 0) > 1e-5) { // 如果有则找到最优的策略，跑去买。
                          double forward, rotate;
                          robot[id] -> ToPoint_1(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
                          Output::Forward(id, forward);
