@@ -132,7 +132,7 @@ namespace Solution1 {
                      if(robot[id] -> workbench_ != -1) {
                          int carry_id = workbench[robot[id] -> workbench_] -> type_id_;
                          // Log::print("Can buy, id: ", id, " workbench : ", robot[id] -> workbench_, " type_id: ", workbench[robot[id] -> workbench_] -> type_id_);
-                         if(workbench[robot[id] -> workbench_] -> TryToBuy(carry_id, 0)) { // 看看能不能买到物品
+                         if(workbench[robot[id] -> workbench_] -> TryToBuy(carry_id, -100)) { // 看看能不能买到物品
                              // 买之前先 check 有没有地方卖
                              bool can_sell = false;
                              for(int i = 0; i < K; ++i) {
@@ -154,8 +154,9 @@ namespace Solution1 {
                      for(int k = 1; k <= 9; ++k) { // 枚举要买的物品
                          for(int i = 0; i < K; ++i) { // 从哪个工作站买
                              for(int j = 0; j < K; ++j) { // 从哪个工作站卖
-                                 double time_to_buy = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i] -> y0_}});
-                                 if(workbench[i] -> TryToBuy(k, time_to_buy) && workbench[j] -> TryToSell(k)) {
+                                 if(workbench[j] -> type_id_ == 9) continue;
+                                 // double time_to_buy = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i] -> y0_}});
+                                 if(workbench[i] -> TryToBuy(k, -100) && workbench[j] -> TryToSell(k)) {
                                      double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
                                                                                dis_[i + robot_num_][j +
                                                                                                     robot_num_]);

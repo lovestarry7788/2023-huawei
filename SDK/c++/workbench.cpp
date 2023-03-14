@@ -10,7 +10,7 @@ Workbench::Workbench(int type_id, double x0, double y0, int frame_remain, int ma
 
 bool Workbench::TryToBuy(int carry_id, double time_to_buy) { // carry_id : 物品的 id
     if(type_id_ >= 1 && type_id_ <= 7 && type_id_ == carry_id) {
-        if(product_status_ || (product_status_ == 0 && time_to_buy >= frame_remain_)) return true;
+        if(product_status_ || (product_status_ == 0 && frame_remain_ > 0 && time_to_buy >= frame_remain_)) return true;
     }
     return false;
 }
