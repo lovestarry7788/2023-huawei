@@ -11,6 +11,7 @@
 #include <cmath>
 #include <algorithm>
 #include <memory>
+#include <vector>
 
 struct Robot {
 
@@ -47,6 +48,8 @@ public:
     double GetRotInerta();
 
     double GetMaxSpeedOnCir(double r);
+
+    double CalcTime(std::vector<Geometry::Point>);
 
     friend class Workbench;
 };

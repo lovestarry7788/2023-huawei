@@ -92,6 +92,11 @@ double Robot::GetMaxSpeedOnCir(double r) {
     return sqrt(max_force_ * r / GetMass());
 }
 
+// Todo:
+double Robot::CalcTime(std::vector<Geometry::Point>) {
+    return 0.0;
+}
+
 // zhijie
 // void Robot::ToPoint(double x0, double y0, double& forward, double& rotate) {
 //     double angle = atan2((y0 - y0_) , (x0 - x0_)); // 计算到目标点的弧度
