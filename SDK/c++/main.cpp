@@ -81,86 +81,89 @@ namespace Solution1 {
                      dis_[idx][idy] = Distance(sx, sy, dx, dy);
                  }
              }
+            for(int id = 0; id < 4; ++id) { // 枚举机器人
+                // Log::print("robot", id);
+                if(robot[id] -> carry_id_) { // 携带物品
+                    // 身边有 workbench
+                    if(robot[id] -> workbench_ != -1) {
+                        if(workbench[robot[id] -> workbench_] -> TryToSell(robot[id] -> carry_id_)) { // 可以卖出去手上的物品
+                            Output::Sell(id);
+                            continue ;
+                        }
+                    }
 
-             for(int id = 0; id < 4; ++id) { // 枚举机器人
-                 if(robot[id] -> carry_id_) { // 携带物品
-                     // 身边有 workbench
-                     if(robot[id] -> workbench_ != -1) {
-                         if(workbench[robot[id] -> workbench_] -> TryToSell(robot[id] -> carry_id_)) { // 可以卖出去手上的物品
-                             Output::Sell(id);
-                             continue ;
-                         }
-                     }
-
-                     // 跑去卖手上的东西
-                     int workbench_id = -1; double mn = 1e9;
-                     for(int i = 0; i < K; ++i) { // 找一个最近的工作台
-                         if(workbench[i] -> TryToSell(robot[id] -> carry_id_)) {
-                             if(workbench_id == -1 || mn > dis_[id][i + robot_num_]) {
-                                 mn = dis_[id][i + robot_num_];
-                                 workbench_id = i;
-                             }
-                         }
-                     }
-
-                     if(workbench_id == -1) { // 找到有工作台
-                        //                         if(robot[id]->carry_id_ != -1)
-                        Output::Destroy(id);
-                     } else { // 否则销毁手上的物件
-                         double forward, rotate;
-                         Log::print("try to sell, robot ", id, " carry_id ", robot[id] -> carry_id_, " sell_workbench: ", workbench_id, " sell_workbench_type_id: ", workbench[workbench_id] -> type_id_);
-                         robot[id] -> ToPoint_1(workbench[workbench_id] -> x0_, workbench[workbench_id] -> y0_, forward, rotate);
-                         Output::Forward(id, forward);
-                         Output::Rotate(id, rotate);
-                     }
-                 } else { // 未携带物品
-                     // 身边有 workbench
-                     if(robot[id] -> workbench_ != -1) {
-                         int carry_id = workbench[robot[id] -> workbench_] -> type_id_;
-                         // Log::print("Can buy, id: ", id, " workbench : ", robot[id] -> workbench_, " type_id: ", workbench[robot[id] -> workbench_] -> type_id_);
-                         if(workbench[robot[id] -> workbench_] -> TryToBuy(carry_id)) { // 看看能不能买到物品
-                             // 买之前先 check 有没有地方卖
-                             bool can_sell = false;
-                             for(int i = 0; i < K; ++i) {
-                                 can_sell |= workbench[i] -> TryToSell(carry_id);
-                                 if(can_sell) break;
-                             }
+                    // 跑去卖手上的东西
+                    int workbench_id = -1; double mn = 1e9;
+                    for(int i = 0; i < K; ++i) { // 找一个最近的工作台
+                        if(workbench[i] -> TryToSell(robot[id] -> carry_id_)) {
+                            if(workbench_id == -1 || mn > dis_[id][i + robot_num_]) {
+                                mn = dis_[id][i + robot_num_];
+                                workbench_id = i;
+                            }
+                        }
+                    }
+                    if(workbench_id == -1) { // 找不到工作台， 画一个大圆， 避免原地障碍
+                        Output::Forward(id, 4);
+                        Output::Rotate(id, pi / 4);
+                        // Output::Destroy(id);
+                    } else { // 否则销毁手上的物件
+                        Log::print("try to sell, robot ", id, " carry_id ", robot[id] -> carry_id_, " sell_workbench: ", workbench_id, " sell_workbench_type_id: ", workbench[workbench_id] -> type_id_);
+                        double forward, rotate;
+                        robot[id] -> ToPoint(workbench[workbench_id] -> x0_, workbench[workbench_id] -> y0_, forward, rotate);
+                        Output::Forward(id, forward);
+                        Output::Rotate(id, rotate);
+                    }
+                } else { // 未携带物品
+                    // 身边有 workbench
+                    if(robot[id] -> workbench_ != -1) {
+                        int carry_id = workbench[robot[id] -> workbench_] -> type_id_;
+                        // Log::print("Can buy, id: ", id, " workbench : ", robot[id] -> workbench_, " type_id: ", workbench[robot[id] -> workbench_] -> type_id_);
+                        if(workbench[robot[id] -> workbench_] -> TryToBuy(carry_id)) { // 看看能不能买到物品
+                            // 买之前先 check 有没有地方卖
+                            bool can_sell = false;
+                            for(int i = 0; i < K; ++i) {
+                                can_sell |= workbench[i] -> TryToSell(carry_id);
+                                if(can_sell) break;
+                            }
 
 //                             // 检测会不会和其它机器人碰撞
 //                             bool crashed = false;
-//                             for(int i = 0; i < 4; ++i) {
-//                                 double dis = (robot[i] -> carry_id_ > 0) ? robot[i] ->
+//                             for(int i = 0; i < 4; ++i) if(i != id) {
+//                                 double dis = (robot[i] -> carry_id_ > 0) ? 0.53 : 0.45;
+//                                 double x_ = robot[id] -> x0_ - robot[i] -> x0_;
+//                                 double y_ = robot[id] -> y0_ - robot[i] -> y0_;
+//                                 if(dis + 0.53 >= sqrt(x_ * x_ + y_ * y_)) crashed = true;
 //                             }
 
-                             if(can_sell) { // 以后可以卖的出去，买。
-                                 Log::print("buy!, id: ", id, " workbench : ", robot[id] -> workbench_, " can_sell : ", can_sell);
-                                 Output::Buy(id);
-                                 continue;
-                             }
-                         }
-                     }
+                            if(can_sell) { // 以后可以卖的出去，买。
+                                Log::print("buy!, id: ", id, " workbench : ", robot[id] -> workbench_, " can_sell : ", can_sell);
+                                Output::Buy(id);
+                                continue;
+                            }
+                        }
+                    }
 
-                     // 根据策略，选一个东西去买
-                     double mn = 0.0; // 物品获利 / 距离
-                     int carry_id = -1, workbench_buy, workbench_sell;
-                     for(int k = 1; k <= 9; ++k) { // 枚举要买的物品
-                         for(int i = 0; i < K; ++i) { // 从哪个工作站买
-                             for(int j = 0; j < K; ++j) { // 从哪个工作站卖
-                                 if(workbench[i] -> TryToBuy(k) && workbench[j] -> TryToSell(k)) {
-                                     double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
-                                     // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
-                                     if(money_per_distance > mn) {
-                                         mn = money_per_distance;
-                                         carry_id = k;
-                                         workbench_buy = i;
-                                         workbench_sell = j;
-                                     }
-                                 }
-                             }
-                         }
-                     }
+                    // 根据策略，选一个东西去买
+                    double mn = 0.0; // 物品获利 / 距离
+                    int carry_id = -1, workbench_buy, workbench_sell;
+                    for(int k = 1; k <= 9; ++k) { // 枚举要买的物品
+                        for(int i = 0; i < K; ++i) { // 从哪个工作站买
+                            for(int j = 0; j < K; ++j) { // 从哪个工作站卖
+                                if(workbench[i] -> TryToBuy(k) && workbench[j] -> TryToSell(k)) {
+                                    double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                    // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
+                                    if(money_per_distance > mn) {
+                                        mn = money_per_distance;
+                                        carry_id = k;
+                                        workbench_buy = i;
+                                        workbench_sell = j;
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-                     Log::print("choose to buy, Robot ", id, " : ", carry_id, workbench_buy, workbench_sell);
+                    Log::print("choose to buy, Robot ", id, " : ", carry_id, workbench_buy, workbench_sell);
 
                      if(fabs(mn - 0) > 1e-5) { // 如果有则找到最优的策略，跑去买。
                          double forward, rotate;
@@ -171,8 +174,9 @@ namespace Solution1 {
                  }
              }
 
-             Output::Print(Input::frameID);
-             Log::print("frame_id: ", frameID, " OK! ");
+
+            Output::Print(Input::frameID);
+            Log::print("frame_id: ", frameID, " OK! ");
          }
      }
  }
