@@ -127,7 +127,7 @@ namespace Solution1 {
                          // Output::Destroy(id);
                      } else { // 找到有工作台
                          double forward, rotate;
-                         robot[id]->ToPoint_1(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
+                         robot[id]->ToPoint(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
                                               rotate);
                          /*
                          if(workbench[workbench_id] -> type_id_ >= 4 && workbench[workbench_id] -> type_id_ <= 7) {
@@ -169,17 +169,17 @@ namespace Solution1 {
                          for(int i = 0; i < K; ++i) { // 从哪个工作站买
                              for(int j = 0; j < K; ++j) { // 从哪个工作站卖
                                  if(workbench[i] -> TryToBuy(k) && workbench[j] -> TryToSell(k)) {
-                                     // if((workbench[i] -> type_id_ <= 3 && workbench[i] -> type_id_ >= 1) || (!vis_buy[i])) {
-                                         double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
-                                                                                   dis_[i + robot_num_][j +
-                                                                                                        robot_num_]);
-                                         // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
-                                         if (money_per_distance > mn) {
-                                             mn = money_per_distance;
-                                             carry_id = k;
-                                             workbench_buy = i;
-                                             workbench_sell = j;
-                                         }
+                                     // if(!vis_buy[i]) {
+                                     double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
+                                                                               dis_[i + robot_num_][j +
+                                                                                                    robot_num_]);
+                                     // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
+                                     if (money_per_distance > mn) {
+                                         mn = money_per_distance;
+                                         carry_id = k;
+                                         workbench_buy = i;
+                                         workbench_sell = j;
+                                     }
                                      // }
                                  }
                              }
@@ -190,9 +190,9 @@ namespace Solution1 {
 
                      if(fabs(mn - 0) > 1e-5) { // 如果有则找到最优的策略，跑去买。
                          double forward, rotate;
-                         robot[id] -> ToPoint_1(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
+                         robot[id] -> ToPoint(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
                          // if(workbench[workbench_buy] -> type_id_ >= 4 && workbench[workbench_buy] -> type_id_ <= 7)
-                         //   vis_buy[workbench_buy] = true;
+                         // vis_buy[workbench_buy] = true;
                          Output::Forward(id, forward);
                          Output::Rotate(id, rotate);
                      }
