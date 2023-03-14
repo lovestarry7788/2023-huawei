@@ -25,7 +25,7 @@ void Output::Destroy(int robot_id) {
 
 void Output::Print(int frame_id) {
     printf("%d\n", frame_id);
-    Log::print(frame_id);
+    // Log::print(frame_id);
     for(const auto& u: Operation) {
         printf("%s\n", u.data()); // 记得换行
         Log::print(u.data());
