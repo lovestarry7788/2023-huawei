@@ -125,15 +125,6 @@ namespace Solution1 {
                                  if(can_sell) break;
                              }
 
-//                             // 检测会不会和其它机器人碰撞
-//                             bool crashed = false;
-//                             for(int i = 0; i < 4; ++i) if(i != id) {
-//                                 double dis = (robot[i] -> carry_id_ > 0) ? 0.53 : 0.45;
-//                                 double x_ = robot[id] -> x0_ - robot[i] -> x0_;
-//                                 double y_ = robot[id] -> y0_ - robot[i] -> y0_;
-//                                 if(dis + 0.53 >= sqrt(x_ * x_ + y_ * y_)) crashed = true;
-//                             }
-
                              if(can_sell) { // 以后可以卖的出去，买。
                                  Log::print("buy!, id: ", id, " workbench : ", robot[id] -> workbench_, " can_sell : ", can_sell);
                                  Output::Buy(id);
