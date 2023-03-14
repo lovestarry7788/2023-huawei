@@ -5,7 +5,7 @@
 #include "geometry.h"
 #include "log.h"
 
-// using namespace Geometry;
+using namespace Geometry;
 
 Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, double collide_coefficient,
              double angular_velocity, double linear_velocity_x, double linear_velocity_y, double orient, double x0, double y0) :
@@ -17,8 +17,8 @@ void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
     double dif_rot = orient_ - aim_rot;
     // TODO: 写个类处理角度的模
-    if (dif_rot > Geometry::pi) dif_rot -= 2 * Geometry::pi;
-    else if (dif_rot < -Geometry::pi) dif_rot += 2 * Geometry::pi;
+    if (dif_rot > Geometry::PI) dif_rot -= 2 * Geometry::PI;
+    else if (dif_rot < -Geometry::PI) dif_rot += 2 * Geometry::PI;
 
     // static int frame = 0;
     // Log::print("frame", ++frame);
@@ -47,8 +47,8 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
     double dif_rot = orient_ - aim_rot;
     // TODO: 写个类处理角度的模
-    if (dif_rot > Geometry::pi) dif_rot -= 2 * Geometry::pi;
-    else if (dif_rot < -Geometry::pi) dif_rot += 2 * Geometry::pi;
+    if (dif_rot > Geometry::PI) dif_rot -= 2 * Geometry::PI;
+    else if (dif_rot < -Geometry::PI) dif_rot += 2 * Geometry::PI;
 
     double dist = Geometry::Dist(x0_, y0_, dx, dy);
 
@@ -93,16 +93,30 @@ double Robot::GetMaxSpeedOnCir(double r) {
 }
 
 // Todo:
-double Robot::CalcTime(std::vector<Geometry::Point>) {
-    return 0.0;
+int Robot::CalcTime(const std::vector<Geometry::Point>& route) {
+    // 不考虑加速过程
+    Point cntp = {x0_, y0_};
+    Angle cntr{orient_};
+    double ans = 0;
+    for (const auto& p : route) {
+        Angle aim_r{atan2(p.y - cntp.y, p.x - cntp.x)};
+        auto dif_r = aim_r - cntr;
+        double dist = Dist(p.x, p.y, cntp.x, cntp.y);
+        // x = 1/2*a*t^2
+        ans += dif_r.r / max_rotate_velocity_ / 0.85; // 粗略估计平均旋转速度为1/2
+        ans += dist / max_forward_velocity_ / 0.7; // 粗略估计6*0.8m/s
+        cntr = aim_r;
+        cntp = p;
+    }
+    return ans * 50;
 }
 
 // zhijie
 // void Robot::ToPoint(double x0, double y0, double& forward, double& rotate) {
 //     double angle = atan2((y0 - y0_) , (x0 - x0_)); // 计算到目标点的弧度
 //     /*
-//      * orient_, angle [-pi, pi]
-//      * 20ms, pi / s
+//      * orient_, angle [-PI, PI]
+//      * 20ms, PI / s
 //     */
 //     double delta_angle = (angle - orient_);
 //     if(fabs(delta_angle) > acos(-1)) {

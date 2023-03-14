@@ -4,6 +4,7 @@
 !/SDK
 /SDK/*
 !/SDK/c++
+/SDK/c++/*.zip
 
 # !/SDK/c++/*.cpp 错误
 # !/**/*.cpp

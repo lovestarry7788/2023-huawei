@@ -38,7 +38,7 @@ namespace Solution2 {
             // Log::print(Input::frameID);
             // for (auto i : Output::Operation)
             //     Log::print(i);
-            Log::print(robot[0]->orient_);
+            // Log::print(robot[0]->orient_);
 
             Output::Print(Input::frameID);
         }
@@ -118,6 +118,7 @@ namespace Solution1 {
                          // Output::Destroy(id);
                      } else { // 找到有工作台
                          double forward, rotate;
+                         Log::print("estimate time", id, workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, robot[id]->CalcTime({Geometry::Point{workbench[workbench_id]->x0_, workbench[workbench_id]->y0_}}));
                          robot[id]->ToPoint_1(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
                                               rotate);
                          Output::Forward(id, forward);
@@ -141,7 +142,7 @@ namespace Solution1 {
                              }
 
                              if(can_sell) { // 以后可以卖的出去，买。
-                                 Log::print("buy!, id: ", id, " workbench : ", robot[id] -> workbench_, " can_sell : ", can_sell);
+                                //  Log::print("buy!, id: ", id, " workbench : ", robot[id] -> workbench_, " can_sell : ", can_sell);
                                  Output::Buy(id);
                                  continue;
                              }
@@ -170,7 +171,7 @@ namespace Solution1 {
                          }
                      }
 
-                     Log::print("choose to buy, Robot ", id, " : ", carry_id, workbench_buy, workbench_sell);
+                    //  Log::print("choose to buy, Robot ", id, " : ", carry_id, workbench_buy, workbench_sell);
 
                      if(fabs(mn - 0) > 1e-5) { // 如果有则找到最优的策略，跑去买。
                          double forward, rotate;
