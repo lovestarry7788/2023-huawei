@@ -1,6 +1,7 @@
 #ifndef HW2023_LOG_H
 #define HW2023_LOG_H
 
+#include "input.h"
 #include <fstream>
 #include <vector>
 #include <string_view>
