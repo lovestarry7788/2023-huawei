@@ -97,12 +97,6 @@ namespace Solution1 {
                      if (robot[id]->workbench_ != -1) { // todo: 如果不能卖，找别的地方卖，不会等。
                          if (workbench[robot[id]->workbench_]->TryToSell(robot[id]->carry_id_)) { // 可以卖出去手上的物品
                              Output::Sell(id);
-                             /*
-                             // 如果有机器人可以直接卖出的，这个地方也不能导航过去。
-                             if(workbench[robot[id]->workbench_] -> type_id_ >= 4 && workbench[robot[id]->workbench_] -> type_id_ <= 7) {
-                                 vis_sell[std::make_pair(robot[id]->workbench_, robot[id]->carry_id_)] = true;
-                             }
-                             */
                              continue;
                          }
                      }
@@ -112,13 +106,10 @@ namespace Solution1 {
                      double mn = 1e9;
                      for (int i = 0; i < K; ++i) { // 找一个最近的工作台
                          if (workbench[i]->TryToSell(robot[id]->carry_id_)) {
-                             // type_id 大于 7 可以直接都去卖，大于等于 4，需要看看前面有没有 robot 去卖。
-                             // if(workbench[i] -> type_id_ > 7 || (workbench[i] -> type_id_ >= 4 && !vis_sell[std::make_pair(i, robot[id]->carry_id_)])) {
-                                 if (workbench_id == -1 || mn > dis_[id][i + robot_num_]) {
-                                     mn = dis_[id][i + robot_num_];
-                                     workbench_id = i;
-                                 }
-                             // }
+                             if (workbench_id == -1 || mn > dis_[id][i + robot_num_]) {
+                                 mn = dis_[id][i + robot_num_];
+                                 workbench_id = i;
+                             }
                          }
                      }
 
@@ -129,11 +120,6 @@ namespace Solution1 {
                          double forward, rotate;
                          robot[id]->ToPoint_1(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
                                               rotate);
-                         /*
-                         if(workbench[workbench_id] -> type_id_ >= 4 && workbench[workbench_id] -> type_id_ <= 7) {
-                            vis_sell[std::make_pair(workbench_id, robot[id]->carry_id_)] = true;
-                         }
-                         */
                          Output::Forward(id, forward);
                          Output::Rotate(id, rotate);
                      }
@@ -169,18 +155,16 @@ namespace Solution1 {
                          for(int i = 0; i < K; ++i) { // 从哪个工作站买
                              for(int j = 0; j < K; ++j) { // 从哪个工作站卖
                                  if(workbench[i] -> TryToBuy(k) && workbench[j] -> TryToSell(k)) {
-                                     // if((workbench[i] -> type_id_ <= 3 && workbench[i] -> type_id_ >= 1) || (!vis_buy[i])) {
-                                         double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
-                                                                                   dis_[i + robot_num_][j +
-                                                                                                        robot_num_]);
-                                         // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
-                                         if (money_per_distance > mn) {
-                                             mn = money_per_distance;
-                                             carry_id = k;
-                                             workbench_buy = i;
-                                             workbench_sell = j;
-                                         }
-                                     // }
+                                     double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
+                                                                               dis_[i + robot_num_][j +
+                                                                                                    robot_num_]);
+                                     // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
+                                     if (money_per_distance > mn) {
+                                         mn = money_per_distance;
+                                         carry_id = k;
+                                         workbench_buy = i;
+                                         workbench_sell = j;
+                                     }
                                  }
                              }
                          }

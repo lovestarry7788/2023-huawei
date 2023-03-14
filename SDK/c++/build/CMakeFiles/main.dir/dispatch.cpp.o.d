@@ -1,10 +1,10 @@
 CMakeFiles/main.dir/dispatch.cpp.o: \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/dispatch.cpp \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/dispatch.h \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/input.h \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/workbench.h \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/robot.h \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/geometry.h \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/dispatch.cpp \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/dispatch.h \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/input.h \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/workbench.h \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/robot.h \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/geometry.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/cmath \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__config \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__config_site \
@@ -424,7 +424,7 @@ CMakeFiles/main.dir/dispatch.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__bsd_locale_defaults.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/vector \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__split_buffer \
-  /Users/liuzhijie/Desktop/2023-huawei/hw2023/sdk/c++/output.h \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/output.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/set \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__functional/is_transparent.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__node_handle \
