@@ -423,6 +423,7 @@ CMakeFiles/main.dir/robot.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/vector \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/__split_buffer \
   /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/log.h \
+  /Users/liuzhijie/Desktop/2023-huawei/hw2023/SDK/c++/input.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/fstream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/filesystem \
   /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/usr/include/c++/v1/stack \

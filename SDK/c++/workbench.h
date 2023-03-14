@@ -17,7 +17,7 @@ public:
     Workbench(int type_id, double x0, double y0, int frame_remain, int materials_status,
               int product_status);
 
-    bool TryToBuy(int carry_id);
+    bool TryToBuy(int carry_id, double time_to_buy);
     bool TryToSell(int carry_id);
 
     friend class Robot;

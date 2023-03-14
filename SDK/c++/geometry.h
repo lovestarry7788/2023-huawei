@@ -10,7 +10,10 @@ namespace Geometry {
     const double pi = acos(-1);
     static constexpr double eps = 1e-10;
 
-    struct Point { double x, y;};
+    struct Point{
+        double x, y;
+        Point(double x_, double y_) : x(x_), y(y_){}
+    };
     using Vector = Point;
 
     int dcmp(double x) ;
