@@ -364,6 +364,7 @@ namespace Solution_zn_1 {
                 vis_buy[workbench_id] = false;
                 pocess_buy[workbench_id] = workbench[workbench_id]->product_status_;
 
+
             }
         }
 
@@ -393,10 +394,10 @@ namespace Solution_zn_1 {
         //没带着东西
         //找一个近的， 123中的去买, 但要有的卖
         double mn;
-        if(goal_buy[id] != -1)
+        if (goal_buy[id] != -1)
             mn = Distance(robot[id]->x0_, robot[id]->y0_, workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_) +
-                    Distance(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, workbench[goal_sell[id]]->x0_,
-                             workbench[goal_sell[id]]->y0_);
+                 Distance(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, workbench[goal_sell[id]]->x0_,
+                          workbench[goal_sell[id]]->y0_);
         else
             mn = 2e9;
         int goal_carry_id = -1;
@@ -404,10 +405,12 @@ namespace Solution_zn_1 {
             for (int i = 0; i < K; i++) {
                 if (workbench[i]->TryToBuy(carry_id) && !vis_buy[i]) {
                     for (int j = 0; j < K; j++) {
-                        if (workbench[j]->type_id_ <= 6 && workbench[j]->type_id_ >= 4 && workbench[j]->TryToSell(carry_id) && ((pocess_sell[j] >> carry_id) & 1) && pocess_sell[j]) {
-                            double dist = Distance(robot[id]->x0_, robot[id]->y0_, workbench[i]->x0_, workbench[i]->y0_) +
-                                          Distance(workbench[i]->x0_, workbench[i]->y0_, workbench[j]->x0_,
-                                                   workbench[j]->y0_);
+                        if (workbench[j]->type_id_ <= 6 && workbench[j]->type_id_ >= 4 &&
+                            workbench[j]->TryToSell(carry_id) && ((pocess_sell[j] >> carry_id) & 1) && pocess_sell[j]) {
+                            double dist =
+                                    Distance(robot[id]->x0_, robot[id]->y0_, workbench[i]->x0_, workbench[i]->y0_) +
+                                    Distance(workbench[i]->x0_, workbench[i]->y0_, workbench[j]->x0_,
+                                             workbench[j]->y0_);
                             //Log::print("Robot id: ", id, "find i, j: ", i, j, dist, mn);
                             if (mn > dist) {
                                 mn = dist;
@@ -423,7 +426,7 @@ namespace Solution_zn_1 {
         }
         if (goal_buy[id] != -1) {
             //可以
-            robot[id]->ToPoint(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, forward[id], rotate[id]);
+            //robot[id]->ToPoint(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, forward[id], rotate[id]);
             robot[id]->ToPoint(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, forward[id], rotate[id]);
             pocess_sell[goal_sell[id]] ^= 1 << goal_carry_id;
             pocess_buy[goal_buy[id]] = 0;
@@ -498,10 +501,12 @@ namespace Solution_zn_1 {
             for (int i = 0; i < K; i++) {
                 if (workbench[i]->TryToBuy(carry_id) && (!vis_buy[i] || (goal_buy[id] == i))) {
                     for (int j = 0; j < K; j++) {
-                        if ((workbench[j]->type_id_ == 7 || workbench[j]->type_id_ == 9) && workbench[j]->TryToSell(carry_id) && ((pocess_sell[j] >> carry_id) & 1) && pocess_sell[j]) {
-                            double dist = Distance(robot[id]->x0_, robot[id]->y0_, workbench[i]->x0_, workbench[i]->y0_) +
-                                          Distance(workbench[i]->x0_, workbench[i]->y0_, workbench[j]->x0_,
-                                                    workbench[j]->y0_);
+                        if ((workbench[j]->type_id_ == 7 || workbench[j]->type_id_ == 9) &&
+                            workbench[j]->TryToSell(carry_id) && ((pocess_sell[j] >> carry_id) & 1) && pocess_sell[j]) {
+                            double dist =
+                                    Distance(robot[id]->x0_, robot[id]->y0_, workbench[i]->x0_, workbench[i]->y0_) +
+                                    Distance(workbench[i]->x0_, workbench[i]->y0_, workbench[j]->x0_,
+                                             workbench[j]->y0_);
                             //Log::print("Robot id: ", id, "find i, j: ", i, j, dist, mn);
                             if (mn > dist) {
                                 mn = dist;
@@ -517,7 +522,7 @@ namespace Solution_zn_1 {
         }
         if (goal_buy[id] != -1 /*&& goal_carry_id != -1*/) {
             //可以
-            robot[id]->ToPoint(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, forward[id], rotate[id]);
+            //robot[id]->ToPoint(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, forward[id], rotate[id]);
             robot[id]->ToPoint(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, forward[id], rotate[id]);
             pocess_sell[goal_sell[id]] ^= 1 << goal_carry_id;
             pocess_buy[goal_buy[id]] = 0;
@@ -592,14 +597,16 @@ namespace Solution_zn_1 {
             for (int i = 0; i < K; i++) {
                 if (workbench[i]->TryToBuy(carry_id) && !vis_buy[i]) {
                     for (int j = 0; j < K; j++) {
-                        if (workbench[j]->type_id_ <= 9 && workbench[j]->type_id_ >= 8 && workbench[j]->TryToSell(carry_id) && ((pocess_sell[j] >> carry_id) & 1) && pocess_sell[j]) {
-                            double dist = Distance(robot[id]->x0_, robot[id]->y0_, workbench[i]->x0_, workbench[i]->y0_) +
-                                          Distance(workbench[i]->x0_, workbench[i]->y0_, workbench[j]->x0_,
-                                                   workbench[j]->y0_);
+                        if (workbench[j]->type_id_ <= 9 && workbench[j]->type_id_ >= 8 &&
+                            workbench[j]->TryToSell(carry_id) && ((pocess_sell[j] >> carry_id) & 1) && pocess_sell[j]) {
+                            double dist =
+                                    Distance(robot[id]->x0_, robot[id]->y0_, workbench[i]->x0_, workbench[i]->y0_) +
+                                    Distance(workbench[i]->x0_, workbench[i]->y0_, workbench[j]->x0_,
+                                             workbench[j]->y0_);
                             //Log::print("Robot id: ", id, "find i, j: ", i, j, dist, mn);
                             if (mn > dist) {
                                 mn = dist;
-                                if(goal_buy[id] != -1) {
+                                if (goal_buy[id] != -1) {
                                     pocess_sell[goal_sell[id]] ^= 1 << goal_carry_id;
                                     pocess_buy[goal_buy[id]] ^= 1;
                                     vis_buy[goal_buy[id]] ^= 1;
@@ -635,9 +642,9 @@ namespace Solution_zn_1 {
 
         while (Input::ScanFrame()) {
 
-            for(int i = 0; i < K; i++) {
-                if(!vis_buy[i]) pocess_buy[i] = workbench[i]->product_status_;
-                if(!vis_sell[i]) pocess_sell[i] = (workbench[i]->materials_status_ ^ material[workbench[i]->type_id_]);
+            for (int i = 0; i < K; i++) {
+                if (!vis_buy[i]) pocess_buy[i] = workbench[i]->product_status_;
+                if (!vis_sell[i]) pocess_sell[i] = (workbench[i]->materials_status_ ^ material[workbench[i]->type_id_]);
                 //初始化， 如果没有被选为目标， 那么产品是怎样的
 //            if(!vis_sell[i]) pocess_sell[i] = material[workbench[i]->type_id_];
 //            Log::print("Workbench_id: ", i, "which can buy: ", pocess_buy[i] * workbench[i]->type_id_, "which can sell: ", pocess_sell[i]);
@@ -659,7 +666,185 @@ namespace Solution_zn_1 {
 
 }
 
+namespace Solution_zn_2 {
+    using namespace Input;
+    using namespace Output;
+    using namespace Geometry;
+
+    static constexpr int robot_num_ = 4;
+
+    double forward[4], rotate[4];
+    double dis_[110][110];
+    const int material[] = {0, 0, 0, 0, 2 + 4, 2 + 8, 4 + 8, 112, 128, 255};
+    const double profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
+    int goal_sell[4] = {-1, -1, -1, -1};
+    int goal_buy[4] = {-1, -1, -1, -1};//目标工作台（购买的， 售卖的）
+    int vis_buy[50] = {0}, vis_sell[50] = {0};
+    int pocess_sell[50] = {0}, pocess_buy[50] = {0};
+    //买东西看product_status, 卖东西看materials_status, 这个值是可以预估
+    //想开一个二维数组了， pocess[time][workbench_id]表示在第time帧，workbench_id是否可用
+    //目前先写一个跟time帧无关的
+
+    double Distance(double x0, double y0, double x1, double y1) {
+        return sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
+    }
+
+    inline int period() {
+        bool flag_456 = false;
+        bool flag_7 = false;
+        for (int i = 0; i < K; i++) {
+            //首先看456有没有填满，有的话是一阶段
+            //如果456填满了考虑卖到7/9当二阶段
+            //如果7/9填满了就考虑把7卖到9当三阶段
+            //如果卖不出去就不用管了
+
+            flag_456 |= (workbench[i]->type_id_ <= 6 && workbench[i]->type_id_ >= 4 &&
+                         pocess_sell[i]);
+            flag_7 |= (workbench[i]->type_id_ == 7 && pocess_sell[i]);
+
+            //有4～6的工作台且可以卖
+            //1 2 3共享资源
+            //4 5 6独享
+            //专机送4 5 6 to 7/9
+
+        }
+
+        if (flag_456 == true) return 1;
+        else if (flag_7 == true) return 2;
+        else return 3;
+
+    }
+
+    inline void decision(int id) {
+        pocess_sell[goal_sell[id]] ^= 1 << workbench[goal_buy[id]]->type_id_;
+        pocess_buy[goal_buy[id]] ^= 1;
+        vis_buy[goal_buy[id]] ^= 1<<id;
+        vis_sell[goal_sell[id]] ^= 1<<id;
+    }
+
+    inline void period_solve(int id, int buy_lower, int buy_upper, int sell_lower, int sell_upper) {
+        //买123， 卖456
+
+        Log::print("Robot_id: ", id, "goal_buy: ", goal_buy[id], "goal_sell: ", goal_sell[id], '\n');
+        //购买123
+        //售出456
+        //for (int id = 0; id < 4; id++) {
+
+
+        if (robot[id]->workbench_ != -1) {
+            //当前机器人位于某个操作台
+            //可以考虑在这里购买或者售卖
+
+            int workbench_id = robot[id]->workbench_;
+
+            if (robot[id]->carry_id_ && robot[id]->workbench_ == goal_sell[id]) {
+
+                Output::Sell(id);
+                goal_sell[id] = -1;
+                vis_sell[workbench_id] = false;
+
+            } else if (robot[id]->carry_id_ == 0 && robot[id]->workbench_ == goal_buy[id] && goal_sell[id] != -1) {
+
+                //因为购买的是123， 对结果没有影响， 所以对于123的pocess_buy全都设为false即可
+                Output::Buy(id);
+                goal_buy[id] = -1;
+                vis_buy[workbench_id] = false;
+                pocess_buy[workbench_id] = workbench[workbench_id]->product_status_;
+
+            }
+        }
+
+        if (goal_buy[id] == -1 && goal_sell[id] != -1) {
+            //已经买过，只能去卖了
+            robot[id]->ToPoint(workbench[goal_sell[id]]->x0_, workbench[goal_sell[id]]->y0_, forward[id], rotate[id]);
+            //robot[id]->ToPoint_1(workbench[goal_sell[id]]->x0_, workbench[goal_sell[id]]->y0_, forward[id], rotate[id]);
+            Output::Forward(id, forward[id]);
+            Output::Rotate(id, rotate[id]);
+            return;
+
+        }
+
+        //没带着东西
+        //找一个近的， 123中的去买, 但要有的卖
+        double mn;
+        if (goal_buy[id] != -1)
+            mn = Distance(robot[id]->x0_, robot[id]->y0_, workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_) +
+                 Distance(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, workbench[goal_sell[id]]->x0_,
+                          workbench[goal_sell[id]]->y0_);
+        else
+            mn = 2e9;
+
+        for (int carry_id = buy_lower; carry_id <= buy_upper; carry_id++) {//要购买的物品
+            for (int i = 0; i < K; i++) {
+                if (workbench[i]->TryToBuy(carry_id) && (!vis_buy[i] || vis_buy[i] == id || (carry_id <= 3 && carry_id >= 1))) {
+                    for (int j = 0; j < K; j++) {
+                        if ((!vis_sell[j] || vis_sell[j] == (1<<id)) && workbench[j]->type_id_ <= sell_upper &&
+                            workbench[j]->type_id_ >= sell_lower && workbench[j]->TryToSell(carry_id) &&
+                            ((pocess_sell[j] >> carry_id) & 1)) {
+                            double dist =
+                                    Distance(robot[id]->x0_, robot[id]->y0_, workbench[i]->x0_, workbench[i]->y0_) +
+                                    Distance(workbench[i]->x0_, workbench[i]->y0_, workbench[j]->x0_,
+                                             workbench[j]->y0_);
+                            //Log::print("Robot id: ", id, "find i, j: ", i, j, dist, mn);
+                            if (mn > dist) {
+                                mn = dist;
+                                if (goal_buy[id] != -1)
+                                    decision(id);
+
+                                goal_buy[id] = i;
+                                goal_sell[id] = j;
+                                decision(id);
+
+                                //Log::print("Robot id: ", id, "buy: ", i, "sell: ", j, "carry_id", carry_id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (goal_buy[id] != -1) {
+            //可以
+            robot[id]->ToPoint(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, forward[id], rotate[id]);
+            //robot[id]->ToPoint_1(workbench[goal_buy[id]]->x0_, workbench[goal_buy[id]]->y0_, forward[id], rotate[id]);
+
+            Output::Forward(id, forward[id]);
+            Output::Rotate(id, rotate[id]);
+        }
+    }
+
+    void Solve() {
+        Input::ScanMap();
+
+        //EK Robot_SearchRode;//感觉需要一些转换， 来跑出一个近似度高的解
+
+        while (Input::ScanFrame()) {
+
+            for (int i = 0; i < K; i++) {
+                if (!vis_buy[i]) pocess_buy[i] = workbench[i]->product_status_;
+                if (!vis_sell[i]) pocess_sell[i] = (workbench[i]->materials_status_ ^ material[workbench[i]->type_id_]);
+                //初始化， 如果没有被选为目标， 那么产品是怎样的
+//            if(!vis_sell[i]) pocess_sell[i] = material[workbench[i]->type_id_];
+                Log::print("Workbench_id: ", i, "which can buy: ", pocess_buy[i] * workbench[i]->type_id_, "which can sell: ", pocess_sell[i]);
+            }
+
+            for (int id = 0; id < 4; id++) {
+//                period_solve(id, 1, 3, 4, 6);//买123，卖456
+                int period_ = period();
+                Log::print("robot_id: ", id, "period: ", period_, '\n');
+                if (period_ == 1) period_solve(id, 1, 3, 4, 6);
+                else if (period_ == 2) period_solve(id, 4, 6, 7, 9);
+                else period_solve(id, 7, 7, 8, 9);
+            }
+
+            Output::Print(Input::frameID);
+            Log::print("frame_id: ", frameID, " OK! ");
+        }
+    }
+
+}
+
 int main() {
-    Solution_zn_1::Solve();
+    Solution_zn_2::Solve();
     return 0;
 }
