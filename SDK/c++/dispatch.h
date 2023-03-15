@@ -12,12 +12,12 @@ namespace Dispatch {
     using namespace Geometry;
     extern std::vector<std::set<Point>> forecast_;
     struct Plan {
-        int robot_id;
+        // int robot_id;
         int buy_workbench = -1, sell_workbench = -1; // -1为已完成，否则为工作台id
     };
     extern std::vector<Plan> plan_;
     
-    // 完成Plan时调用委托
+    // 完成Plan时调用委托。单独(延迟)规划用
     extern std::function<void(int)> robotPlanEnded_;
     
     void init(std::function<void(int)> plan_ed, int robot_num);
@@ -35,13 +35,12 @@ namespace Dispatch {
     }
 
     // 是否现在可以完成，可以则调用 robotPlanEnded_
-    void ManagePlan(int robot_id, const Plan& plan) {
-    }
+    void ManagePlan(int robot_id, const Plan& plan);
 
     // 输出行走
     void ControlWalk();
 
-    // 外部主循环中，manageplan(), controlwalk()。决策中，如果是完成任务再规划，则robotPlanEnded_调用addplan；如果要每时每刻重新规划，则在manageplan前调用一遍robotPlanEnded_；如果固定时间规划一次，则固定时间调用一遍robotPlanEnded_
+    // 外部主循环中，manageplan(), controlwalk()。决策中，如果是完成任务再规划，则robotPlanEnded_调用addplan；如果要每时每刻重新单独规划，则在manageplan前调用一遍robotPlanEnded_；如果每时每刻整体规划，则直接调用UpdatePlan；如果固定时间规划一次，则固定时间调用
 }
 
 #endif
