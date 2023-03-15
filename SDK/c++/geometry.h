@@ -37,14 +37,14 @@ namespace Geometry {
     // 两向量夹角
     double InterAngle(const Vector& A, const Vector& B);
 
-    struct Angle {
-        double r; // [-pi, pi]
-        Angle(double r = 0);
-        static double reg(double r);
-    };
-
-    Angle operator+(const Angle& A, const Angle& B); // 不using可以使用吗？
-    Angle operator-(const Angle& A, const Angle& B);
+    double AngleReg(double r);
+    // struct Angle {
+    //     double r; // [-pi, pi]
+    //     Angle(double r = 0);
+    //     static double reg(double r);
+    // };
+    // Angle operator+(const Angle& A, const Angle& B); // 不using可以使用吗？
+    // Angle operator-(const Angle& A, const Angle& B);
 }
 
 #endif

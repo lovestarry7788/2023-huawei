@@ -32,7 +32,9 @@ double Geometry::MinRadius(double dist, double theta) {
     return dist / (2 * std::max(1e-8, sin(theta)));
 }
 
-Geometry::Angle::Angle(double r) { this->r = reg(r); }
-double Geometry::Angle::reg(double r) {if (r > PI) r -= 2*PI; else if (r < -PI) r += 2*PI; return r;}
-Angle Geometry::operator+(const Angle& A, const Angle& B) { Angle r{Geometry::Angle::reg(A.r + B.r)}; return r; }
-Angle Geometry::operator-(const Angle& A, const Angle& B) { Angle r{Geometry::Angle::reg(A.r - B.r)}; return r; }
+double Geometry::AngleReg(double r) {if (r > PI) r -= 2*PI; else if (r < -PI) r += 2*PI; return r;}
+
+// Geometry::Angle::Angle(double r) { this->r = reg(r); }
+// double Geometry::Angle::reg(double r) {if (r > PI) r -= 2*PI; else if (r < -PI) r += 2*PI; return r;}
+// Angle Geometry::operator+(const Angle& A, const Angle& B) { Angle r{Geometry::Angle::reg(A.r + B.r)}; return r; }
+// Angle Geometry::operator-(const Angle& A, const Angle& B) { Angle r{Geometry::Angle::reg(A.r - B.r)}; return r; }

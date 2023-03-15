@@ -119,7 +119,7 @@ namespace Solution1 {
                      } else { // 找到有工作台
                          double forward, rotate;
                          Log::print("estimate time", id, workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, robot[id]->CalcTime({Geometry::Point{workbench[workbench_id]->x0_, workbench[workbench_id]->y0_}}));
-                         robot[id]->ToPoint_1(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
+                         robot[id]->ToPoint(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
                                               rotate);
                          Output::Forward(id, forward);
                          Output::Rotate(id, rotate);
@@ -175,7 +175,7 @@ namespace Solution1 {
 
                      if(fabs(mn - 0) > 1e-5) { // 如果有则找到最优的策略，跑去买。
                          double forward, rotate;
-                         robot[id] -> ToPoint_1(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
+                         robot[id] -> ToPoint(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
                          // if(workbench[workbench_buy] -> type_id_ >= 4 && workbench[workbench_buy] -> type_id_ <= 7)
                          //   vis_buy[workbench_buy] = true;
                          Output::Forward(id, forward);
