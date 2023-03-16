@@ -53,7 +53,7 @@ namespace Solution1 {
 
     static constexpr int robot_num_ = 4;
     static constexpr int total_frame = 9000;
-    static constexpr int can_not_buy_in_last_frame = 400;
+    static constexpr int can_not_buy_in_last_frame = 0;
 
     double dis_[110][110];
     double profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
