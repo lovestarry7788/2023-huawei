@@ -9,12 +9,13 @@ std::vector<std::set<Geometry::Point>> Dispatch::forecast_;
 
 std::vector<Plan> Dispatch::plan_;
 
-std::function<void(int)> Dispatch::RobotReplan_;
+// std::function<void(int)> Dispatch::RobotReplan_;
+void (*Dispatch::RobotReplan_)(int);
 // std::function<void(int,int)> Dispatch::RobotBuy_;
 // std::function<void(int,int,int)> Dispatch::RobotSell_;
 
 
-void Dispatch::init(std::function<void(int)> RobotReplan, int robot_num) {
+void Dispatch::init(void (*RobotReplan)(int), int robot_num) {
     RobotReplan_ = RobotReplan;
     plan_.resize(robot_num);
 }

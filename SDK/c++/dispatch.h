@@ -19,11 +19,11 @@ namespace Dispatch {
     extern std::vector<Plan> plan_;
     
     // 完成Plan时调用委托。单独(延迟)规划用
-    extern std::function<void(int)> RobotReplan_;
+    extern void (*RobotReplan_)(int);
     // extern std::function<void(int,int)> Dispatch::RobotBuy_;
     // extern std::function<void(int,int,int)> Dispatch::RobotSell_;
 
-    void init(std::function<void(int)> RobotReplan, int robot_num);
+    void init(void (*RobotReplan)(int), int robot_num);
     // void init(std::function<void(int)> RobotReplan, std::function<void(int,int)> RobotBuy, std::function<void(int,int,int)> RobotSell, int robot_num);
 
     // 被robotReplan_调用。更新plan，否则默认继承上帧plan

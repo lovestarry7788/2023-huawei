@@ -12,11 +12,8 @@
 
 namespace Solution3 {
     using namespace Input;
-    // using namespace Output;
     using namespace Geometry;
-    // double dist_between(int robot_id, int workbench_id) {
-    //     return Geometry::dist(robot[robot_id]->x0_, robot[robot_id]->y0_, workbench[workbench_id]->x0_, workbench[workbench_id]->y0_);
-    // }
+
     constexpr int profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
     int award_buy(int robot_id, int workbench_id) {
         return 0;
