@@ -45,7 +45,7 @@ namespace Solution3 {
         double bst_award_pf = 0; // per frame
         for (int buy_wb_id = 0; buy_wb_id < K; buy_wb_id++) {
             auto buy_wb = workbench[buy_wb_id];
-            if (buy_wb-> frame_remain_ == -1) continue; // 暂不考虑后后运送上的 
+            if (!buy_wb->product_status_) continue; // 暂不考虑后后运送上的 
             if (occupy[buy_wb_id].buy_occupy) continue;
             int mat_id = buy_wb->type_id_; // 购买与出售物品id
             int buy_frame = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});

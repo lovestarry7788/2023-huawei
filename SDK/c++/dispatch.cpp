@@ -2,9 +2,10 @@
 #include "input.h"
 #include "output.h"
 #include "log.h"
+#include "geometry.h"
 
 using namespace Dispatch;
-
+using namespace Geometry;
 std::vector<std::set<Geometry::Point>> Dispatch::forecast_;
 
 std::vector<Plan> Dispatch::plan_;
@@ -63,6 +64,25 @@ void Dispatch::ManagePlan(int robot_id, Plan& plan) {
     }
 }
 
+double DistToWall(Point p, double orient) {
+    double mind = 100;
+    Vector ori{cos(orient), sin(orient)};
+    const static std::vector<std::pair<Point, double>> wall{
+        {{0,0}, 0},
+        {{50,0}, PI/2},
+        {{50,50}, PI},
+        {{0,50}, -PI/2},
+    };
+    for (const auto& [wp, wo] : wall) {
+        Point sec = GetLineIntersection2(p, ori, wp, {cos(wo), sin(wo)});
+        // if (Input::frame)
+        if (Dot(sec - p, ori) > 0) {
+            mind = std::min(mind, Length(sec - p));
+        }
+    }
+    return mind;
+}
+
 // 输出行走
 void Dispatch::ControlWalk() {
     for (size_t ri = 0; ri < plan_.size(); ri++) {
@@ -73,6 +93,13 @@ void Dispatch::ControlWalk() {
         const double invalid = -100;
         double forward = invalid, rotate = invalid;
         Input::robot[ri]->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
+        
+        double limit = robot->CalcSlowdownDist();
+        double walld = DistToWall({robot->x0_, robot->y0_}, robot->orient_);
+        Log::print(ri, limit, walld, robot->GetLinearVelocity(), robot->GetMass());
+        if (limit >= walld - 1.1) {
+            forward = 0;
+        }
         if (fabs(forward - invalid) > 1e-5) Output::Forward(ri, forward);
         if (fabs(rotate - invalid) > 1e-5) Output::Rotate(ri, rotate);
     }

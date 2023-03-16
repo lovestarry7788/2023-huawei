@@ -35,12 +35,17 @@ namespace Geometry {
 
     double Dot(const Vector& A, const Vector& B) ;
 
+    double Cross(const Vector& A, const Vector& B) ;
+
     double Length(const Vector& A);
 
     // 两向量夹角
     double InterAngle(const Vector& A, const Vector& B);
 
     double AngleReg(double r);
+
+    Point GetLineIntersection2(Point P, Vector v, Point Q, Vector w);
+
     // struct Angle {
     //     double r; // [-pi, pi]
     //     Angle(double r = 0);

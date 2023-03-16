@@ -34,6 +34,15 @@ double Geometry::MinRadius(double dist, double theta) {
 
 double Geometry::AngleReg(double r) {if (r > PI) r -= 2*PI; else if (r < -PI) r += 2*PI; return r;}
 
+Point Geometry::GetLineIntersection2(Point P, Vector v, Point Q, Vector w) {
+    Vector u = P - Q;
+    double t = Cross(w, u) / Cross(v, w);
+    return P + v * t;
+}
+
+double Geometry::Cross(const Vector& A, const Vector& B) { return A.x * B.y - A.y * B.x; }
+
+
 // Geometry::Angle::Angle(double r) { this->r = reg(r); }
 // double Geometry::Angle::reg(double r) {if (r > PI) r -= 2*PI; else if (r < -PI) r += 2*PI; return r;}
 // Angle Geometry::operator+(const Angle& A, const Angle& B) { Angle r{Geometry::Angle::reg(A.r + B.r)}; return r; }

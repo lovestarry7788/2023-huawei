@@ -60,7 +60,7 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     // if (limit_v > dist) forward = 0; // 开始线速度减速
 
     forward = std::min(forward, max_forward_velocity_);
-    Log::print(id_, dist, dif_rot, cir, forward, rotate);
+    // Log::print(id_, dist, dif_rot, cir, forward, rotate);
     // static int frame = 0;
     // Log::print("frame", ++frame);
     // Log::print(dx, dy, x0_, y0_, forward);
@@ -68,7 +68,8 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
 }
 
 double Robot::GetRadius() {
-    return this->carry_id_ != 0 ? Robot::radius_with_thing_ : Robot::radius_;
+    return Robot::radius_with_thing_;
+    // return this->carry_id_ != 0 ? Robot::radius_with_thing_ : Robot::radius_;
 }
 
 double Robot::GetMass() {
@@ -103,6 +104,13 @@ int Robot::CalcTime(const std::vector<Geometry::Point>& route) {
         cntp = p;
     }
     return ans * 50;
+}
+
+double Robot::GetLinearVelocity() {
+    return Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
+}
+double Robot::CalcSlowdownDist() {
+    return Geometry::UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), 0);
 }
 
 // zhijie

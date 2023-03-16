@@ -52,6 +52,10 @@ public:
     // 预估走完这些点的帧
     int CalcTime(const std::vector<Geometry::Point>& route);
 
+    double CalcSlowdownDist();
+
+    double GetLinearVelocity();
+    
     friend class Workbench;
 };
 
