@@ -28,7 +28,7 @@ void Output::Print(int frame_id) {
     // Log::print(frame_id);
     for(const auto& u: Operation) {
         printf("%s\n", u.data()); // 记得换行
-        Log::print(u.data());
+        // Log::print(u.data());
     }
     puts("OK\n");
     fflush(stdout);
