@@ -38,6 +38,10 @@ namespace Dispatch {
     // 输出行走
     void ControlWalk();
 
+//    void ToPoint_2(double x0, double y0, double &forward, double &rotate) {
+//
+//    }
+
     // 外部主循环中，manageplan(), controlwalk()。决策中，如果是完成任务再规划，则robotReplan_调用addplan；如果要每时每刻重新单独规划，则在manageplan前调用一遍robotReplan_；如果每时每刻整体规划，则直接调用UpdatePlan；如果固定时间规划一次，则固定时间调用
 }
 

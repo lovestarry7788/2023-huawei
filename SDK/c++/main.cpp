@@ -48,14 +48,14 @@ namespace Solution3 {
             if (buy_wb-> frame_remain_ == -1) continue; // 暂不考虑后后运送上的 
             if (occupy[buy_wb_id].buy_occupy) continue;
             int mat_id = buy_wb->type_id_; // 购买与出售物品id
-            int buy_frame = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
+            int buy_frame = rb->CalcTime({Geometry::Point{buy_wb->x0_, buy_wb->y0_}});
             buy_frame += std::max(0, buy_wb-> frame_remain_ - buy_frame) * 8; // 少浪费时间
 
             for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
                 auto sell_wb = workbench[sell_wb_id];
                 int sell_frame = 
-                    rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_}}) - 
-                    rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
+                    rb->CalcTime({Geometry::Point{buy_wb->x0_, buy_wb->y0_}, Geometry::Point{sell_wb->x0_, sell_wb->y0_}}) -
+                    rb->CalcTime({Geometry::Point(buy_wb->x0_, buy_wb->y0_)});
 
                 if (!sell_wb->TryToSell(mat_id)) continue; // 暂时只考虑能直接卖的，不考虑产品被拿走可以重新生产的
                 if (occupy[sell_wb_id].sell_occupy >> mat_id & 1) continue;
@@ -214,7 +214,7 @@ namespace Solution1 {
                                  continue;
                          }
                          double forward, rotate;
-                         robot[id]->ToPoint_1(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
+                         robot[id]->ToPoint(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
                                               rotate);
                          Output::Forward(id, forward);
                          Output::Rotate(id, rotate);
@@ -263,7 +263,7 @@ namespace Solution1 {
                              }
 
                              double forward, rotate;
-                             robot[id]->ToPoint_1(workbench[workbench_buy]->x0_, workbench[workbench_buy]->y0_, forward,
+                             robot[id]->ToPoint(workbench[workbench_buy]->x0_, workbench[workbench_buy]->y0_, forward,
                                                 rotate);
                              // if(workbench[workbench_buy] -> type_id_ >= 4 && workbench[workbench_buy] -> type_id_ <= 7)
                              vis_[workbench_buy] = true;

@@ -13,7 +13,7 @@
 #include <memory>
 #include <vector>
 
-struct Robot {
+class Robot {
 
 public:
     static constexpr double radius_ = 0.45;
@@ -24,7 +24,7 @@ public:
     static constexpr double max_force_ = 250;
     static constexpr double max_rot_force_ = 50;
     static constexpr double max_orient_diff_ = 3e-2; // 最大角度偏差
-    const double max_rotate_velocity_ = Geometry::PI;
+    const double max_rotate_velocity_ = acos(-1);
 
     int id_, workbench_, carry_id_; // 机器人的 id, 所属工作台id(-1不属工作台）,所携带的物品 id(0没有带物品)
     double time_coefficient_, collide_coefficient_; // 机器人的坐标, 时间系数, 碰撞系数
@@ -37,6 +37,8 @@ public:
     void ToPoint(double dx, double dy, double& forward, double& rotate);
 
     void ToPoint_1(double dx, double dy, double& forward, double& rotate);
+
+    //void ToPoint_2(double dx, double dy, double& forward, double& rotate);
 
     // 获取当前半径
     double GetRadius();

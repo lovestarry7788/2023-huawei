@@ -1,5 +1,6 @@
 #include "dispatch.h"
 #include "input.h"
+#include "DWA.h"
 #include "output.h"
 #include "log.h"
 
@@ -40,7 +41,7 @@ void Dispatch::ManagePlan() {
 }
 
 // 是否现在可以完成，可以则调用 RobotReplan_
-void Dispatch::ManagePlan(int robot_id, Plan& plan) {
+void Dispatch::ManagePlan(int robot_id, Plan &plan) {
     // Log::print("ManagePlan", robot_id, plan.buy_workbench, plan.sell_workbench);
     if (((plan.buy_workbench == -1 && plan.sell_workbench == -1) || plan.update) && RobotReplan_) {
         plan.update = false;
@@ -59,9 +60,15 @@ void Dispatch::ManagePlan(int robot_id, Plan& plan) {
             // 统一下一帧规划。否则要修改的数据太多了。
             // wi = -1;
             plan.update = true;
-        } 
+        }
     }
 }
+
+//inline void ToPoint_2(CarState currentstate, double x0, double y0, double &forward, double &rotate){
+////    forward = 0; rotate = 0;
+//
+//    DWA::planning(currentstate);
+//}
 
 // 输出行走
 void Dispatch::ControlWalk() {
@@ -72,8 +79,25 @@ void Dispatch::ControlWalk() {
         if (wi == -1) continue;
         const double invalid = -100;
         double forward = invalid, rotate = invalid;
-        Input::robot[ri]->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
-        if (fabs(forward - invalid) > 1e-5) Output::Forward(ri, forward);
-        if (fabs(rotate - invalid) > 1e-5) Output::Rotate(ri, rotate);
+//        Car car()
+
+        DWA dwa;
+        dwa.environment = &Input::env;
+        dwa.currentState =
+                CarState(Input::robot[ri]->x0_, Input::robot[ri]->y0_, Input::robot[ri]->orient_,
+                         sqrt(Input::robot[ri]->linear_velocity_x_ * Input::robot[ri]->linear_velocity_x_ +
+                              Input::robot[ri]->linear_velocity_y_ * Input::robot[ri]->linear_velocity_y_),
+                         Input::robot[ri]->angular_velocity_);
+        dwa.destinationState =
+                CarState(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, 0, 0, 0);
+
+        dwa.startPoint = Geometry::Point(Input::robot[ri]->x0_, Input::robot[ri]->y0_);
+        dwa.destinationPoint = Geometry::Point(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_);
+
+        auto speed = dwa.planning();
+
+        if (fabs(forward - invalid) > 1e-5) Output::Forward(ri, speed[0]);
+        if (fabs(rotate - invalid) > 1e-5) Output::Rotate(ri, speed[1]);
+//        Input::env.barrier.push_back(dwa);
     }
 }

@@ -3,8 +3,10 @@
 
 int Input::frameID, Input::coins, Input::K;
 char Input::map_[101][101];
+Environment Input::env;
 std::vector<std::shared_ptr<Workbench> > Input::workbench;
-std::vector<std::shared_ptr<Robot> > Input::robot;        
+std::vector<std::shared_ptr<Robot> > Input::robot;
+//std::vector<std::shared_ptr<Robot> > Input::dwa;
 
 bool Input::readUntilOK() {
     char line[1024];
@@ -29,7 +31,7 @@ void Input::ScanMap() {
     fflush(stdout);
 }
 
-bool Input::ScanFrame() { 
+bool Input::ScanFrame() {
     while (scanf("%d%d", &frameID, &coins) != EOF) {
         scanf("%d",&K);
         workbench.resize(K);

@@ -1,14 +1,14 @@
 #include "geometry.h"
 
-using namespace Geometry;
+//using namespace Geometry;
 
 int Geometry::dcmp(double x) { if (fabs(x) < eps) return 0; return x < 0 ? -1 : 1; }
-Vector Geometry::operator+(const Vector& A, const Vector& B) { return Vector{A.x + B.x, A.y + B.y}; }
-Vector Geometry::operator-(const Point& A, const Point& B) { return Vector{A.x - B.x, A.y - B.y}; }
-Vector Geometry::operator*(const Vector& A, double p) { return Vector{A.x * p, A.y * p}; }
-Vector Geometry::operator/(const Vector& A, double p) { return Vector{A.x / p, A.y / p}; }
-bool Geometry::operator==(const Point& a, const Point& b) { return a.x == b.x && a.y == b.y; }
-bool Geometry::operator<(const Point& p1, const Point& p2) {
+Geometry::Point Geometry::operator+(const Geometry::Point& A, const Geometry::Point& B) { return Geometry::Point{A.x + B.x, A.y + B.y}; }
+Geometry::Point Geometry::operator-(const Geometry::Point& A, const Geometry::Point& B) { return Geometry::Point{A.x - B.x, A.y - B.y}; }
+Geometry::Point Geometry::operator*(const Geometry::Point& A, double p) { return Geometry::Point{A.x * p, A.y * p}; }
+Geometry::Point Geometry::operator/(const Geometry::Point& A, double p) { return Geometry::Point{A.x / p, A.y / p}; }
+bool Geometry::operator==(const Geometry::Point& a, const Geometry::Point& b) { return a.x == b.x && a.y == b.y; }
+bool Geometry::operator<(const Geometry::Point& p1, const Geometry::Point& p2) {
     if (p1.x != p2.x) return p1.x < p2.x;
     return p1.y < p2.y;
 }
@@ -22,11 +22,11 @@ double Geometry::UniformVariableDist(double a, double v, double aim_v) {
     return abs(v * v - aim_v * aim_v) / (2 * a);
 }
 
-double Geometry::Dot(const Vector& A, const Vector& B) { return A.x * B.x + A.y * B.y; }
+double Geometry::Dot(const Geometry::Point& A, const Geometry::Point& B) { return A.x * B.x + A.y * B.y; }
 
-double Geometry::Length(const Vector& A) { return sqrt(Dot(A, A)); }
+double Geometry::Length(const Geometry::Point& A) { return sqrt(Dot(A, A)); }
 
-double Geometry::InterAngle(const Vector& A, const Vector& B) { return acos(Dot(A, B) / Length(A) / Length(B)); }
+double Geometry::InterAngle(const Geometry::Point& A, const Geometry::Point& B) { return acos(Dot(A, B) / Length(A) / Length(B)); }
 
 double Geometry::MinRadius(double dist, double theta) {
     return dist / (2 * std::max(1e-8, sin(theta)));
