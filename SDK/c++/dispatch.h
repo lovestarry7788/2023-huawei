@@ -10,37 +10,35 @@
 // 先购买/出售，再addplan，再调用FrameEnd交给dispatch处理topoint
 namespace Dispatch {
     using namespace Geometry;
-    extern std::vector<std::set<Point>> forecast_;
+    extern std::vector<std::set<Geometry::Point>> forecast_;
     struct Plan {
         // int robot_id;
         int buy_workbench = -1, sell_workbench = -1; // -1为已完成，否则为工作台id
+        bool update = false;
     };
     extern std::vector<Plan> plan_;
     
     // 完成Plan时调用委托。单独(延迟)规划用
-    extern std::function<void(int)> robotPlanEnded_;
-    
-    void init(std::function<void(int)> plan_ed, int robot_num);
+    extern std::function<void(int)> RobotReplan_;
+    // extern std::function<void(int,int)> Dispatch::RobotBuy_;
+    // extern std::function<void(int,int,int)> Dispatch::RobotSell_;
 
-    // 被robotPlanEnded_调用。更新plan，否则默认继承上帧plan
-    void UpdatePlan(int robot_id, Plan plan) {
-        ManagePlan(robot_id, plan);
-        plan_[robot_id] = plan;
-    }   
+    void init(std::function<void(int)> RobotReplan, int robot_num);
+    // void init(std::function<void(int)> RobotReplan, std::function<void(int,int)> RobotBuy, std::function<void(int,int,int)> RobotSell, int robot_num);
+
+    // 被robotReplan_调用。更新plan，否则默认继承上帧plan
+    void UpdatePlan(int robot_id, Plan plan);
 
     // 处理计划，外部call
-    void ManagePlan() {
-        for (int i = 0; i < plan_.size(); i++)
-            ManagePlan(i, plan_[i]);
-    }
+    void ManagePlan();
 
-    // 是否现在可以完成，可以则调用 robotPlanEnded_
-    void ManagePlan(int robot_id, const Plan& plan);
+    // 是否现在可以完成，可以则调用 robotReplan_
+    void ManagePlan(int robot_id, Plan& plan);
 
     // 输出行走
     void ControlWalk();
 
-    // 外部主循环中，manageplan(), controlwalk()。决策中，如果是完成任务再规划，则robotPlanEnded_调用addplan；如果要每时每刻重新单独规划，则在manageplan前调用一遍robotPlanEnded_；如果每时每刻整体规划，则直接调用UpdatePlan；如果固定时间规划一次，则固定时间调用
+    // 外部主循环中，manageplan(), controlwalk()。决策中，如果是完成任务再规划，则robotReplan_调用addplan；如果要每时每刻重新单独规划，则在manageplan前调用一遍robotReplan_；如果每时每刻整体规划，则直接调用UpdatePlan；如果固定时间规划一次，则固定时间调用
 }
 
 #endif

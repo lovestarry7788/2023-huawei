@@ -1,5 +1,6 @@
 #include "log.h"
 #include "geometry.h"
+#include "dispatch.h"
 #include "input.h"
 #include "output.h"
 #include <cmath>
@@ -7,8 +8,106 @@
 #include <queue>
 #include <unordered_map>
 #include <map>
+// #include <cassert>
 
+namespace Solution3 {
+    using namespace Input;
+    // using namespace Output;
+    using namespace Geometry;
+    // double dist_between(int robot_id, int workbench_id) {
+    //     return Geometry::dist(robot[robot_id]->x0_, robot[robot_id]->y0_, workbench[workbench_id]->x0_, workbench[workbench_id]->y0_);
+    // }
+    constexpr int profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
+    int award_buy(int robot_id, int workbench_id) {
+        return 0;
+    }
+    int award_sell(int robot_id, int workbench_id, int materials) {
+        return 0;
+    }
+    // 工作台占用情况
+    struct Occupy {
+        bool buy_occupy = 0;
+        int sell_occupy = 0; // >>i&1 则i物品被占用
+    };
+    std::vector<Occupy> occupy;
+    void RobotReplan(int robot_id) {
+        Log::print("RobotReplan", robot_id, Input::frameID);
+        auto rb = robot[robot_id];
+        auto &plan = Dispatch::plan_[robot_id];
+        if ((plan.buy_workbench == -1) != (plan.sell_workbench == -1)) return;
 
+        if (plan.buy_workbench != -1  ) {
+            int bw = plan.buy_workbench;
+            int sw = plan.sell_workbench;
+            int mat_id = workbench[bw]->type_id_;
+            occupy[bw].buy_occupy = false;
+            occupy[sw].sell_occupy &= ((unsigned)1 << 31) - 1 - (1<<mat_id);
+            plan.buy_workbench = plan.sell_workbench = -1;
+        }
+        Dispatch::Plan bst = {-1, -1};
+        double bst_award_pf = 0; // per frame
+        for (int buy_wb_id = 0; buy_wb_id < K; buy_wb_id++) {
+            auto buy_wb = workbench[buy_wb_id];
+            if (buy_wb-> frame_remain_ == -1) continue; // 暂不考虑后后运送上的 
+            if (occupy[buy_wb_id].buy_occupy) continue;
+            int mat_id = buy_wb->type_id_; // 购买与出售物品id
+            int buy_frame = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
+            buy_frame += std::max(0, buy_wb-> frame_remain_ - buy_frame) * 8; // 少浪费时间
+
+            for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
+                auto sell_wb = workbench[sell_wb_id];
+                int sell_frame = 
+                    rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_}}) - 
+                    rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
+
+                if (!sell_wb->TryToSell(mat_id)) continue; // 暂时只考虑能直接卖的，不考虑产品被拿走可以重新生产的
+                if (occupy[sell_wb_id].sell_occupy >> mat_id & 1) continue;
+
+                int award = award_buy(robot_id, buy_wb_id) + 
+                            award_sell(robot_id, sell_wb_id, mat_id) + 
+                            profit_[mat_id];
+
+                double award_pf = (double)award / (buy_frame + sell_frame);
+                if (award_pf > bst_award_pf) {
+                    bst_award_pf = award_pf;
+                    bst.buy_workbench = buy_wb_id;
+                    bst.sell_workbench = sell_wb_id;
+                }
+
+            }
+
+        }
+        if (bst.sell_workbench != -1) {
+            int bw = bst.buy_workbench;
+            int sw = bst.sell_workbench;
+            int mat_id = workbench[bw]->type_id_;
+            occupy[bw].buy_occupy = true;
+            // assert(~occupy[sw].sell_occupy>>mat_id & 1);
+            occupy[sw].sell_occupy |= (1<<mat_id);
+            Dispatch::UpdatePlan(robot_id, bst);
+        }
+    }
+    void Solve() {
+        Input::ScanMap();
+        Dispatch::init(RobotReplan, Input::robot_num_);
+        // occupy.resize(K);
+        // ScanFrame才初始化
+        // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
+        //     RobotReplan(ri); // 开始规划
+        // }
+        while (Input::ScanFrame()) {
+            if (occupy.size() == 0)
+                occupy.resize(K);
+            Dispatch::ManagePlan();
+            // for (size_t ri = 0; ri < Input::robot_num_; ri++) { // 每帧重新规划，不必须
+            //     RobotReplan(ri);
+            // }
+            Dispatch::ControlWalk();
+            Output::Print(Input::frameID);
+            Log::print("frame", Input::frameID);
+        }
+    }
+}
 // 测试行走
 namespace Solution2 {
     using namespace Input;
@@ -203,6 +302,6 @@ namespace Solution1 {
  }
 
 int main() {
-    Solution1::Solve();
+    Solution3::Solve();
     return 0;
 }
