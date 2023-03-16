@@ -202,8 +202,8 @@ namespace Solution1 {
 
             // sell
             for(int id = 0; id < 4; ++id) { // 枚举机器人
-                 if (robot[id]->carry_id_) {
-                     if (robot[id]->workbench_sell_ == -1) { // 携带物品，计划卖去哪
+                 if (robot[id] -> carry_id_) {
+                     if (robot[id] -> workbench_sell_ == -1) { // 携带物品，计划卖去哪
                          // 跑去卖手上的东西
                          int workbench_id = -1;
                          double mn = 1e9;
@@ -224,7 +224,7 @@ namespace Solution1 {
                          Log::print("id: ", id, " carry things ", robot[id]->carry_id_);
                          Output::Destroy(id);
                          robot[id] -> workbench_buy_ = robot[id] -> workbench_sell_ = -1;
-                     } else if(robot[id] -> workbench_sell_ != -1){ // 找到有工作台
+                     } else if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
                          // 身边有 workbench
                          if (robot[id]->workbench_ == robot[id] -> workbench_sell_) {
                              Output::Sell(id);
@@ -233,8 +233,10 @@ namespace Solution1 {
                              continue;
                          }
                          double forward, rotate;
-                         robot[id]->ToPoint_1(workbench[robot[id] -> workbench_sell_]->x0_, workbench[robot[id] -> workbench_sell_]->y0_, forward,
-                                              rotate);
+                         robot[id]->ToPoint(workbench[robot[id]->workbench_sell_]->x0_, workbench[robot[id]->workbench_sell_]->y0_,
+                                            forward, rotate);
+                         robot[id]->AvoidToWall(forward, rotate);
+
                          Output::Forward(id, forward);
                          Output::Rotate(id, rotate);
                          robot[id] -> workbench_buy_ = -1;
@@ -291,8 +293,9 @@ namespace Solution1 {
                             }
 
                             double forward, rotate;
-                            robot[id]->ToPoint_1(workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward,
+                            robot[id]->ToPoint(workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward,
                                                  rotate);
+                            robot[id]->AvoidToWall(forward, rotate);
 
                             Output::Forward(id, forward);
                             Output::Rotate(id, rotate);

@@ -39,6 +39,10 @@ public:
 
     void ToPoint_1(double dx, double dy, double& forward, double& rotate);
 
+    void AvoidToWall(double& forward, double& rotate);
+
+    double DistToWall(Geometry::Point p, double orient);
+
     // 获取当前半径
     double GetRadius();
 

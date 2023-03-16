@@ -67,6 +67,33 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     // Log::print(orient_, aim_rot, dif_rot, rotate);
 }
 
+void Robot::AvoidToWall(double &forward, double &rotate) {
+    double limit = CalcSlowdownDist();
+    double walld = DistToWall({x0_, y0_}, orient_);
+    if (limit >= walld - 1.1) {
+        forward = 0;
+    }
+}
+
+double Robot::DistToWall(Point p, double orient) {
+    double mind = 100;
+    Vector ori{cos(orient), sin(orient)};
+    const static std::vector<std::pair<Point, double>> wall{
+            {{0,0}, 0},
+            {{50,0}, PI/2},
+            {{50,50}, PI},
+            {{0,50}, -PI/2},
+    };
+    for (const auto& [wp, wo] : wall) {
+        Point sec = GetLineIntersection2(p, ori, wp, {cos(wo), sin(wo)});
+        // if (Input::frame)
+        if (Dot(sec - p, ori) > 0) {
+            mind = std::min(mind, Length(sec - p));
+        }
+    }
+    return mind;
+}
+
 double Robot::GetRadius() {
     return Robot::radius_with_thing_;
     // return this->carry_id_ != 0 ? Robot::radius_with_thing_ : Robot::radius_;
