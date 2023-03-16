@@ -7,7 +7,7 @@
 // double UniformVariableDist(double a, double v, double aim_v);
 
 namespace Geometry {
-    const double pi = acos(-1);
+    const double PI = acos(-1);
     static constexpr double eps = 1e-10;
 
     struct Point{
@@ -37,7 +37,17 @@ namespace Geometry {
 
     double Length(const Vector& A);
 
-    double Angle(const Vector& A, const Vector& B);
+    // 两向量夹角
+    double InterAngle(const Vector& A, const Vector& B);
+
+    double AngleReg(double r);
+    // struct Angle {
+    //     double r; // [-pi, pi]
+    //     Angle(double r = 0);
+    //     static double reg(double r);
+    // };
+    // Angle operator+(const Angle& A, const Angle& B); // 不using可以使用吗？
+    // Angle operator-(const Angle& A, const Angle& B);
 }
 
 #endif

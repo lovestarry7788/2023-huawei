@@ -24,7 +24,7 @@ public:
     static constexpr double max_force_ = 250;
     static constexpr double max_rot_force_ = 50;
     static constexpr double max_orient_diff_ = 3e-2; // 最大角度偏差
-    const double max_rotate_velocity_ = Geometry::pi;
+    const double max_rotate_velocity_ = Geometry::PI;
 
     int id_, workbench_, carry_id_; // 机器人的 id, 所携带的物品 id(0没有带物品)
     double time_coefficient_, collide_coefficient_; // 机器人的坐标, 时间系数, 碰撞系数
@@ -41,15 +41,16 @@ public:
     // 获取当前半径
     double GetRadius();
 
-    // 获取质量
+    // 获取质量，不拿16，15加速度
     double GetMass();
 
-    // 获取转动惯量
+    // 获取转动惯量，不拿2，25转动速度
     double GetRotInerta();
 
     double GetMaxSpeedOnCir(double r);
 
-    double CalcTime(std::vector<Geometry::Point>);
+    // 预估走完这些点的帧
+    int CalcTime(const std::vector<Geometry::Point>& route);
 
     friend class Workbench;
 };

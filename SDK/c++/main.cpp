@@ -38,7 +38,7 @@ namespace Solution2 {
             // Log::print(Input::frameID);
             // for (auto i : Output::Operation)
             //     Log::print(i);
-            Log::print(robot[0]->orient_);
+            // Log::print(robot[0]->orient_);
 
             Output::Print(Input::frameID);
         }
@@ -52,6 +52,8 @@ namespace Solution1 {
     using namespace Geometry;
 
     static constexpr int robot_num_ = 4;
+    static constexpr int total_frame = 9000;
+    static constexpr int can_not_buy_in_last_frame = 400;
 
     double dis_[110][110];
     double profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
@@ -118,7 +120,8 @@ namespace Solution1 {
                          // Output::Destroy(id);
                      } else { // 找到有工作台
                          double forward, rotate;
-                         robot[id]->ToPoint_1(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
+                         Log::print("estimate time", id, workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, robot[id]->CalcTime({Geometry::Point{workbench[workbench_id]->x0_, workbench[workbench_id]->y0_}}));
+                         robot[id]->ToPoint(workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward,
                                               rotate);
                          Output::Forward(id, forward);
                          Output::Rotate(id, rotate);
@@ -126,63 +129,63 @@ namespace Solution1 {
                  }
              }
 
-             for(int id = 0; id < 4; ++id) { // 未携带物品，打算去买的。
-                 if(robot[id]->carry_id_ == 0) {
-                    // 身边有 workbench
-                     if(robot[id] -> workbench_ != -1) {
-                         int carry_id = workbench[robot[id] -> workbench_] -> type_id_;
-                         // Log::print("Can buy, id: ", id, " workbench : ", robot[id] -> workbench_, " type_id: ", workbench[robot[id] -> workbench_] -> type_id_);
-                         if(workbench[robot[id] -> workbench_] -> TryToBuy(carry_id, -100)) { // 看看能不能买到物品
-                             // 买之前先 check 有没有地方卖
-                             bool can_sell = false;
-                             for(int i = 0; i < K; ++i) {
-                                 can_sell |= workbench[i] -> TryToSell(carry_id);
-                                 if(can_sell) break;
-                             }
+             if(frameID <= total_frame - can_not_buy_in_last_frame) {
+                 for (int id = 0; id < 4; ++id) { // 未携带物品，打算去买的。
+                     if (robot[id]->carry_id_ == 0) {
+                         // 身边有 workbench
+                         if (robot[id]->workbench_ != -1) {
+                             int carry_id = workbench[robot[id]->workbench_]->type_id_;
+                             // Log::print("Can buy, id: ", id, " workbench : ", robot[id] -> workbench_, " type_id: ", workbench[robot[id] -> workbench_] -> type_id_);
+                             if (workbench[robot[id]->workbench_]->TryToBuy(carry_id, -100)) { // 看看能不能买到物品
+                                 // 买之前先 check 有没有地方卖
+                                 bool can_sell = false;
+                                 for (int i = 0; i < K; ++i) {
+                                     can_sell |= workbench[i]->TryToSell(carry_id);
+                                     if (can_sell) break;
+                                 }
 
-                             if(can_sell) { // 以后可以卖的出去，买。
-                                 Log::print("buy!, id: ", id, " workbench : ", robot[id] -> workbench_, " can_sell : ", can_sell);
-                                 Output::Buy(id);
-                                 continue;
+                                 if (can_sell) { // 以后可以卖的出去，买。
+                                     //  Log::print("buy!, id: ", id, " workbench : ", robot[id] -> workbench_, " can_sell : ", can_sell);
+                                     Output::Buy(id);
+                                     continue;
+                                 }
                              }
                          }
-                     }
 
-                     // 根据策略，选一个东西去买
-                     double mn = 0.0; // 物品获利 / 距离
-                     int carry_id = -1, workbench_buy, workbench_sell;
-                     for(int k = 1; k <= 9; ++k) { // 枚举要买的物品
-                         for(int i = 0; i < K; ++i) { // 从哪个工作站买
-                             for(int j = 0; j < K; ++j) { // 从哪个工作站卖
-                                 if(workbench[j] -> type_id_ == 9) continue;
-                                 // double time_to_buy = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i] -> y0_}});
-                                 if(workbench[i] -> TryToBuy(k, -100) && workbench[j] -> TryToSell(k)) {
-                                     double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
-                                                                               dis_[i + robot_num_][j +
-                                                                                                    robot_num_]);
-                                     // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
-                                     if (money_per_distance > mn) {
-                                         mn = money_per_distance;
-                                         carry_id = k;
-                                         workbench_buy = i;
-                                         workbench_sell = j;
-                                         // goto loop1;
+                         // 根据策略，选一个东西去买
+                         double mn = 0.0; // 物品获利 / 距离
+                         int carry_id = -1, workbench_buy, workbench_sell;
+                         for (int k = 1; k <= 9; ++k) { // 枚举要买的物品
+                             for (int i = 0; i < K; ++i) { // 从哪个工作站买
+                                 for (int j = 0; j < K; ++j) { // 从哪个工作站卖
+                                     if (workbench[j]->type_id_ == 9) continue;
+                                     // double time_to_buy = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i] -> y0_}});
+                                     if (workbench[i]->TryToBuy(k, -100) && workbench[j]->TryToSell(k)) {
+                                         double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
+                                                                                   dis_[i + robot_num_][j +
+                                                                                                        robot_num_]);
+                                         // Log::print("things: ", k," buy from : ", i," sell from: ", j , " money_per_distance: ", money_per_distance);
+                                         if (money_per_distance > mn) {
+                                             mn = money_per_distance;
+                                             carry_id = k;
+                                             workbench_buy = i;
+                                             workbench_sell = j;
+                                             // goto loop1;
+                                         }
                                      }
                                  }
                              }
                          }
-                     }
 
-                     // loop1:
-                     Log::print("choose to buy, Robot ", id, " : ", carry_id, workbench_buy, workbench_sell);
-
-                     if(fabs(mn - 0) > 1e-5) { // 如果有则找到最优的策略，跑去买。
-                         double forward, rotate;
-                         robot[id] -> ToPoint_1(workbench[workbench_buy] -> x0_, workbench[workbench_buy] -> y0_, forward, rotate);
-                         // if(workbench[workbench_buy] -> type_id_ >= 4 && workbench[workbench_buy] -> type_id_ <= 7)
-                         //   vis_buy[workbench_buy] = true;
-                         Output::Forward(id, forward);
-                         Output::Rotate(id, rotate);
+                         if (fabs(mn - 0) > 1e-5) { // 如果有则找到最优的策略，跑去买。
+                             double forward, rotate;
+                             robot[id]->ToPoint(workbench[workbench_buy]->x0_, workbench[workbench_buy]->y0_, forward,
+                                                rotate);
+                             // if(workbench[workbench_buy] -> type_id_ >= 4 && workbench[workbench_buy] -> type_id_ <= 7)
+                             //   vis_buy[workbench_buy] = true;
+                             Output::Forward(id, forward);
+                             Output::Rotate(id, rotate);
+                         }
                      }
                  }
              }

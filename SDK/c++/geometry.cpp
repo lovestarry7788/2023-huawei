@@ -26,8 +26,15 @@ double Geometry::Dot(const Vector& A, const Vector& B) { return A.x * B.x + A.y 
 
 double Geometry::Length(const Vector& A) { return sqrt(Dot(A, A)); }
 
-double Geometry::Angle(const Vector& A, const Vector& B) { return acos(Dot(A, B) / Length(A) / Length(B)); }
+double Geometry::InterAngle(const Vector& A, const Vector& B) { return acos(Dot(A, B) / Length(A) / Length(B)); }
 
 double Geometry::MinRadius(double dist, double theta) {
     return dist / (2 * std::max(1e-8, sin(theta)));
 }
+
+double Geometry::AngleReg(double r) {if (r > PI) r -= 2*PI; else if (r < -PI) r += 2*PI; return r;}
+
+// Geometry::Angle::Angle(double r) { this->r = reg(r); }
+// double Geometry::Angle::reg(double r) {if (r > PI) r -= 2*PI; else if (r < -PI) r += 2*PI; return r;}
+// Angle Geometry::operator+(const Angle& A, const Angle& B) { Angle r{Geometry::Angle::reg(A.r + B.r)}; return r; }
+// Angle Geometry::operator-(const Angle& A, const Angle& B) { Angle r{Geometry::Angle::reg(A.r - B.r)}; return r; }
