@@ -20,7 +20,7 @@ void Output::Sell(int robot_id) {
 }
 
 void Output::Destroy(int robot_id) {
-    Operation.emplace_back(std::string{"destory " + std::to_string(robot_id)});
+    Operation.emplace_back(std::string{"destroy " + std::to_string(robot_id)});
 }
 
 void Output::Print(int frame_id) {
