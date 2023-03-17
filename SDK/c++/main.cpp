@@ -151,6 +151,7 @@ namespace Solution1 {
     static constexpr int total_frame = 9000;
     static constexpr int can_not_buy_in_last_frame = 0;
     static constexpr double inf = 1e9;
+    static constexpr int frame_to_wait_in_buy = 3;
 
     // double time_[110][110];
     double profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
@@ -163,72 +164,55 @@ namespace Solution1 {
     int can_plan_to_sell_[110][10];
     double dis_[110][110];
 
+    void Init() {
+        if(frameID == 1) {
+            for(int id = 0; id < 4; ++id) {
+                robot[id] -> workbench_buy_ = -1;
+                robot[id] -> workbench_sell_ = -1;
+            }
+            for(int i = 0; i < K; ++i) {
+                can_plan_to_buy_[i] = true;
+                for(int j = 1; j <= 7; ++j) {
+                    can_plan_to_sell_[i][j] = true;
+                }
+            }
+        }
+        for(int idx = 0; idx < robot_num_ + K; ++idx) {
+            for(int idy = 0; idy < robot_num_ + K; ++idy) {
+                double sx, sy, dx, dy;
+                if(idx < 4) {
+                    sx = robot[idx] -> x0_;
+                    sy = robot[idx] -> y0_;
+                } else {
+                    sx = workbench[idx - robot_num_] -> x0_;
+                    sy = workbench[idx - robot_num_] -> y0_;
+                }
+                if(idy < 4) {
+                    dx = robot[idy] -> x0_;
+                    dy = robot[idy] -> y0_;
+                } else {
+                    dx = workbench[idy - robot_num_] -> x0_;
+                    dy = workbench[idy - robot_num_] -> y0_;
+                }
+                dis_[idx][idy] = Distance(sx, sy, dx, dy);
+            }
+        }
+    }
+
     void Solve() {
         Input::ScanMap();
         while(Input::ScanFrame()) {
-
-            if(frameID == 1) {
-                for(int id = 0; id < 4; ++id) {
-                    robot[id] -> workbench_buy_ = -1;
-                    robot[id] -> workbench_sell_ = -1;
-                }
-                for(int i = 0; i < K; ++i) {
-                    can_plan_to_buy_[i] = true;
-                    for(int j = 1; j <= 7; ++j) {
-                        can_plan_to_sell_[i][j] = true;
-                    }
-                }
-            }
-            for(int idx = 0; idx < robot_num_ + K; ++idx) {
-                 for(int idy = 0; idy < robot_num_ + K; ++idy) {
-                     double sx, sy, dx, dy;
-                     if(idx < 4) {
-                         sx = robot[idx] -> x0_;
-                         sy = robot[idx] -> y0_;
-                     } else {
-                         sx = workbench[idx - robot_num_] -> x0_;
-                         sy = workbench[idx - robot_num_] -> y0_;
-                     }
-                     if(idy < 4) {
-                         dx = robot[idy] -> x0_;
-                         dy = robot[idy] -> y0_;
-                     } else {
-                         dx = workbench[idy - robot_num_] -> x0_;
-                         dy = workbench[idy - robot_num_] -> y0_;
-                     }
-                     dis_[idx][idy] = Distance(sx, sy, dx, dy);
-                 }
-            }
+            Init();
 
             // sell
             for(int id = 0; id < 4; ++id) { // 枚举机器人
                  if (robot[id] -> carry_id_) {
-                     if (robot[id] -> workbench_sell_ == -1) { // 携带物品，计划卖去哪
-                         // 跑去卖手上的东西
-                         int workbench_id = -1;
-                         double mn = 1e9;
-                         for (int i = 0; i < K; ++i) { // 找一个最近的工作台
-                             if (workbench[i]->TryToSell(robot[id]->carry_id_) && can_plan_to_sell_[workbench_id][robot[id] -> carry_id_]) {
-                                 // double time_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i] -> x0_, workbench[i] -> y0_}});
-                                 if (workbench_id == -1 || mn > dis_[id][i + robot_num_]) {
-                                     mn = dis_[id][i + robot_num_];
-                                     workbench_id = i;
-                                 }
-                             }
-                         }
-                         robot[id]->workbench_sell_ = workbench_id;
-                         can_plan_to_sell_[workbench_id][robot[id] -> carry_id_] = false;
-                     }
-
-                     if (robot[id] -> workbench_sell_ == -1) { // 如果卖不掉
-                         Log::print("id: ", id, " carry things ", robot[id]->carry_id_);
-                         Output::Destroy(id);
-                         robot[id] -> workbench_buy_ = robot[id] -> workbench_sell_ = -1;
-                     } else if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
+                     if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
                          // 身边有 workbench
                          if (robot[id]->workbench_ == robot[id] -> workbench_sell_) {
                              Output::Sell(id);
                              can_plan_to_sell_[robot[id] -> workbench_sell_][robot[id] -> carry_id_] = true;
+                             workbench[robot[id] -> workbench_sell_] -> materials_status_ |= 1 << robot[id] -> carry_id_;
                              robot[id] -> workbench_buy_ = robot[id] -> workbench_sell_ = -1;
                              continue;
                          }
@@ -257,9 +241,9 @@ namespace Solution1 {
                                         for (int j = 0; j < K; ++j) if(can_plan_to_sell_[j][k]) { // 从哪个工作站卖
                                             double buy_sell_frame_ = robot[id]->CalcTime(
                                                     std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
-                                                                Geometry::Point{workbench[j]->x0_,
-                                                                                workbench[j]->y0_}});
+                                                                Geometry::Point{workbench[j]->x0_, workbench[j]->y0_}});
                                             if (frameID + buy_sell_frame_ > total_frame) continue;  //  没时间去卖了，所以不买。
+                                            // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_}});
                                             if (workbench[i]->TryToBuy(k, -100) && workbench[j]->TryToSell(k)) {
                                                 double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
                                                                                           dis_[i + robot_num_][j +
@@ -269,7 +253,6 @@ namespace Solution1 {
                                                     carry_id = k;
                                                     workbench_buy = i;
                                                     workbench_sell = j;
-                                                    // goto loop1;
                                                 }
                                             }
                                         }
@@ -282,12 +265,14 @@ namespace Solution1 {
                                 can_plan_to_sell_[workbench_sell][carry_id] = false;
                             }
                         }
-
+                        
                         if (robot[id] -> workbench_buy_ != -1) { // 如果有则找到最优的策略，跑去买。
                             // 身边有 workbench
                             if (robot[id]->workbench_ == robot[id]->workbench_buy_) {
+                                // if(workbench[robot[id] -> workbench_buy_] -> frame_remain_ > 0 && workbench[robot[id] -> workbench_buy_] -> frame_remain_ <= frame_to_wait_in_buy) continue ;
                                 Output::Buy(id);
                                 can_plan_to_buy_[robot[id] -> workbench_buy_] = true;
+                                workbench[robot[id] -> workbench_sell_] -> product_status_ = 0;
                                 robot[id] -> workbench_buy_ = -1;
                                 continue;
                             }
@@ -305,7 +290,6 @@ namespace Solution1 {
             }
 
             Output::Print(Input::frameID);
-            Log::print("frame_id: ", frameID, " OK! ");
          }
      }
  }
