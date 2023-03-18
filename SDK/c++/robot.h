@@ -14,7 +14,6 @@
 #include <vector>
 
 struct Robot {
-
 public:
     static constexpr double radius_ = 0.45;
     static constexpr double radius_with_thing_ = 0.53;
@@ -57,9 +56,9 @@ public:
     double GetMaxSpeedOnCir(double r);
 
     // 预估走完这些点的帧
-    int CalcTime(const std::vector<Geometry::Point>& route);
+    double CalcTime(const Geometry::Point& p1, const Geometry::Point& p2);
 
-    double CalcTime(const Geometry::Point p);
+    double CalcTime(const Geometry::Point& p);
     
     double CalcSlowdownDist();
 

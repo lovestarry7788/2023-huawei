@@ -22,6 +22,15 @@ double Geometry::UniformVariableDist(double a, double v, double aim_v) {
     return abs(v * v - aim_v * aim_v) / (2 * a);
 }
 
+// v -> v_max -> v_max -> 0，求时间
+double Geometry::UniformVariableDist2(double a, double x, double v, double v_max) {
+    double t = (2 * v_max - v) / a;
+    x -= UniformVariableDist(a, v, v_max);
+    x -= UniformVariableDist(a, v_max, 0);
+    t += x / v_max;
+    return t;
+}
+
 double Geometry::Dot(const Vector& A, const Vector& B) { return A.x * B.x + A.y * B.y; }
 
 double Geometry::Length(const Vector& A) { return sqrt(Dot(A, A)); }

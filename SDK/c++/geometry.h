@@ -30,6 +30,9 @@ namespace Geometry {
     // 匀变速运动距离/角度
     double UniformVariableDist(double a, double v, double aim_v);
 
+    // v -> v_max -> v_max -> 0，求时间
+    double UniformVariableDist2(double a, double x, double v, double v_max);
+
     // 圆周运动最小半径。
     double MinRadius(double dist, double theta);
 
