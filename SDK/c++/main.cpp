@@ -162,9 +162,14 @@ namespace Solution1 {
 
     int can_plan_to_buy_[110];
     int can_plan_to_sell_[110][10];
+    bool should_not_plan_to_buy_[110];
+    /*
+     * 如果A去这个商店卖，同时B规划的是去同一个商店买；可以让A卖完直接去做B的规划，让B去规划别的买的路径。
+     */
     double dis_[110][110];
 
     void Init() {
+        // 第一帧开始初始化的
         if(frameID == 1) {
             for(int id = 0; id < 4; ++id) {
                 robot[id] -> workbench_buy_ = -1;
@@ -176,6 +181,11 @@ namespace Solution1 {
                     can_plan_to_sell_[i][j] = true;
                 }
             }
+        }
+
+        // 每帧都需要初始化的
+        for(int i = 0; i < K; ++i) {
+            should_not_plan_to_buy_[i] = false;
         }
         for(int idx = 0; idx < robot_num_ + K; ++idx) {
             for(int idy = 0; idy < robot_num_ + K; ++idy) {
@@ -199,6 +209,21 @@ namespace Solution1 {
         }
     }
 
+    void Choose_To_Point(int id, double dx, double dy, double& forward, double& rotate) {
+        switch(Input::map_number_) {
+            /*
+            case 2:
+                robot[id]->ToPoint_1(dx, dy, forward, rotate);
+                // Log::print("Choose_ToPoint_1\n");
+                break;
+            */
+            default:
+                robot[id]->ToPoint(dx, dy, forward, rotate);
+                // Log::print("Choose_ToPoint\n");
+                break;
+        }
+    }
+
     void Solve() {
         Input::ScanMap();
         while(Input::ScanFrame()) {
@@ -208,6 +233,7 @@ namespace Solution1 {
             for(int id = 0; id < 4; ++id) { // 枚举机器人
                  if (robot[id] -> carry_id_) {
                      if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
+                         should_not_plan_to_buy_[robot[id] -> workbench_sell_] = true;
                          // 身边有 workbench
                          if (robot[id]->workbench_ == robot[id] -> workbench_sell_) {
                              Output::Sell(id);
@@ -217,8 +243,11 @@ namespace Solution1 {
                              continue;
                          }
                          double forward, rotate;
-                         robot[id]->ToPoint(workbench[robot[id]->workbench_sell_]->x0_, workbench[robot[id]->workbench_sell_]->y0_,
+                         /*
+                         robot[id]->ToPoint_1(workbench[robot[id]->workbench_sell_]->x0_, workbench[robot[id]->workbench_sell_]->y0_,
                                             forward, rotate);
+                            */
+                         Choose_To_Point(id, workbench[robot[id]->workbench_sell_]->x0_, workbench[robot[id]->workbench_sell_]->y0_, forward, rotate);
                          robot[id]->AvoidToWall(forward, rotate);
 
                          Output::Forward(id, forward);
@@ -239,6 +268,7 @@ namespace Solution1 {
                             for (int k = 1; k <= 7; ++k) { // 枚举要买的物品
                                 for (int i = 0; i < K; ++i) if(can_plan_to_buy_[i]) { // 从哪个工作站买，多少帧内不能去同一个地方买
                                         for (int j = 0; j < K; ++j) if(can_plan_to_sell_[j][k]) { // 从哪个工作站卖
+                                            if (should_not_plan_to_buy_[i]) continue; // 优化：别人去卖的，你不能去买
                                             double buy_sell_frame_ = robot[id]->CalcTime(
                                                     std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
                                                                 Geometry::Point{workbench[j]->x0_, workbench[j]->y0_}});
@@ -278,8 +308,11 @@ namespace Solution1 {
                             }
 
                             double forward, rotate;
-                            robot[id]->ToPoint(workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward,
+                            /*
+                            robot[id]->ToPoint_1(workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward,
                                                  rotate);
+                             */
+                            Choose_To_Point(id, workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward, rotate);
                             robot[id]->AvoidToWall(forward, rotate);
 
                             Output::Forward(id, forward);

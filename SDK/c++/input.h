@@ -13,11 +13,12 @@ namespace Input {
     extern std::vector<std::shared_ptr<Workbench> > workbench;
     extern std::vector<std::shared_ptr<Robot> > robot;        
     constexpr int robot_num_ = 4;
+    extern int map_number_; // 是哪张地图，-1 = unknown
 
     bool readUntilOK();
     void ScanMap();
-
     bool ScanFrame();
+    void Identify_Map_Number();
 };
 
 #endif

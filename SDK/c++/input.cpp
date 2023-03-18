@@ -3,6 +3,7 @@
 
 int Input::frameID, Input::coins, Input::K;
 char Input::map_[101][101];
+int Input::map_number_;
 std::vector<std::shared_ptr<Workbench> > Input::workbench;
 std::vector<std::shared_ptr<Robot> > Input::robot;        
 
@@ -27,6 +28,7 @@ void Input::ScanMap() {
     readUntilOK();
     puts("OK");
     fflush(stdout);
+    Identify_Map_Number();
 }
 
 bool Input::ScanFrame() { 
@@ -78,4 +80,13 @@ bool Input::ScanFrame() {
         return true;
     }
     return false;
+}
+
+void Input::Identify_Map_Number() {
+    if(map_[2][2] == '1' && map_[2][6] == '2' && map_[2][10] == '4') map_number_ = 1;
+    else if(map_[2][9] == '1' && map_[2][19] == '2') map_number_ = 2;
+    else if(map_[98][4] == '3' && map_[98][95] == '3') map_number_ = 3;
+    else if(map_[95][12] == '6' && map_[95][84] == '4') map_number_ = 4;
+    else map_number_ = -1;
+    Log::print("Identify_Map_Number: ", map_number_);
 }
