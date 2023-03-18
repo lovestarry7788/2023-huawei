@@ -39,7 +39,7 @@ public:
 
     void ToPoint_1(double dx, double dy, double& forward, double& rotate);
 
-    void ToPoint_2(double dx, double dy, double& forward, double& rotate);
+    // void ToPoint_2(double dx, double dy, double& forward, double& rotate);
 
     void AvoidToWall(double& forward, double& rotate);
 
@@ -59,6 +59,8 @@ public:
     // 预估走完这些点的帧
     int CalcTime(const std::vector<Geometry::Point>& route);
 
+    double CalcTime(const Geometry::Point p);
+    
     double CalcSlowdownDist();
 
     double GetLinearVelocity();

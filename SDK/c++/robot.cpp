@@ -114,6 +114,24 @@ double Robot::GetMaxSpeedOnCir(double r) {
     return sqrt(max_force_ * r / GetMass());
 }
 
+double Robot::CalcTime(const Point p) {
+    double aim_r = atan2(p.y - y0_, p.x - x0_);
+    double dif_r = fabs(AngleReg(aim_r - orient_));
+    double dist = Dist(p.x, p.y, x0_, y0_);
+    double ans = UniformVariableDist(max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_);
+    double linearV = GetLinearVelocity();
+    double cir = std::min(1.5 * linearV / max_forward_velocity_, MinRadius(dist, dif_r)); 
+    dist -= 2 * cir * sin(dif_r / 2);
+
+    double a = max_force_ / GetMass();
+    double ans_up_speed = (max_forward_velocity_ - linearV) / a;
+    ans = 0.97 * std::max(ans, ans_up_speed) + 0.15 * std::min(ans, ans_up_speed);
+    dist -= UniformVariableDist(a, GetMaxSpeedOnCir(cir), max_forward_velocity_);
+
+    ans += dist / max_forward_velocity_;
+    return ans;
+}
+
 // Todo:
 int Robot::CalcTime(const std::vector<Geometry::Point>& route) {
     // 不考虑加速过程
