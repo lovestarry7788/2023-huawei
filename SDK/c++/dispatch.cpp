@@ -29,7 +29,7 @@ void Dispatch::UpdatePlan(int robot_id, Plan plan) {
         occupy_[plan.buy_workbench].buy_occupy = true;
     if (plan.sell_workbench != -1)
         occupy_[plan.sell_workbench].sell_occupy |= (1<<plan.mat_id);
-    ManagePlan(robot_id, plan);
+    // ManagePlan(robot_id, plan);
     plan_[robot_id] = plan;
 }
 
@@ -108,8 +108,10 @@ void Dispatch::ControlWalk() {
         if (wi == -1) continue;
         const double invalid = -100;
         double forward = invalid, rotate = invalid;
-        Input::robot[ri]->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
-        Input::robot[ri] -> AvoidToWall(forward, rotate);
+        robot->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
+        robot -> AvoidToWall(forward, rotate);
+        // double v = robot->GetLinearVelocity();
+        // if (fabs(v - forward) > 1 && robot->on_cir < 2) rotate /= 4;
 //        double limit = robot->CalcSlowdownDist();
 //        double walld = DistToWall({robot->x0_, robot->y0_}, robot->orient_);
 //        Log::print(ri, limit, walld, robot->GetLinearVelocity(), robot->GetMass());

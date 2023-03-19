@@ -1,4 +1,5 @@
 #include "geometry.h"
+#include "log.h"
 
 using namespace Geometry;
 
@@ -37,6 +38,12 @@ double Geometry::Length(const Vector& A) { return sqrt(Dot(A, A)); }
 
 double Geometry::InterAngle(const Vector& A, const Vector& B) { return acos(Dot(A, B) / Length(A) / Length(B)); }
 
+double Geometry::MinRadius2(double x, double y, double theta) {
+    const static double m = .1;
+    double r = (-2*y + sqrt(4*y*y + 4*m*m*(x*x+y*y))) / (2 * m*m * std::max(theta * theta, 1e-8));
+    Log::print("called MinRadius2");
+    return r;
+}
 double Geometry::MinRadius(double dist, double theta) {
     return dist / (2 * std::max(1e-8, sin(theta)));
 }

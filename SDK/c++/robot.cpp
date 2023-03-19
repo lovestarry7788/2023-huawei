@@ -45,37 +45,32 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     double dif_rot = AngleReg(orient_ - aim_rot);
     double dist = Geometry::Dist(x0_, y0_, dx, dy);
 
-
-    double cir = Geometry::MinRadius(dist, fabs(dif_rot)); 
+    double cir = Geometry::MinRadius(dist, fabs(dif_rot));
+    if (fabs(dif_rot) > 0.5 && cir < 2 && dist < 3)
+        cir = Geometry::MinRadius2(dx-x0_, dy-y0_, fabs(aim_rot));
     forward = GetMaxSpeedOnCir(cir);
     forward = std::min(forward, max_forward_velocity_);
 
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
-    double linearV = GetLinearVelocity();
+    // double linearV = GetLinearVelocity();
+    // 速度不匹配？相差角度太大？cir变化太大？没有好的表示形式，更没有好解决方法。不碰撞自己转，乱调参数则出问题。
     if (fabs(dif_rot) < limit_r) rotate = 0; // 开始角速度减速
     else {
         rotate = max_rotate_velocity_;
         rotate = dif_rot > 0 ? -rotate : rotate;
     }
     // cir < 1 仅用于小圈转入情况，dif_rot与PI/2相近，只用于目标点在圆心处。绕圈特征：dif_rot随时间变化，以PI/2为中心，0.5幅度变化。
-    if (cir < 2.0 && fabs(fabs(dif_rot) - PI/2) < 0.3 && fabs(fabs(dif_rot) - PI/2) > 0.05) { // 调参
-        Log::print("ToPoint2", id_, linearV, forward, fabs(fabs(dif_rot) - PI/2), cir);
-        rotate *= 0.40*cir; // 调参 1 -> 0.4; 2->0.8 cir * 0.4
-        // forward *= 0.5;
-    }
-
-    // 不减速假设
-    // double velocity = Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
-    // double limit_v = Geometry::UniformVariableDist(max_force_ / GetMass(), velocity, 0);
-    // if (limit_v > dist) forward = 0; // 开始线速度减速
-
-
+    // if (cir < 2.0 && fabs(fabs(dif_rot) - PI/2) < 0.3 && fabs(fabs(dif_rot) - PI/2) > 0.05) { // 调参
+    //     Log::print("ToPoint2", id_, linearV, forward, fabs(fabs(dif_rot) - PI/2), cir);
+    //     rotate *= 0.40*cir; // 调参 1 -> 0.4; 2->0.8 cir * 0.4
+    //     // forward *= 0.5;
+    // }
 }
 
 void Robot::AvoidToWall(double &forward, double &rotate) {
     double limit = CalcMaxSlowdownDist();
     double walld = DistToWall({x0_, y0_}, orient_);
-    if (limit >= walld - 1.1) {
+    if (limit >= walld - 1.2) {
         forward = 0;
     }
 }

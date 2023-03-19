@@ -37,7 +37,7 @@ namespace Solution3 {
             if (rb->carry_id_ == 0) {
                 buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
                 if (!buy_wb->product_status_) // 有产品了也可以在生产时间中，故必须要此判断
-                    buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * 8; // 少浪费时间
+                    buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * 16; // 少浪费时间
             }
 
             for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
@@ -80,8 +80,8 @@ namespace Solution3 {
         //     RobotReplan(ri); // 开始规划
         // }
         while (Input::ScanFrame()) {
-            // Dispatch::UpdateCompleted();
             Log::print("frame", Input::frameID);
+            // Dispatch::UpdateCompleted();
             Dispatch::UpdateAll();
             Dispatch::ManagePlan();
             Dispatch::ControlWalk();
@@ -316,6 +316,7 @@ namespace Solution1 {
  }
 
 int main() {
+    // Log::print(Geometry::MinRadius2(1,1));
     Solution3::Solve();
     return 0;
 }

@@ -33,6 +33,8 @@ namespace Geometry {
     // v -> v_max -> v_max -> 0，求时间
     double UniformVariableDist2(double a, double x, double v, double v_max);
 
+    double MinRadius2(double x, double y, double theta);
+
     // 圆周运动最小半径。
     double MinRadius(double dist, double theta);
 
