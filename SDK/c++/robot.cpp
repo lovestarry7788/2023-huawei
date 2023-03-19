@@ -52,6 +52,8 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     forward = std::min(forward, max_forward_velocity_);
 
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
+    // if (Input::frameID > 230 && Input::frameID < 260 && id_ == 3)
+    //     Log::print("ToPoint", angular_velocity_, limit_r, dif_rot, dx, dy, x0_, y0_);
     // double linearV = GetLinearVelocity();
     // 速度不匹配？相差角度太大？cir变化太大？没有好的表示形式，更没有好解决方法。不碰撞自己转，乱调参数则出问题。
     if (fabs(dif_rot) < limit_r) rotate = 0; // 开始角速度减速

@@ -81,8 +81,8 @@ namespace Solution3 {
         // }
         while (Input::ScanFrame()) {
             Log::print("frame", Input::frameID);
-            // Dispatch::UpdateCompleted();
-            Dispatch::UpdateAll();
+            Dispatch::UpdateCompleted();
+            // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
             Dispatch::ControlWalk();
             Output::Print(Input::frameID);

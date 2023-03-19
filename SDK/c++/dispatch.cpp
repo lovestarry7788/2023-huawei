@@ -6,7 +6,8 @@
 
 using namespace Dispatch;
 using namespace Geometry;
-std::vector<std::set<Geometry::Point>> Dispatch::forecast_;
+std::vector<std::vector<Geometry::Point>> Dispatch::forecast_;
+std::vector<std::pair<double, double>> Dispatch::movement_;
 
 std::vector<Plan> Dispatch::plan_;
 
@@ -101,15 +102,17 @@ void Dispatch::ManagePlan(int robot_id, Plan& plan) {
 
 // 输出行走
 void Dispatch::ControlWalk() {
+    movement_.resize(Input::robot_num_);
     for (size_t ri = 0; ri < plan_.size(); ri++) {
         auto robot = Input::robot[ri];
         int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
         // Log::print("ControlWalk", ri, plan_[ri].buy_workbench, plan_[ri].sell_workbench);
         if (wi == -1) continue;
-        const double invalid = -100;
-        double forward = invalid, rotate = invalid;
+        double& forward = movement_[ri].first;
+        double& rotate = movement_[ri].second;
         robot->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
         robot -> AvoidToWall(forward, rotate);
+        // Log::print(ri, forward, rotate);
         // double v = robot->GetLinearVelocity();
         // if (fabs(v - forward) > 1 && robot->on_cir < 2) rotate /= 4;
 //        double limit = robot->CalcSlowdownDist();
@@ -118,8 +121,83 @@ void Dispatch::ControlWalk() {
 //        if (limit >= walld - 1.1) {
 //            forward = 0;
 //        }
-        Log::print("ControlWalk", ri, forward, rotate);
-        if (fabs(forward - invalid) > 1e-5) Output::Forward(ri, forward);
-        if (fabs(rotate - invalid) > 1e-5) Output::Rotate(ri, rotate);
+        // Log::print("ControlWalk", ri, forward, rotate);
+        // if (fabs(forward - invalid) > 1e-5) Output::Forward(ri, forward);
+        // if (fabs(rotate - invalid) > 1e-5) Output::Rotate(ri, rotate);
+    }
+    Clash();
+    for (size_t ri = 0; ri < plan_.size(); ri++) {
+        double& forward = movement_[ri].first;
+        double& rotate = movement_[ri].second;
+
+        Log::print(ri, forward, rotate);
+        Output::Forward(ri, forward);
+        Output::Rotate(ri, rotate);
+    }
+}
+
+void Dispatch::Collide() {
+    static std::vector<std::vector<double>> lstang;
+    lstang.resize(Input::robot_num_);
+    forecast_.resize(Input::robot_num_, std::vector<Point>(forecast_num_, {0, 0}));
+    for (int ri = 0; ri < Input::robot_num_; ri++) {
+        auto robot = Input::robot[ri];
+        bool P = Input::frameID >= 376 && Input::frameID <= 380 && (ri == 2 || ri == 1);
+        
+        lstang[ri].push_back(robot->angular_velocity_);
+        if (lstang[ri].size() > 5) lstang[ri].erase(begin(lstang[ri]));
+        double angularV = 0;
+        for (auto i: lstang[ri]) angularV += i;
+        angularV /= lstang[ri].size();
+
+        if (P) Log::print(angularV);
+        if (fabs(angularV) < 1e-8) angularV = 1e-8 * (angularV > 0 ? 1 : -1);
+        double linearV = std::max(1e-8, Input::robot[ri]->GetLinearVelocity());
+        double cir = linearV / angularV;
+        Point center = {robot->x0_, robot->y0_};
+        Vector mov = Vector{-sin(robot->orient_), cos(robot->orient_)} * cir;
+        center = center + mov;
+        if (P) Log::print(cir, angularV, center.x, center.y);
+        for (int i = 0; i < forecast_num_; i++) {
+            forecast_[ri][i] = center - mov * cos(i / 50.0 * linearV / cir);
+            if (P) Log::print(forecast_[ri][i].x, forecast_[ri][i].y);
+        }
+    }
+    std::vector<int> change(Input::robot_num_, 0);
+    // &1减速，&2转向
+    for (int ri = 0; ri < Input::robot_num_; ri++)
+        for (int rj = ri+1; rj < Input::robot_num_; rj++) {
+            for (int t = 0; t < forecast_num_; t++) {
+                double dist = Length(forecast_[ri][t] - forecast_[rj][t]);
+                if (dist > 1.5 + t * 0.03) continue; // 越小对路线估计要求越高，越大越浪费时间
+                int c1 = rj, c2 = ri;
+                auto roboti = Input::robot[ri];
+                auto robotj = Input::robot[rj];
+
+                if (roboti->carry_id_ < robotj->carry_id_ || roboti->carry_id_ == robotj->carry_id_ && ri < rj) std::swap(c1, c2);
+                // c2重要
+                // change[c2] |= 0b10; // 重要的转
+                // change[c1] |= 0b01; // 不重要的减速
+                if (fabs(AngleReg(roboti->orient_ - robotj->orient_ - PI)) < 0.3)
+                    change[c1] |= 0b10; // 转向
+                else change[c1] |= 0b01;
+                Log::print("colide", ri, rj, c1, change[c1], Input::robot[c1]->angular_velocity_);
+                break;
+            }
+    }
+    for (int ri = 0; ri < Input::robot_num_; ri++) {
+        // auto roboti = Input::robot[ri];
+        // if (change[ri]) 
+        if (change[ri]>>0&1) {
+            if (Input::robot[ri]->GetLinearVelocity() >3)
+                movement_[ri].first = Input::robot[ri]->GetLinearVelocity();
+            else 
+                movement_[ri].first = 6;
+        }
+        if (change[ri]>>1&1) {
+            movement_[ri].second = PI * (Input::robot[ri]->angular_velocity_ > 0 ? 1 : -1) ;
+            // movement_[ri].first += 1;
+        }
+        
     }
 }
