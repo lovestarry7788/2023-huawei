@@ -51,13 +51,16 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     forward = std::min(forward, max_forward_velocity_);
 
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
-    if (fabs(dif_rot) < limit_r) rotate = 0; // 开始角速度减速
-    else rotate = dif_rot > 0 ? -max_rotate_velocity_ : max_rotate_velocity_;
     double linearV = GetLinearVelocity();
-    // cir < 1 仅用于小圈转入情况，dif_rot与PI/2相近，只用于目标点在圆心处
-    if (cir < 1 && fabs(fabs(dif_rot) - PI/2) < 0.4) { // 调参
-        // Log::print("ToPoint", id_, linearV, forward, cir);
-        rotate *= cir * 0.4; // 调参
+    if (fabs(dif_rot) < limit_r) rotate = 0; // 开始角速度减速
+    else {
+        rotate = max_rotate_velocity_;
+        rotate = dif_rot > 0 ? -rotate : rotate;
+    }
+    // cir < 1 仅用于小圈转入情况，dif_rot与PI/2相近，只用于目标点在圆心处。绕圈特征：dif_rot随时间变化，以PI/2为中心，0.5幅度变化。
+    if (cir < 2.0 && fabs(fabs(dif_rot) - PI/2) < 0.3 && fabs(fabs(dif_rot) - PI/2) > 0.05) { // 调参
+        Log::print("ToPoint2", id_, linearV, forward, fabs(fabs(dif_rot) - PI/2), cir);
+        rotate *= 0.40*cir; // 调参 1 -> 0.4; 2->0.8 cir * 0.4
         // forward *= 0.5;
     }
 
@@ -113,7 +116,7 @@ double Robot::GetRotInerta() {
 }
 
 double Robot::GetMaxSpeedOnCir(double r) {
-    return sqrt(max_force_ * r / GetMass());
+    return sqrt(0.7 * max_force_ * r / GetMass()); // 0.95 转向时加速度用不完
 }
 
 double Robot::CalcTime(const Point& p) {
@@ -121,16 +124,20 @@ double Robot::CalcTime(const Point& p) {
     double dif_r = fabs(AngleReg(aim_r - orient_));
     double dist = Dist(p.x, p.y, x0_, y0_);
     double ans = UniformVariableDist2(max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_);
+    double ans1 = ans;
     double linearV = GetLinearVelocity();
     double cir = std::min(1.5 * linearV / max_forward_velocity_, MinRadius(dist, dif_r)); 
     dist -= 2 * cir * sin(dif_r / 2);
 
     double a = max_force_ / GetMass();
     double ans_up_speed = (max_forward_velocity_ - linearV) / a;
-    ans = 0.97 * std::max(ans, ans_up_speed) + 0.15 * std::min(ans, ans_up_speed);
+    ans += 0.97 * std::max(ans, ans_up_speed) + 0.15 * std::min(ans, ans_up_speed);
+    double ans2 = ans;
     dist -= UniformVariableDist(a, GetMaxSpeedOnCir(cir), max_forward_velocity_);
 
     ans += dist / max_forward_velocity_;
+    // if (id_ == 2 && Input::frameID == 51)
+    Log::print(ans1, ans2, ans, x0_, y0_, p.x, p.y);
     return ans;
 }
 

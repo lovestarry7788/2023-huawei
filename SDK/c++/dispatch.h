@@ -13,18 +13,29 @@ namespace Dispatch {
     extern std::vector<std::set<Geometry::Point>> forecast_;
     struct Plan {
         // int robot_id;
+        int mat_id = 0;
         int buy_workbench = -1, sell_workbench = -1; // -1为已完成，否则为工作台id
-        bool update = false;
     };
     extern std::vector<Plan> plan_;
     
+    // 工作台占用情况
+    struct Occupy {
+        bool buy_occupy = 0;
+        int sell_occupy = 0; // >>i&1 则i物品被占用
+    };
+    extern std::vector<Occupy> occupy_;
+
     // 完成Plan时调用委托。单独(延迟)规划用
     extern void (*RobotReplan_)(int);
     // extern std::function<void(int,int)> Dispatch::RobotBuy_;
     // extern std::function<void(int,int,int)> Dispatch::RobotSell_;
 
-    void init(void (*RobotReplan)(int), int robot_num);
+    void init(void (*RobotReplan)(int), int robot_num, int workbench_num);
     // void init(std::function<void(int)> RobotReplan, std::function<void(int,int)> RobotBuy, std::function<void(int,int,int)> RobotSell, int robot_num);
+
+    void UpdateAll();
+
+    void UpdateCompleted();
 
     // 被robotReplan_调用。更新plan，否则默认继承上帧plan
     void UpdatePlan(int robot_id, Plan plan);

@@ -21,88 +21,74 @@ namespace Solution3 {
     int award_sell(int robot_id, int workbench_id, int materials) {
         return 0;
     }
-    // 工作台占用情况
-    struct Occupy {
-        bool buy_occupy = 0;
-        int sell_occupy = 0; // >>i&1 则i物品被占用
-    };
-    std::vector<Occupy> occupy;
     void RobotReplan(int robot_id) {
-        Log::print("RobotReplan", robot_id, Input::frameID);
+        // Log::print("RobotReplan", robot_id, Input::frameID);
         auto rb = robot[robot_id];
-        auto &plan = Dispatch::plan_[robot_id];
-        if ((plan.buy_workbench == -1) != (plan.sell_workbench == -1)) return;
 
-        if (plan.buy_workbench != -1  ) {
-            int bw = plan.buy_workbench;
-            int sw = plan.sell_workbench;
-            int mat_id = workbench[bw]->type_id_;
-            occupy[bw].buy_occupy = false;
-            occupy[sw].sell_occupy &= ((unsigned)1 << 31) - 1 - (1<<mat_id);
-            plan.buy_workbench = plan.sell_workbench = -1;
-        }
-        Dispatch::Plan bst = {-1, -1};
+        Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
         double bst_award_pf = 0; // per frame
         for (int buy_wb_id = 0; buy_wb_id < K; buy_wb_id++) {
             auto buy_wb = workbench[buy_wb_id];
             if (!buy_wb->product_status_ && buy_wb-> frame_remain_ == -1) continue; // 暂不考虑后后运送上的 
-            if (occupy[buy_wb_id].buy_occupy) continue;
+            if (Dispatch::occupy_[buy_wb_id].buy_occupy) continue;
             int mat_id = buy_wb->type_id_; // 购买与出售物品id
-            int buy_frame = round(rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}}) * 50);
-            // Log::print("CalcTime", robot_id, buy_wb->x0_, buy_wb->y0_, buy_frame);
-            buy_frame += std::max(0, buy_wb-> frame_remain_ - buy_frame) * 8; // 少浪费时间
+            if (rb->carry_id_ != 0 && rb->carry_id_ != mat_id) continue;
+            double buy_time = 0;
+            if (rb->carry_id_ == 0) {
+                buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
+                buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * 8; // 少浪费时间
+            }
 
             for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
                 auto sell_wb = workbench[sell_wb_id];
-                int sell_frame = round(50 * 
-                    rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_}) - 
-                    rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}));
+                double sell_time = 0;
+                if (rb->carry_id_ == 0) {
+                    sell_time = 
+                        rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_}) - 
+                        rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_});
+                } else {
+                    sell_time = rb->CalcTime(Point{sell_wb->x0_, sell_wb->y0_});
+                }
 
                 if (!sell_wb->TryToSell(mat_id)) continue; // 暂时只考虑能直接卖的，不考虑产品被拿走可以重新生产的
-                if (occupy[sell_wb_id].sell_occupy >> mat_id & 1) continue;
+                if (Dispatch::occupy_[sell_wb_id].sell_occupy >> mat_id & 1) continue;
 
                 int award = award_buy(robot_id, buy_wb_id) + 
                             award_sell(robot_id, sell_wb_id, mat_id) + 
                             profit_[mat_id];
 
-                double award_pf = (double)award / (buy_frame + sell_frame);
+                double award_pf = award / (buy_time + sell_time);
                 if (award_pf > bst_award_pf) {
                     bst_award_pf = award_pf;
                     bst.buy_workbench = buy_wb_id;
                     bst.sell_workbench = sell_wb_id;
+                    bst.mat_id = mat_id;
                 }
-
+                // if (Input::frameID == 51 && robot_id == 2) {
+                //     Log::print(award, award_pf, buy_wb_id, sell_wb_id, sell_wb->type_id_);
+                //     Log::print(buy_time, sell_time);
+                // }
             }
 
         }
-        if (bst.sell_workbench != -1) {
-            int bw = bst.buy_workbench;
-            int sw = bst.sell_workbench;
-            int mat_id = workbench[bw]->type_id_;
-            occupy[bw].buy_occupy = true;
-            // assert(~occupy[sw].sell_occupy>>mat_id & 1);
-            occupy[sw].sell_occupy |= (1<<mat_id);
-            Dispatch::UpdatePlan(robot_id, bst);
-        }
+        Log::print("UpdatePlan", robot_id, bst.buy_workbench, bst.sell_workbench);
+        Dispatch::UpdatePlan(robot_id, bst);
     }
     void Solve() {
         Input::ScanMap();
-        Dispatch::init(RobotReplan, Input::robot_num_);
+        Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
         // occupy.resize(K);
         // ScanFrame才初始化
         // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
         //     RobotReplan(ri); // 开始规划
         // }
         while (Input::ScanFrame()) {
-            if (occupy.size() == 0)
-                occupy.resize(K);
+            // Dispatch::UpdateCompleted();
+            Log::print("frame", Input::frameID);
+            Dispatch::UpdateAll();
             Dispatch::ManagePlan();
-            // for (size_t ri = 0; ri < Input::robot_num_; ri++) { // 每帧重新规划，不必须
-            //     RobotReplan(ri);
-            // }
             Dispatch::ControlWalk();
             Output::Print(Input::frameID);
-            Log::print("frame", Input::frameID);
         }
     }
 }
@@ -329,6 +315,6 @@ namespace Solution1 {
  }
 
 int main() {
-    Solution3::Solve();
+    Solution2::Solve();
     return 0;
 }

@@ -19,10 +19,12 @@ bool Input::readUntilOK() {
 }
 
 void Input::ScanMap() {
+    K = 0;
     // 地图输入开始
     for(int i = 0; i < 100; ++i) {
         for(int j = 0; j < 100; ++j) {
             scanf("\n%c",&map_[i][j]);
+            K += map_[i][j] >= '1' && map_[i][j] <= '9'; 
         }
     }
     readUntilOK();
