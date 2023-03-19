@@ -47,6 +47,8 @@ public:
     // 获取当前半径
     double GetRadius();
 
+    double GetMaxMass();
+    
     // 获取质量，不拿16，15加速度
     double GetMass();
 
@@ -60,7 +62,7 @@ public:
 
     double CalcTime(const Geometry::Point& p);
     
-    double CalcSlowdownDist();
+    double CalcMaxSlowdownDist();
 
     double GetLinearVelocity();
     

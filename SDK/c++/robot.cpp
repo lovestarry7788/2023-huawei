@@ -73,7 +73,7 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
 }
 
 void Robot::AvoidToWall(double &forward, double &rotate) {
-    double limit = CalcSlowdownDist();
+    double limit = CalcMaxSlowdownDist();
     double walld = DistToWall({x0_, y0_}, orient_);
     if (limit >= walld - 1.1) {
         forward = 0;
@@ -100,8 +100,12 @@ double Robot::DistToWall(Point p, double orient) {
 }
 
 double Robot::GetRadius() {
-    return Robot::radius_with_thing_;
-    // return this->carry_id_ != 0 ? Robot::radius_with_thing_ : Robot::radius_;
+    // return Robot::radius_with_thing_;
+    return this->carry_id_ != 0 ? Robot::radius_with_thing_ : Robot::radius_;
+}
+
+double Robot::GetMaxMass() {
+    return Robot::density_ * radius_with_thing_ * radius_with_thing_;
 }
 
 double Robot::GetMass() {
@@ -124,28 +128,39 @@ double Robot::CalcTime(const Point& p) {
     double dif_r = fabs(AngleReg(aim_r - orient_));
     double dist = Dist(p.x, p.y, x0_, y0_);
     double ans = UniformVariableDist2(max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_);
-    double ans1 = ans;
     double linearV = GetLinearVelocity();
     double cir = std::min(1.5 * linearV / max_forward_velocity_, MinRadius(dist, dif_r)); 
+    // Log::print(dist);
     dist -= 2 * cir * sin(dif_r / 2);
+    // Log::print(dist);
+    double t1 = ans;
+    // Log::print(dif_r, cir, angular_velocity_);
 
     double a = max_force_ / GetMass();
     double ans_up_speed = (max_forward_velocity_ - linearV) / a;
-    ans += 0.97 * std::max(ans, ans_up_speed) + 0.15 * std::min(ans, ans_up_speed);
-    double ans2 = ans;
+    // Log::print(ans_up_speed, ans);
+    ans = 0.97 * std::max(ans, ans_up_speed) + 0.15 * std::min(ans, ans_up_speed);
     dist -= UniformVariableDist(a, GetMaxSpeedOnCir(cir), max_forward_velocity_);
+    // Log::print(dist);
+    double t2 = ans;
+    // Log::print(dist);
 
     ans += dist / max_forward_velocity_;
-    // if (id_ == 2 && Input::frameID == 51)
-    Log::print(ans1, ans2, ans, x0_, y0_, p.x, p.y);
+    // Log::print(cir, dif_r, linearV, orient_, t1, t2, ans);
     return ans;
+    // x = 1/2*a*t^2
+    // ans += dif_r / max_rotate_velocity_ / 0.85; // 粗略估计平均旋转速度为1/2
+    // ans += dist / max_forward_velocity_ / 0.7; // 粗略估计6*0.8m/s
+    // cntr = aim_r;
+    // cntp = p;
+
 }
 
 double Robot::CalcTime(const Point& p1, const Point& p2) {
     double ans = CalcTime(p1);
     Robot a = *this;
-    a.x0_ = p2.x;
-    a.y0_ = p2.y;
+    a.x0_ = p1.x;
+    a.y0_ = p1.y;
     a.orient_ = atan2(p2.y - p1.y, p2.x - p1.x);
     a.angular_velocity_ = 0;
     a.linear_velocity_x_ = max_forward_velocity_ * cos(a.orient_);
@@ -159,8 +174,8 @@ double Robot::CalcTime(const Point& p1, const Point& p2) {
 double Robot::GetLinearVelocity() {
     return Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
 }
-double Robot::CalcSlowdownDist() {
-    return Geometry::UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), 0);
+double Robot::CalcMaxSlowdownDist() {
+    return Geometry::UniformVariableDist(max_force_ / GetMaxMass(), GetLinearVelocity(), 0);
 }
 
 //void Robot::ToPoint_2(double x0, double y0, double& forward, double& rotate) {

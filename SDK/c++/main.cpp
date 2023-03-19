@@ -36,7 +36,8 @@ namespace Solution3 {
             double buy_time = 0;
             if (rb->carry_id_ == 0) {
                 buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
-                buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * 8; // 少浪费时间
+                if (!buy_wb->product_status_) // 有产品了也可以在生产时间中，故必须要此判断
+                    buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * 8; // 少浪费时间
             }
 
             for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
@@ -64,10 +65,6 @@ namespace Solution3 {
                     bst.sell_workbench = sell_wb_id;
                     bst.mat_id = mat_id;
                 }
-                // if (Input::frameID == 51 && robot_id == 2) {
-                //     Log::print(award, award_pf, buy_wb_id, sell_wb_id, sell_wb->type_id_);
-                //     Log::print(buy_time, sell_time);
-                // }
             }
 
         }
@@ -99,25 +96,29 @@ namespace Solution2 {
     void Solve() {
         Input::ScanMap();
         using namespace Geometry;
-        std::queue<Geometry::Point> route;
+        std::vector<Geometry::Point> route;
         // Geometry::Point{10,10}, Geometry::Point{40, 10}, Geometry::Point{40, 40}, Geometry::Point{10, 40}
-        route.push(Geometry::Point{20,20});
-        route.push(Geometry::Point{25,25});
-        route.push(Geometry::Point{40,30});
-        route.push(Geometry::Point{10,40});
+        route.push_back(Geometry::Point{20,20});
+        route.push_back(Geometry::Point{25,25});
+        route.push_back(Geometry::Point{40,30});
+        route.push_back(Geometry::Point{10,40});
         while(Input::ScanFrame()) {
+            Log::print("frame", Input::frameID);
+
             // Solution
             Geometry::Point loc{robot[0]->x0_, robot[0]->y0_};
-            while (Geometry::Length(loc - route.front()) < 1e-1)
-                route.pop();
+            while (route.size() && Geometry::Length(loc - route.front()) < 1e-1)
+                route.erase(begin(route));
             if (route.size()) {
                 double forward = 0, rotate = 0;
                 robot[0]->ToPoint(route.front().x, route.front().y, forward, rotate);
 
                 Output::Forward(0, forward);
                 Output::Rotate(0, rotate);
+                Log::print("estimate", robot[0]->CalcTime(route.front()));
+                if (route.size() >= 2)
+                    Log::print("estimate2", robot[0]->CalcTime(route[0], route[1]));
             }
-
             // Log::print(Input::frameID);
             // for (auto i : Output::Operation)
             //     Log::print(i);
@@ -315,6 +316,6 @@ namespace Solution1 {
  }
 
 int main() {
-    Solution2::Solve();
+    Solution3::Solve();
     return 0;
 }
