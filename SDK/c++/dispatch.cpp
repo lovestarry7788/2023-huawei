@@ -73,7 +73,7 @@ void Dispatch::ControlWalk() {
         if (wi == -1) continue;
         const double invalid = -100;
         double forward = invalid, rotate = invalid;
-        Input::robot[ri]->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
+        Input::robot[ri]->ToPoint_3(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
         Input::robot[ri] -> AvoidToWall(forward, rotate);
 //        double limit = robot->CalcSlowdownDist();
 //        double walld = DistToWall({robot->x0_, robot->y0_}, robot->orient_);

@@ -12,6 +12,34 @@ Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, doubl
              id_(id), workbench_(workbench), carry_id_(carry_id), time_coefficient_(time_coefficient), collide_coefficient_(collide_coefficient),
              angular_velocity_(angular_velocity), linear_velocity_x_(linear_velocity_x), linear_velocity_y_(linear_velocity_y), orient_(orient), x0_(x0), y0_(y0){}
 
+// 方案2：控制通过转向圆周控制速度，除了圆周不够，都不减速
+void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
+    double aim_rot = atan2(dy-y0_, dx-x0_);
+    double dif_rot = AngleReg(orient_ - aim_rot);
+
+    double dist = Geometry::Dist(x0_, y0_, dx, dy);
+
+
+    double cir = Geometry::MinRadius(dist, fabs(dif_rot));
+    forward = GetMaxSpeedOnCir(cir);
+
+    double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
+    if (fabs(dif_rot) < limit_r) rotate = 0; // 开始角速度减速
+    else rotate = dif_rot > 0 ? -max_rotate_velocity_ : max_rotate_velocity_;
+
+    // 不减速假设
+    // double velocity = Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
+    // double limit_v = Geometry::UniformVariableDist(max_force_ / GetMass(), velocity, 0);
+    // if (limit_v > dist) forward = 0; // 开始线速度减速
+
+    forward = std::min(forward, max_forward_velocity_);
+    // Log::print(id_, dist, dif_rot, cir, forward, rotate);
+    // static int frame = 0;
+    // Log::print("frame", ++frame);
+    // Log::print(dx, dy, x0_, y0_, forward);
+    // Log::print(orient_, aim_rot, dif_rot, rotate);
+}
+
 // 方案1：从当前点到某点，到达时速度为0（防止走过头，更容易控制）。
 void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
@@ -40,31 +68,39 @@ void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
 }
 
 // 方案2：控制通过转向圆周控制速度，除了圆周不够，都不减速
-void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
+void Robot::ToPoint_3(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
-    double dif_rot = AngleReg(orient_ - aim_rot);
-
+    double dif_rot = AngleReg(aim_rot - orient_);
     double dist = Geometry::Dist(x0_, y0_, dx, dy);
 
-
-    double cir = Geometry::MinRadius(dist, fabs(dif_rot)); 
-    forward = GetMaxSpeedOnCir(cir);
-
+    double cir = Geometry::MinRadius(dist, fabs(dif_rot));
+    // if (fabs(dif_rot) > 0.5 && cir < 2 && dist < 3)
+    //     cir = Geometry::MinRadius2(dx-x0_, dy-y0_, fabs(aim_rot));
+    // forward = GetMaxSpeedOnCir(cir);
+    // forward = std::min(forward, max_forward_velocity_);
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
-    if (fabs(dif_rot) < limit_r) rotate = 0; // 开始角速度减速
-    else rotate = dif_rot > 0 ? -max_rotate_velocity_ : max_rotate_velocity_;
-
-    // 不减速假设
-    // double velocity = Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
-    // double limit_v = Geometry::UniformVariableDist(max_force_ / GetMass(), velocity, 0);
-    // if (limit_v > dist) forward = 0; // 开始线速度减速
-
-    forward = std::min(forward, max_forward_velocity_);
-    // Log::print(id_, dist, dif_rot, cir, forward, rotate);
-    // static int frame = 0;
-    // Log::print("frame", ++frame);
-    // Log::print(dx, dy, x0_, y0_, forward);
-    // Log::print(orient_, aim_rot, dif_rot, rotate);
+    // if (Input::frameID > 230 && Input::frameID < 260 && id_ == 3)
+    //     Log::print("ToPoint", angular_velocity_, limit_r, dif_rot, dx, dy, x0_, y0_);
+    // double linearV = GetLinearVelocity();
+    // 速度不匹配？相差角度太大？cir变化太大？没有好的表示形式，更没有好解决方法。不碰撞自己转，乱调参数则出问题。
+    if (fabs(dif_rot) < limit_r) {
+        rotate = 0; // 开始角速度减速
+        forward = max_forward_velocity_;
+    }
+    else {
+        rotate = max_rotate_velocity_;
+        forward = std::min(max_forward_velocity_, max_rotate_velocity_ * cir); // not bad solution
+        // double cntv = std::max(GetLinearVelocity(), 1e-6);
+        // forward = sqrt(cntv * max_rotate_velocity_ * cir);
+        // rotate = cntv / forward * max_rotate_velocity_;
+        rotate *= dcmp(dif_rot);
+    }
+    // cir < 1 仅用于小圈转入情况，dif_rot与PI/2相近，只用于目标点在圆心处。绕圈特征：dif_rot随时间变化，以PI/2为中心，0.5幅度变化。
+    // if (cir < 2.0 && fabs(fabs(dif_rot) - PI/2) < 0.3 && fabs(fabs(dif_rot) - PI/2) > 0.05) { // 调参
+    //     Log::print("ToPoint2", id_, linearV, forward, fabs(fabs(dif_rot) - PI/2), cir);
+    //     rotate *= 0.40*cir; // 调参 1 -> 0.4; 2->0.8 cir * 0.4
+    //     // forward *= 0.5;
+    // }
 }
 
 void Robot::AvoidToWall(double &forward, double &rotate) {

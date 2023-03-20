@@ -125,7 +125,7 @@ namespace Solution2 {
                 route.pop();
             if (route.size()) {
                 double forward = 0, rotate = 0;
-                robot[0]->ToPoint(route.front().x, route.front().y, forward, rotate);
+                robot[0]->ToPoint_3(route.front().x, route.front().y, forward, rotate);
 
                 Output::Forward(0, forward);
                 Output::Rotate(0, rotate);
@@ -211,14 +211,14 @@ namespace Solution1 {
 
     void Choose_To_Point(int id, double dx, double dy, double& forward, double& rotate) {
         switch(Input::map_number_) {
-            /*
+
             case 2:
-                robot[id]->ToPoint_1(dx, dy, forward, rotate);
+                robot[id]->ToPoint(dx, dy, forward, rotate);
                 // Log::print("Choose_ToPoint_1\n");
                 break;
-            */
+
             default:
-                robot[id]->ToPoint(dx, dy, forward, rotate);
+                robot[id]->ToPoint_3(dx, dy, forward, rotate);
                 // Log::print("Choose_ToPoint\n");
                 break;
         }
