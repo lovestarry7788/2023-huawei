@@ -98,26 +98,29 @@ namespace Solution2 {
         using namespace Geometry;
         std::vector<Geometry::Point> route;
         // Geometry::Point{10,10}, Geometry::Point{40, 10}, Geometry::Point{40, 40}, Geometry::Point{10, 40}
-        route.push_back(Geometry::Point{20,20});
-        route.push_back(Geometry::Point{25,25});
-        route.push_back(Geometry::Point{40,30});
-        route.push_back(Geometry::Point{10,40});
+        route.push_back(Geometry::Point{24.7-10,38.75}); // 4正常，2出现错误
+        route.push_back(Geometry::Point{24.7-10,38.75+2}); // 4正常，2出现错误
+        // route.push_back(Geometry::Point{25,25});
+        // route.push_back(Geometry::Point{40,30});
+        // route.push_back(Geometry::Point{10,40});
         while(Input::ScanFrame()) {
             Log::print("frame", Input::frameID);
 
             // Solution
             Geometry::Point loc{robot[0]->x0_, robot[0]->y0_};
-            while (route.size() && Geometry::Length(loc - route.front()) < 1e-1)
+            while (route.size() && Geometry::Length(loc - route.front()) < 1e-1) {
+                Log::print("arrive", route.front().x, route.front().y);
                 route.erase(begin(route));
+            }
             if (route.size()) {
                 double forward = 0, rotate = 0;
                 robot[0]->ToPoint(route.front().x, route.front().y, forward, rotate);
 
                 Output::Forward(0, forward);
                 Output::Rotate(0, rotate);
-                Log::print("estimate", robot[0]->CalcTime(route.front()));
-                if (route.size() >= 2)
-                    Log::print("estimate2", robot[0]->CalcTime(route[0], route[1]));
+                Log::print("From", robot[0]->x0_, robot[0]->y0_);
+                Log::print("Now", robot[0]->GetLinearVelocity(), robot[0]->angular_velocity_);
+                Log::print("Aim", forward, rotate);
             }
             // Log::print(Input::frameID);
             // for (auto i : Output::Operation)

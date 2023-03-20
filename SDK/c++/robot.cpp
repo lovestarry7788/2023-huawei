@@ -46,19 +46,25 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     double dist = Geometry::Dist(x0_, y0_, dx, dy);
 
     double cir = Geometry::MinRadius(dist, fabs(dif_rot));
-    if (fabs(dif_rot) > 0.5 && cir < 2 && dist < 3)
-        cir = Geometry::MinRadius2(dx-x0_, dy-y0_, fabs(aim_rot));
-    forward = GetMaxSpeedOnCir(cir);
-    forward = std::min(forward, max_forward_velocity_);
-
+    // if (fabs(dif_rot) > 0.5 && cir < 2 && dist < 3)
+    //     cir = Geometry::MinRadius2(dx-x0_, dy-y0_, fabs(aim_rot));
+    // forward = GetMaxSpeedOnCir(cir);
+    // forward = std::min(forward, max_forward_velocity_);
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
     // if (Input::frameID > 230 && Input::frameID < 260 && id_ == 3)
     //     Log::print("ToPoint", angular_velocity_, limit_r, dif_rot, dx, dy, x0_, y0_);
     // double linearV = GetLinearVelocity();
     // 速度不匹配？相差角度太大？cir变化太大？没有好的表示形式，更没有好解决方法。不碰撞自己转，乱调参数则出问题。
-    if (fabs(dif_rot) < limit_r) rotate = 0; // 开始角速度减速
+    if (fabs(dif_rot) < limit_r) {
+        rotate = 0; // 开始角速度减速
+        forward = max_forward_velocity_;
+    }
     else {
         rotate = max_rotate_velocity_;
+        forward = std::min(forward, max_rotate_velocity_ * cir); // not bad solution
+        // double cntv = std::max(GetLinearVelocity(), 1e-6);
+        // forward = sqrt(cntv * max_rotate_velocity_ * cir);
+        // rotate = cntv / forward * max_rotate_velocity_;
         rotate = dif_rot > 0 ? -rotate : rotate;
     }
     // cir < 1 仅用于小圈转入情况，dif_rot与PI/2相近，只用于目标点在圆心处。绕圈特征：dif_rot随时间变化，以PI/2为中心，0.5幅度变化。
