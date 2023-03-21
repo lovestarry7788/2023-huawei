@@ -154,10 +154,11 @@ namespace Solution1 {
     static constexpr int can_not_buy_in_last_frame = 0;
     static constexpr double inf = 1e9;
     static constexpr int frame_to_wait_in_buy = 3;
-    double sever_one = 2.0;
-    double four_five_six_one = 1.5;
-    double sever_two = 1.2;
-    double four_five_six_two = 1.2;
+    double sever_one;
+    double four_five_six_one;
+    double sever_two;
+    double four_five_six_two;
+    double sever_three;
 
     // double time_[110][110];
     double profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
@@ -252,8 +253,29 @@ namespace Solution1 {
         return false;
     }
 
+    void Config_Read_From_Files() {
+        double sever_one_, four_five_six_one_, sever_two_, four_five_six_two_, sever_three_;
+
+        FILE *fp = fopen("config.txt", "r+");
+        if(fp == NULL) {
+            Log::print("Fail to open file!");
+            exit(0);
+        }
+        fscanf(fp, "%lf%lf%lf%lf%lf",&sever_one_, &four_five_six_one_, &sever_two_, &four_five_six_two_, &sever_three_);
+        fclose(fp);
+
+        sever_one = sever_one_;
+        four_five_six_one = four_five_six_one_;
+        sever_two = sever_two_;
+        four_five_six_two = four_five_six_two_;
+        sever_three = sever_three_;
+        Log::print(" sever_one: ", sever_one, " four_five_six_one: ", four_five_six_one, " sever_two ", sever_two,
+                   " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
+    }
+
     void Solve() {
         Input::ScanMap();
+        Config_Read_From_Files(); // 搜参数专用
         while(Input::ScanFrame()) {
             Init();
 
@@ -388,6 +410,8 @@ namespace Solution1 {
                                         money_per_distance = profit_[k] * sever_two / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     } else if((workbench[j] -> type_id_ >= 4 && workbench[j] -> type_id_ <= 6) && workbench[j] -> ItemsAreMissing() == 2) {
                                         money_per_distance = profit_[k] * four_five_six_two / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                    } else if(workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 3 && map_number_ == 1) { // 第一张图加这个优化好
+                                        money_per_distance = profit_[k] * sever_three / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     } else {
                                         money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     }
