@@ -376,6 +376,8 @@ namespace Solution1 {
                                         money_per_distance = profit_[k] * 2 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     } else if((workbench[j] -> type_id_ >= 4 && workbench[j] -> type_id_ <= 6) && workbench[j] -> ItemsAreMissing() == 1){
                                         money_per_distance = profit_[k] * 1.5 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                    } else if(workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 2) {
+                                        money_per_distance = profit_[k] * 1.2 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     } else {
                                         money_per_distance = profit_[k] / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     }
