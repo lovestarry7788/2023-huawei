@@ -23,6 +23,7 @@ void Input::ScanMap() {
     for(int i = 0; i < 100; ++i) {
         for(int j = 0; j < 100; ++j) {
             scanf("\n%c",&map_[i][j]);
+            // Log::print("i: ", i, "j: ", j, map_[i][j]);
         }
     }
     readUntilOK();
@@ -83,7 +84,10 @@ bool Input::ScanFrame() {
 }
 
 void Input::Identify_Map_Number() {
-    if(map_[2][2] == '1' && map_[2][6] == '2' && map_[2][10] == '4') map_number_ = 1;
+    if(map_[2][2] == '1' && map_[2][6] == '2' && map_[2][10] == '4') {
+        // Log::print("???");
+        map_number_ = 1;
+    }
     else if(map_[2][9] == '1' && map_[2][19] == '2') map_number_ = 2;
     else if(map_[98][4] == '3' && map_[98][95] == '3') map_number_ = 3;
     else if(map_[95][12] == '6' && map_[95][84] == '4') map_number_ = 4;

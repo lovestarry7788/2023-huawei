@@ -217,17 +217,32 @@ namespace Solution1 {
 
     void Choose_To_Point(int id, double dx, double dy, double& forward, double& rotate) {
         switch(Input::map_number_) {
-
             case 2:
                 robot[id]->ToPoint(dx, dy, forward, rotate);
                 // Log::print("Choose_ToPoint_1\n");
                 break;
-
             default:
                 robot[id]->ToPoint_3(dx, dy, forward, rotate);
                 // Log::print("Choose_ToPoint\n");
                 break;
         }
+    }
+
+    // 针对地图来忽略一些点，传入一些工作台的点坐标
+    bool MissingPoint(int id, double x, double y) {
+        switch(map_number_) {
+            case 1:
+                break;
+                // 忽略四个角
+                if(workbench[id] -> type_id_ < 4 || workbench[id] -> type_id_ > 6) return false;
+                if(x <= 7.5 && y <= 42.5) return true;
+                if(x <= 7.5 && y >= 42.5) return true;
+                if(x >= 42.5 && y <= 7.5) return true;
+                if(x >= 42.5 && y >= 42.5) return true;
+
+                // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
+        }
+        return false;
     }
 
     void Solve() {
@@ -300,6 +315,7 @@ namespace Solution1 {
                                     for (int j = 0; j < K; ++j)
                                         if(can_plan_to_sell_tmp_[j][k] && workbench[j]->TryToSell(k)) { // 从哪个工作站卖
                                             // Log::print("frame: ", frameID, "times: ", times, "k: ", k, "i: ", i, "j: ", j);
+                                            if (MissingPoint(i, workbench[i] -> x0_, workbench[i] -> y0_) || MissingPoint(j, workbench[j] -> x0_, workbench[j] -> y0_)) continue ; // 针对地图忽略一些点
                                             if (should_not_plan_to_buy_[i]) continue; // 优化：别人去卖的，你不能去买
                                             double buy_sell_frame_ = robot[id]->CalcTime(
                                                     std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
@@ -344,22 +360,26 @@ namespace Solution1 {
                     for (int k = 1; k <= 7; ++k) { // 枚举要买的物品
                         for (int i = 0; i < K; ++i) if(can_plan_to_buy_[i] && workbench[i]->TryToBuy(k, -100) && !should_not_plan_to_buy_[i]) { // 从哪个工作站买
                                 for (int j = 0; j < K; ++j) if(can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k)) { // 从哪个工作站卖
-                                        if (should_not_plan_to_buy_[i]) continue; // 优化：别人去卖的，你不能去买
-                                        double buy_sell_frame_ = robot[id]->CalcTime(
-                                                std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
-                                                            Geometry::Point{workbench[j]->x0_, workbench[j]->y0_}});
-                                        if (frameID + buy_sell_frame_ > total_frame) continue;  //  没时间去卖了，所以不买。
-                                        // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_}});
-                                        double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
-                                                                                  dis_[i + robot_num_][j +
-                                                                                                       robot_num_]);
-                                        if (money_per_distance > mn) {
-                                            mn = money_per_distance;
-                                            carry_id = k;
-                                            workbench_buy = i;
-                                            workbench_sell = j;
-                                        }
+                                    Log::print("map_number: ", map_number_, " i: ", i , "x: ", workbench[i] -> x0_, "y: ", workbench[i] -> y0_, " MissingPoint: ", MissingPoint(i, workbench[i] -> x0_, workbench[i] -> y0_));
+                                    Log::print("map_number: ", map_number_, " j: ", j , "x: ", workbench[j] -> x0_, "y: ", workbench[j] -> y0_, " MissingPoint: ", MissingPoint(j, workbench[j] -> x0_, workbench[j] -> y0_));
+
+                                    if (MissingPoint(i, workbench[i] -> x0_, workbench[i] -> y0_) || MissingPoint(j, workbench[j] -> x0_, workbench[j] -> y0_)) continue ; // 针对地图忽略一些点
+                                    if (should_not_plan_to_buy_[i]) continue; // 优化：别人去卖的，你不能去买
+                                    double buy_sell_frame_ = robot[id]->CalcTime(
+                                            std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
+                                                        Geometry::Point{workbench[j]->x0_, workbench[j]->y0_}});
+                                    if (frameID + buy_sell_frame_ > total_frame) continue;  //  没时间去卖了，所以不买。
+                                    // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_}});
+                                    double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
+                                                                              dis_[i + robot_num_][j +
+                                                                                                   robot_num_]);
+                                    if (money_per_distance > mn) {
+                                        mn = money_per_distance;
+                                        carry_id = k;
+                                        workbench_buy = i;
+                                        workbench_sell = j;
                                     }
+                                }
                             }
                     }
                     if (fabs(mn) > 1e-5) {
