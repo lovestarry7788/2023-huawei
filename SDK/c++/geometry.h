@@ -24,6 +24,8 @@ namespace Geometry {
     bool operator==(const Point& a, const Point& b);
     bool operator<(const Point& p1, const Point& p2);
 
+    Vector Rotate(Vector A, double rad);
+    
     // 两点间距离
     double Dist(double x1, double y1, double x2, double y2);
 

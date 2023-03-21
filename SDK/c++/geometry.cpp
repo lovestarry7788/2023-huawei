@@ -14,6 +14,8 @@ bool Geometry::operator<(const Point& p1, const Point& p2) {
     return p1.y < p2.y;
 }
 
+Vector Geometry::Rotate(Vector A, double rad) { return Vector{A.x * cos(rad) - A.y * sin(rad), A.x * sin(rad) + A.y * cos(rad)}; }
+
 double Geometry::Dist(double x1, double y1, double x2, double y2) {
     return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 }

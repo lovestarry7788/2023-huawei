@@ -42,8 +42,11 @@ namespace Solution3 {
 
             for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
                 auto sell_wb = workbench[sell_wb_id];
+                if (!sell_wb->TryToSell(mat_id)) continue; // 暂时只考虑能直接卖的，不考虑产品被拿走可以重新生产的
                 double sell_time = 0;
                 if (rb->carry_id_ == 0) {
+                    // if (!sell_wb->product_status_ && sell_wb-> > 0) 
+                    // TODO: 在生产，且填上当前物品就满了，则结束时间为max{到达，生产完成}。这样来到达送且拿。
                     sell_time = 
                         rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_}) - 
                         rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_});
@@ -51,7 +54,6 @@ namespace Solution3 {
                     sell_time = rb->CalcTime(Point{sell_wb->x0_, sell_wb->y0_});
                 }
 
-                if (!sell_wb->TryToSell(mat_id)) continue; // 暂时只考虑能直接卖的，不考虑产品被拿走可以重新生产的
                 if (Dispatch::occupy_[sell_wb_id].sell_occupy >> mat_id & 1) continue;
 
                 int award = award_buy(robot_id, buy_wb_id) + 
