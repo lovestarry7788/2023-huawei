@@ -239,7 +239,6 @@ namespace Solution1 {
                 if(x <= 7.5 && y >= 42.5) return true;
                 if(x >= 42.5 && y <= 7.5) return true;
                 if(x >= 42.5 && y >= 42.5) return true;
-
                 // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
         }
         return false;
@@ -370,9 +369,17 @@ namespace Solution1 {
                                                         Geometry::Point{workbench[j]->x0_, workbench[j]->y0_}});
                                     if (frameID + buy_sell_frame_ > total_frame) continue;  //  没时间去卖了，所以不买。
                                     // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_}});
-                                    double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
-                                                                              dis_[i + robot_num_][j +
-                                                                                                   robot_num_]);
+
+                                    double money_per_distance;
+
+                                    if(workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 1) { // 如果 7 只差一点，给一个更大的值
+                                        money_per_distance = profit_[k] * 2 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                    } else if((workbench[j] -> type_id_ >= 4 && workbench[j] -> type_id_ <= 6) && workbench[j] -> ItemsAreMissing() == 1){
+                                        money_per_distance = profit_[k] * 1.5 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                    } else {
+                                        money_per_distance = profit_[k] / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                    }
+
                                     if (money_per_distance > mn) {
                                         mn = money_per_distance;
                                         carry_id = k;

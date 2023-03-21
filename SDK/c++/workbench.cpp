@@ -37,3 +37,25 @@ bool Workbench::TryToSell(int carry_id) { // carry_id : 物品的 id
     }
     return false;
 }
+
+int Workbench::ItemsAreMissing() {
+    int s = 0;
+    if(type_id_ == 4) {
+        if(!(materials_status_ & (1 << 1))) s++;
+        if(!(materials_status_ & (1 << 2))) s++;
+    }
+    else if(type_id_ == 5) {
+        if(!(materials_status_ & (1 << 1))) s++;
+        if(!(materials_status_ & (1 << 3))) s++;
+    }
+    else if(type_id_ == 6) {
+        if(!(materials_status_ & (1 << 2))) s++;
+        if(!(materials_status_ & (1 << 3))) s++;
+    }
+    else if(type_id_ == 7) {
+        if(!(materials_status_ & (1 << 4))) s++;
+        if(!(materials_status_ & (1 << 5))) s++;
+        if(!(materials_status_ & (1 << 6))) s++;
+    }
+    return s;
+}
