@@ -141,10 +141,10 @@ void Dispatch::ControlWalk() {
 }
 
 double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<Point>& b, double mx_dist) {
-    double mx = 100;
-    for (int ti = 0; ti < forecast_num_; ti++) {
+    double mx = mx_dist;
+    for (int ti = 0; ti < forecast_num_; ti += forecast_per_) {
         double dist = Length(a[ti] - b[ti]);
-        mx = std::min(mx, dist + ti * 0.03);
+        mx = std::min(mx, dist + ti * collide_time_elemit_);
         // TODO: 手动设置多个距离层级，
         if (mx < mx_dist) return mx;
         // 2 - 0 * t
@@ -171,16 +171,18 @@ void Dispatch::AvoidCollide() {
         }
     }
     for (int ri = 0; ri < Input::robot_num_; ri++) {
-        if (Input::frameID >= 244 && Input::frameID <= 244+50 && ri == 0) {
-            auto robot = Input::robot[ri];
-            Log::print("true_pos", robot->x0_, robot->y0_);
-        }
+        // if (Input::frameID >= 244 && Input::frameID <= 244+50 && ri == 0) {
+        //     auto robot = Input::robot[ri];
+        //     Log::print("true_pos", robot->x0_, robot->y0_);
+        // }
         std::vector<int> collide_robot;
-        for (int rj = 0; rj < Input::robot_num_; rj++) if (rj != ri) {
-            if (ForecastCollide(forecast[ri], forecast[rj], collide_dist_) < collide_dist_) {
+        double bst_dist = collide_dist_;
+        for (int rj = ri+1; rj < Input::robot_num_; rj++) if (rj != ri) {
+            double d = ForecastCollide(forecast[ri], forecast[rj], bst_dist);
+            bst_dist = std::min(bst_dist, d);
+            if (d < collide_dist_) {
                 collide_robot.push_back(rj);
                 Log::print("ori_collide", ri, rj);
-                // break;
             }
         }
         if (collide_robot.empty()) continue;
@@ -190,33 +192,34 @@ void Dispatch::AvoidCollide() {
             return Input::robot[l]->carry_id_ > Input::robot[r]->carry_id_;
         });
         auto movement_best = movement_;
-        double bst_dist = 0;
+
         std::function<bool(int)> dfs = [&](int cur) {
             if (cur == collide_robot.size()) {
+                double d_min = collide_dist_;
                 for (int i = 0; i < collide_robot.size(); i++) 
                     for (int j = i+1; j < collide_robot.size(); j++) {
                         double d = ForecastCollide(forecast[collide_robot[i]], forecast[collide_robot[j]], bst_dist);
-                        if (d > bst_dist) {
-                            bst_dist = d;
-                            movement_best = movement_;
-                        }
-                        if (d < collide_dist_)
-                            return false;
+                        d_min = std::min(d_min, d);
                     }
+                if (d_min > bst_dist) {
+                    bst_dist = d_min;
+                    movement_best = movement_;
+                }
+                if (d_min < collide_dist_)
+                    return false;
                 return true;
             }
             if (dfs(cur+1)) return true;
             static const std::vector<std::pair<double,double>> choose= {
                 {0, 6},
-                {PI/2, 6}, {-PI/2, 6},
+                // {PI/2, 6}, {-PI/2, 6},
                 {PI, 6}, {-PI, 6},
-                {0, 3},
-                {PI/2, 3}, {-PI/2, 3},
-                {PI, 3}, {-PI, 3},
-                {0, 0.5},
-                {PI, 0}, {-PI, 0},
+                {0, 5.5},
+                // {PI/2, 3}, {-PI/2, 3},
+                // {PI, 3}, {-PI, 3},
+                // {0, 0.5},
+                // {PI, 0}, {-PI, 0},
             }; // 从影响轻到重的顺序
-
             int ri = collide_robot[cur];
             auto robot = Input::robot[ri];
             for (auto& [rotate, forward] : choose) {
