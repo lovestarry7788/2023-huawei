@@ -174,6 +174,7 @@ namespace Solution1 {
     using namespace Input;
     using namespace Output;
     using namespace Geometry;
+    using namespace Dispatch;
 
     static constexpr int robot_num_ = 4;
     static constexpr int total_frame = 9000;
@@ -209,6 +210,11 @@ namespace Solution1 {
     int fac[5];
 
     void Init() {
+
+        //
+        Dispatch::avoidCollide = true;
+        Dispatch::init(nullptr, robot_num_, K);
+
         // 第一帧开始初始化的
         if(frameID == 1) {
             for(int id = 0; id < 4; ++id) {
@@ -535,11 +541,18 @@ namespace Solution1 {
 
                         double forward, rotate;
                         Choose_To_Point(id, workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward, rotate);
-                        robot[id]->AvoidToWall(forward, rotate);
 
-                        Output::Forward(id, forward);
-                        Output::Rotate(id, rotate);
+                        movement_[id] = {forward, rotate};
                     }
+                }
+
+                if (avoidCollide) AvoidCollide();
+                for(int id = 0; id < 4; ++id) {
+                    double& forward = movement_[id].first;
+                    double& rotate = movement_[id].second;
+                    robot[id]->AvoidToWall(forward, rotate);
+                    Output::Forward(id, forward);
+                    Output::Rotate(id, rotate);
                 }
 
             }
