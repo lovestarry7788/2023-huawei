@@ -195,15 +195,6 @@ namespace Solution1 {
                     can_plan_to_sell_[i][j] = true;
                 }
             }
-
-            for(int i = 0; i < K; ++i) {
-                for(int j = 0; j < K; ++j) {
-                    if(dis_[i + robot_num_][j + robot_num_] < Around_Distance) {
-                        around_points[i].emplace_back(j);
-                        around_points[j].emplace_back(i);
-                    }
-                }
-            }
         }
 
         // 每帧都需要初始化的
@@ -229,6 +220,18 @@ namespace Solution1 {
                 }
                 dis_[idx][idy] = Distance(sx, sy, dx, dy);
                 // Log::print("idx : ",idx, "idy : ", idy, " dis_[idx][idy] : ", dis_[idx][idy]);
+            }
+        }
+
+        if(frameID == 1) {
+            for(int i = 0; i < K; ++i) {
+                for(int j = 0; j < K; ++j) {
+                    if(dis_[i + robot_num_][j + robot_num_] < Around_Distance) {
+                        around_points[i].emplace_back(j);
+                        around_points[j].emplace_back(i);
+                        Log::print(" i: ", i , " -> ", " j: ", j);
+                    }
+                }
             }
         }
 
@@ -292,7 +295,7 @@ namespace Solution1 {
     }
 
     bool AroundPoint(int idx) {
-        for(const auto& idy: around_points[idx]) if(dis_[robot_num_ + idx][robot_num_ + idy] < Around_Distance) {
+        for(const auto& idy: around_points[idx]) {
             if(workbench[idx] -> TryToSell(workbench[idy] -> type_id_) && workbench[idy] -> TryToBuy(workbench[idy] -> type_id_, -100)) {
                 return true;
             }
