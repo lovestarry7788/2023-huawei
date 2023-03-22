@@ -14,6 +14,8 @@ std::vector<Plan> Dispatch::plan_;
 
 std::vector<Occupy> Dispatch::occupy_;
 
+bool Dispatch::avoidCollide = false;
+
 // std::function<void(int)> Dispatch::RobotReplan_;
 void (*Dispatch::RobotReplan_)(int);
 
@@ -128,7 +130,7 @@ void Dispatch::ControlWalk() {
         // if (fabs(forward - invalid) > 1e-5) Output::Forward(ri, forward);
         // if (fabs(rotate - invalid) > 1e-5) Output::Rotate(ri, rotate);
     }
-    AvoidCollide();
+    if (avoidCollide) AvoidCollide();
     for (size_t ri = 0; ri < plan_.size(); ri++) {
         double& forward = movement_[ri].first;
         double& rotate = movement_[ri].second;

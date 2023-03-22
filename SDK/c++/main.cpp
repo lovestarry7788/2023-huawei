@@ -15,11 +15,20 @@ namespace Solution3 {
     using namespace Geometry;
 
     constexpr int profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
+    constexpr double wait_ratio_ = 20;
     int award_buy(int robot_id, int workbench_id) {
         return 0;
     }
     int award_sell(int robot_id, int workbench_id, int materials) {
         return 0;
+    }
+    int workbench_remain_num(int workbench_id) {
+        int mat_id = Input::workbench[workbench_id]->type_id_;
+        if (mat_id <= 3) return 0;
+        int num = __builtin_popcount(Input::workbench[workbench_id]->materials_status_) + 
+                __builtin_popcount(Dispatch::occupy_[workbench_id].sell_occupy);
+        if (mat_id <= 6) return 2 - num;
+        return 3 - num;
     }
     void RobotReplan(int robot_id) {
         // Log::print("RobotReplan", robot_id, Input::frameID);
@@ -33,11 +42,17 @@ namespace Solution3 {
             if (Dispatch::occupy_[buy_wb_id].buy_occupy) continue;
             int mat_id = buy_wb->type_id_; // 购买与出售物品id
             if (rb->carry_id_ != 0 && rb->carry_id_ != mat_id) continue;
+            // 仅在搭上了顺风车才买
+            bool P = Input::frameID == 2011;
+            if (P) Log::print(mat_id, Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_));
+            // if (mat_id >= 4 && Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_) > 1)
+            //     continue;
+
             double buy_time = 0;
             if (rb->carry_id_ == 0) {
                 buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
                 if (!buy_wb->product_status_) // 有产品了也可以在生产时间中，故必须要此判断
-                    buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * 16; // 少浪费时间
+                    buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * wait_ratio_; // 等待生产
             }
 
             for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
@@ -47,9 +62,13 @@ namespace Solution3 {
                 if (rb->carry_id_ == 0) {
                     // if (!sell_wb->product_status_ && sell_wb-> > 0) 
                     // TODO: 在生产，且填上当前物品就满了，则结束时间为max{到达，生产完成}。这样来到达送且拿。
-                    sell_time = 
-                        rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_}) - 
-                        rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_});
+                    sell_time = rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_});
+                    if (false && workbench_remain_num(sell_wb_id) == 1 && !sell_wb->product_status_) {
+                        // if (sell_wb->frame_remain_ / 50.0 - sell_time > 0) continue;
+                        sell_time += std::max(0.0, sell_wb->frame_remain_ / 50.0 - sell_time) * wait_ratio_;
+                        // 还要保证到了sellwb，能有地方需求该物品。即对占用的预测，不光有占用，还有清除的预测。
+                    }
+                    sell_time -= rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_});
                 } else {
                     sell_time = rb->CalcTime(Point{sell_wb->x0_, sell_wb->y0_});
                 }
@@ -70,12 +89,15 @@ namespace Solution3 {
             }
 
         }
+        if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1)
+            Log::print("NoPlan", robot_id);
         Log::print("UpdatePlan", robot_id, bst.buy_workbench, bst.sell_workbench);
         Dispatch::UpdatePlan(robot_id, bst);
     }
     void Solve() {
         Input::ScanMap();
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
+        // Dispatch::avoidCollide = true;
         // occupy.resize(K);
         // ScanFrame才初始化
         // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
@@ -105,24 +127,32 @@ namespace Solution2 {
         // route.push_back(Geometry::Point{25,25});
         // route.push_back(Geometry::Point{40,30});
         // route.push_back(Geometry::Point{10,40});
+        // std::vector<int> arrive;
+        std::vector<int> estimate;
+        std::vector<int> true_estimate;
+        std::vector<std::vector<double>> mov;
         while(Input::ScanFrame()) {
             Log::print("frame", Input::frameID);
 
             // Solution
             Geometry::Point loc{robot[0]->x0_, robot[0]->y0_};
             while (route.size() && Geometry::Length(loc - route.front()) < 1e-1) {
-                Log::print("arrive", route.front().x, route.front().y);
+                // Log::print("arrive", route.front().x, route.front().y);
+                // arrive.push_back(Input::frameID);
+                while (true_estimate.size() < estimate.size())
+                    true_estimate.push_back(Input::frameID - true_estimate.size());
                 route.erase(begin(route));
             }
             if (route.size()) {
                 double forward = 0, rotate = 0;
                 robot[0]->ToPoint(route.front().x, route.front().y, forward, rotate);
-
+                estimate.push_back(round(50* robot[0]->CalcTime(route.front())));
                 Output::Forward(0, forward);
                 Output::Rotate(0, rotate);
-                Log::print("From", robot[0]->x0_, robot[0]->y0_);
-                Log::print("Now", robot[0]->GetLinearVelocity(), robot[0]->angular_velocity_);
-                Log::print("Aim", forward, rotate);
+                mov.push_back({forward, rotate, robot[0]->angular_velocity_});
+                // Log::print("From", robot[0]->x0_, robot[0]->y0_);
+                // Log::print("Now", robot[0]->GetLinearVelocity(), robot[0]->angular_velocity_);
+                // Log::print("Aim", forward, rotate);
             }
             // Log::print(Input::frameID);
             // for (auto i : Output::Operation)
@@ -130,6 +160,10 @@ namespace Solution2 {
             // Log::print(robot[0]->orient_);
 
             Output::Print(Input::frameID);
+        }
+        for (int i = 0; i < estimate.size(); i++) {
+            Log::print(i, estimate[i] - true_estimate[i],true_estimate[i]);
+            Log::print(mov[i][0], mov[i][1], mov[i][2]);
         }
     }
 }
@@ -322,6 +356,6 @@ namespace Solution1 {
 
 int main() {
     // Log::print(Geometry::MinRadius2(1,1));
-    Solution3::Solve();
+    Solution2::Solve();
     return 0;
 }

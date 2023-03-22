@@ -22,12 +22,12 @@ double Geometry::Dist(double x1, double y1, double x2, double y2) {
 
 // 匀变速运动，估计开始减速距离
 double Geometry::UniformVariableDist(double a, double v, double aim_v) {
-    return abs(v * v - aim_v * aim_v) / (2 * a);
+    return fabs(v * v - aim_v * aim_v) / (2 * a);
 }
 
 // v -> v_max -> v_max -> 0，求时间
 double Geometry::UniformVariableDist2(double a, double x, double v, double v_max) {
-    double t = (2 * v_max - v) / a;
+    double t = fabs(2 * v_max - v) / a;
     x -= UniformVariableDist(a, v, v_max);
     x -= UniformVariableDist(a, v_max, 0);
     t += x / v_max;

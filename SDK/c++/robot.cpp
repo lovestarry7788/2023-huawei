@@ -295,13 +295,15 @@ double Robot::GetMaxSpeedOnCir(double r) {
 }
 
 double Robot::CalcTime(const Point& p) {
+    bool P = Input::frameID == 135;
     double aim_r = atan2(p.y - y0_, p.x - x0_);
     double dif_r = fabs(AngleReg(aim_r - orient_));
     double dist = Dist(p.x, p.y, x0_, y0_);
-    double ans = UniformVariableDist2(max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_);
+    double ans = UniformVariableDist2(max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_ * dcmp(dif_r));
     double linearV = GetLinearVelocity();
     double cir = std::min(1.5 * linearV / max_forward_velocity_, MinRadius(dist, dif_r)); 
     // Log::print(dist);
+    if (P) Log::print(ans);
     dist -= 2 * cir * sin(dif_r / 2);
     // Log::print(dist);
     double t1 = ans;
@@ -311,12 +313,13 @@ double Robot::CalcTime(const Point& p) {
     double ans_up_speed = (max_forward_velocity_ - linearV) / a;
     // Log::print(ans_up_speed, ans);
     ans = 0.97 * std::max(ans, ans_up_speed) + 0.15 * std::min(ans, ans_up_speed);
+    if (P) Log::print(ans);
     dist -= UniformVariableDist(a, GetMaxSpeedOnCir(cir), max_forward_velocity_);
     // Log::print(dist);
     double t2 = ans;
     // Log::print(dist);
 
-    ans += dist / max_forward_velocity_;
+    ans += (dist + cir * dif_r) / max_forward_velocity_; // 这句话对圆周，非常不准确
     // Log::print(cir, dif_r, linearV, orient_, t1, t2, ans);
     return ans;
     // x = 1/2*a*t^2

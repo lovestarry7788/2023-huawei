@@ -28,6 +28,7 @@ namespace Dispatch {
         int sell_occupy = 0; // >>i&1 则i物品被占用
     };
     extern std::vector<Occupy> occupy_;
+    extern bool avoidCollide;
 
     // 完成Plan时调用委托。单独(延迟)规划用
     extern void (*RobotReplan_)(int);
