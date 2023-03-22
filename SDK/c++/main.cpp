@@ -98,7 +98,7 @@ namespace Solution3 {
     void Solve() {
         Input::ScanMap();
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
-        Dispatch::avoidCollide = true;
+        // Dispatch::avoidCollide = true;
         // occupy.resize(K);
         // ScanFrame才初始化
         // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
@@ -563,6 +563,6 @@ namespace Solution1 {
 
 int main() {
     // Log::print(Geometry::MinRadius2(1,1));
-    Solution1::Solve();
+    Solution3::Solve();
     return 0;
 }

@@ -13,7 +13,7 @@ Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, doubl
              angular_velocity_(angular_velocity), linear_velocity_x_(linear_velocity_x), linear_velocity_y_(linear_velocity_y), orient_(orient), x0_(x0), y0_(y0){}
 
 // 方案2：控制通过转向圆周控制速度，除了圆周不够，都不减速
-void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
+void Robot::ToPoint_3(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
     double dif_rot = AngleReg(orient_ - aim_rot);
 
@@ -68,7 +68,7 @@ void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
 }
 
 // 方案2：控制通过转向圆周控制速度，除了圆周不够，都不减速
-void Robot::ToPoint_3(double dx, double dy, double& forward, double& rotate) {
+void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
     double dif_rot = AngleReg(aim_rot - orient_);
     double dist = Geometry::Dist(x0_, y0_, dx, dy);
@@ -89,7 +89,7 @@ void Robot::ToPoint_3(double dx, double dy, double& forward, double& rotate) {
     }
     else {
         rotate = max_rotate_velocity_;
-        forward = std::min(max_forward_velocity_, max_rotate_velocity_ * cir); // not bad solution
+        forward = std::min(max_forward_velocity_, max_rotate_velocity_ * cir * 0.70); // not bad solution
         // double cntv = std::max(GetLinearVelocity(), 1e-6);
         // forward = sqrt(cntv * max_rotate_velocity_ * cir);
         // rotate = cntv / forward * max_rotate_velocity_;
@@ -273,8 +273,12 @@ std::vector<Geometry::Point> Robot::ForecastFixed(double forward, double rotate,
 
 void Robot::AvoidToWall(double &forward, double &rotate) {
     double limit = CalcMaxSlowdownDist();
-    double walld = DistToWall({x0_, y0_}, orient_);
-    if (limit >= walld - 0.7) {
+    double walld = DistToWall({x0_, y0_}, atan2(linear_velocity_y_, linear_velocity_x_));
+    // if (Input::frameID == 117 && id_ == 0) {
+    //     Log::print(id_, walld, limit);
+    // }
+
+    if (limit >= walld - 0.55) {
         forward = 0;
     }
 }
@@ -283,16 +287,20 @@ double Robot::DistToWall(Point p, double orient) {
     double mind = 100;
     Vector ori{cos(orient), sin(orient)};
     const static std::vector<std::pair<Point, double>> wall{
-            {{0,0.55}, 0},
-            {{49.45,0}, PI/2},
-            {{50,49.45}, PI},
-            {{0.55,50}, -PI/2},
+            {{0,0.40}, 0},
+            {{49.60,0}, PI/2},
+            {{50,49.60}, PI},
+            {{0.40,50}, -PI/2},
     };
     for (const auto& [wp, wo] : wall) {
         Point sec = GetLineIntersection2(p, ori, wp, {cos(wo), sin(wo)});
         // if (Input::frame)
         if (Dot(sec - p, ori) > 0) {
             mind = std::min(mind, Length(sec - p));
+            // if (Input::frameID == 117 && id_ == 0) {
+            //     Log::print(id_, Length(sec - p), ori.x, ori.y);
+            //     Log::print(p.x, p.y);
+            // }
         }
     }
     return mind;

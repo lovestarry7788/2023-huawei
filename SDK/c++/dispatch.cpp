@@ -204,6 +204,7 @@ void Dispatch::AvoidCollide() {
                 for (int i = 0; i < collide_robot.size(); i++) 
                     for (int j = i+1; j < collide_robot.size(); j++) {
                         double d = ForecastCollide(forecast[collide_robot[i]], forecast[collide_robot[j]], bst_dist);
+                        if (d < bst_dist) return false;
                         d_min = std::min(d_min, d);
                     }
                 // Log::print("not better", bst_dist, d_min);
@@ -219,8 +220,8 @@ void Dispatch::AvoidCollide() {
             std::vector<std::pair<double,double>> choose= {
                 {6, 0},
                 {6, PI}, {6, -PI},
-                {5.5, 0},
-                {5.5, PI}, {5.5, -PI},
+                {5.5, PI/4}, {5.5, -PI/4},
+                // {5.5, PI}, {5.5, -PI},
                 // {6, PI/2}, {-6, PI/2},
                 // {3,PI/2}, {-3,PI/2},
                 // {3,PI}, 3,{-PI},
