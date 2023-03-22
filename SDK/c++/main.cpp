@@ -352,6 +352,7 @@ namespace Solution1 {
                              can_plan_to_sell_[robot[id] -> workbench_sell_][robot[id] -> carry_id_] = true;
                              workbench[robot[id] -> workbench_sell_] -> materials_status_ |= 1 << robot[id] -> carry_id_;
                              robot[id] -> workbench_buy_ = robot[id] -> workbench_sell_ = -1;
+                             plan_[id].sell_workbench = -1;
                              continue;
                          }
                          double forward, rotate;
@@ -361,6 +362,7 @@ namespace Solution1 {
                             */
                          Choose_To_Point(id, workbench[robot[id]->workbench_sell_]->x0_, workbench[robot[id]->workbench_sell_]->y0_, forward, rotate);
                          movement_[id] = {forward, rotate};
+                         plan_[id].sell_workbench = robot[id] -> workbench_sell_;
                          robot[id] -> workbench_buy_ = -1;
                      }
                 }
@@ -533,15 +535,18 @@ namespace Solution1 {
                             can_plan_to_buy_[robot[id] -> workbench_buy_] = true;
                             workbench[robot[id] -> workbench_sell_] -> product_status_ = 0;
                             robot[id] -> workbench_buy_ = -1;
+                            plan_[id].sell_workbench = -1;
                             continue;
                         }
 
                         double forward, rotate;
                         Choose_To_Point(id, workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward, rotate);
                         movement_[id] = {forward, rotate};
+                        plan_[id].buy_workbench = robot[id] -> workbench_buy_;
                     }
                 }
             }
+
             // 防碰撞
             if (avoidCollide) AvoidCollide();
             for(int id = 0; id < 4; ++id) {
