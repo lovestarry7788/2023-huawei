@@ -14,7 +14,6 @@
 #include <vector>
 
 struct Robot {
-
 public:
     static constexpr double radius_ = 0.45;
     static constexpr double radius_with_thing_ = 0.53;
@@ -39,7 +38,7 @@ public:
 
     void ToPoint_1(double dx, double dy, double& forward, double& rotate);
 
-    void ToPoint_2(double dx, double dy, double& forward, double& rotate);
+    // void ToPoint_2(double dx, double dy, double& forward, double& rotate);
 
     void ToPoint_3(double dx, double dy, double& forward, double& rotate);
 
@@ -50,6 +49,8 @@ public:
     // 获取当前半径
     double GetRadius();
 
+    double GetMaxMass();
+    
     // 获取质量，不拿16，15加速度
     double GetMass();
 
@@ -59,12 +60,18 @@ public:
     double GetMaxSpeedOnCir(double r);
 
     // 预估走完这些点的帧
-    int CalcTime(const std::vector<Geometry::Point>& route);
+    double CalcTime(const Geometry::Point& p1, const Geometry::Point& p2);
 
-    double CalcSlowdownDist();
+    double CalcTime(const Geometry::Point& p);
+    
+    double CalcMaxSlowdownDist();
 
     double GetLinearVelocity();
     
+    std::vector<Geometry::Point> ForecastToPoint(double dx, double dy, int forecast_num);
+
+    std::vector<Geometry::Point> ForecastFixed(double forward, double rotate, int forecast_num);
+
     friend class Workbench;
 };
 

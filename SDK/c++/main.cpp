@@ -17,93 +17,100 @@ namespace Solution3 {
     using namespace Geometry;
 
     constexpr int profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
+    constexpr double wait_ratio_ = 20;
     int award_buy(int robot_id, int workbench_id) {
         return 0;
     }
     int award_sell(int robot_id, int workbench_id, int materials) {
         return 0;
     }
-    // 工作台占用情况
-    struct Occupy {
-        bool buy_occupy = 0;
-        int sell_occupy = 0; // >>i&1 则i物品被占用
-    };
-    std::vector<Occupy> occupy;
+    int workbench_remain_num(int workbench_id) {
+        int mat_id = Input::workbench[workbench_id]->type_id_;
+        if (mat_id <= 3) return 0;
+        int num = __builtin_popcount(Input::workbench[workbench_id]->materials_status_) + 
+                __builtin_popcount(Dispatch::occupy_[workbench_id].sell_occupy);
+        if (mat_id <= 6) return 2 - num;
+        return 3 - num;
+    }
     void RobotReplan(int robot_id) {
-        Log::print("RobotReplan", robot_id, Input::frameID);
+        // Log::print("RobotReplan", robot_id, Input::frameID);
         auto rb = robot[robot_id];
-        auto &plan = Dispatch::plan_[robot_id];
-        if ((plan.buy_workbench == -1) != (plan.sell_workbench == -1)) return;
 
-        if (plan.buy_workbench != -1  ) {
-            int bw = plan.buy_workbench;
-            int sw = plan.sell_workbench;
-            int mat_id = workbench[bw]->type_id_;
-            occupy[bw].buy_occupy = false;
-            occupy[sw].sell_occupy &= ((unsigned)1 << 31) - 1 - (1<<mat_id);
-            plan.buy_workbench = plan.sell_workbench = -1;
-        }
-        Dispatch::Plan bst = {-1, -1};
+        Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
         double bst_award_pf = 0; // per frame
         for (int buy_wb_id = 0; buy_wb_id < K; buy_wb_id++) {
             auto buy_wb = workbench[buy_wb_id];
-            if (!buy_wb->product_status_) continue; // 暂不考虑后后运送上的 
-            if (occupy[buy_wb_id].buy_occupy) continue;
+            if (!buy_wb->product_status_ && buy_wb-> frame_remain_ == -1) continue; // 暂不考虑后后运送上的 
+            if (Dispatch::occupy_[buy_wb_id].buy_occupy) continue;
             int mat_id = buy_wb->type_id_; // 购买与出售物品id
-            int buy_frame = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
-            buy_frame += std::max(0, buy_wb-> frame_remain_ - buy_frame) * 8; // 少浪费时间
+            if (rb->carry_id_ != 0 && rb->carry_id_ != mat_id) continue;
+            // 仅在搭上了顺风车才买
+            bool P = Input::frameID == 2011;
+            if (P) Log::print(mat_id, Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_));
+            // if (mat_id >= 4 && Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_) > 1)
+            //     continue;
 
+            double buy_time = 0;
+            if (rb->carry_id_ == 0) {
+                buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
+                if (!buy_wb->product_status_) // 有产品了也可以在生产时间中，故必须要此判断
+                    buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * wait_ratio_; // 等待生产
+            }
             for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
                 auto sell_wb = workbench[sell_wb_id];
-                int sell_frame = 
-                    rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_}}) - 
-                    rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
-
                 if (!sell_wb->TryToSell(mat_id)) continue; // 暂时只考虑能直接卖的，不考虑产品被拿走可以重新生产的
-                if (occupy[sell_wb_id].sell_occupy >> mat_id & 1) continue;
+                double sell_time = 0;
+                if (rb->carry_id_ == 0) {
+                    // if (!sell_wb->product_status_ && sell_wb-> > 0) 
+                    // TODO: 在生产，且填上当前物品就满了，则结束时间为max{到达，生产完成}。这样来到达送且拿。
+                    sell_time = rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_});
+                    if (false && workbench_remain_num(sell_wb_id) == 1 && !sell_wb->product_status_) {
+                        // if (sell_wb->frame_remain_ / 50.0 - sell_time > 0) continue;
+                        sell_time += std::max(0.0, sell_wb->frame_remain_ / 50.0 - sell_time) * wait_ratio_;
+                        // 还要保证到了sellwb，能有地方需求该物品。即对占用的预测，不光有占用，还有清除的预测。
+                    }
+                    sell_time -= rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_});
+                } else {
+                    sell_time = rb->CalcTime(Point{sell_wb->x0_, sell_wb->y0_});
+                }
+
+                if (Dispatch::occupy_[sell_wb_id].sell_occupy >> mat_id & 1) continue;
 
                 int award = award_buy(robot_id, buy_wb_id) + 
                             award_sell(robot_id, sell_wb_id, mat_id) + 
                             profit_[mat_id];
 
-                double award_pf = (double)award / (buy_frame + sell_frame);
+                double award_pf = award / (buy_time + sell_time);
                 if (award_pf > bst_award_pf) {
                     bst_award_pf = award_pf;
                     bst.buy_workbench = buy_wb_id;
                     bst.sell_workbench = sell_wb_id;
+                    bst.mat_id = mat_id;
                 }
-
             }
 
         }
-        if (bst.sell_workbench != -1) {
-            int bw = bst.buy_workbench;
-            int sw = bst.sell_workbench;
-            int mat_id = workbench[bw]->type_id_;
-            occupy[bw].buy_occupy = true;
-            // assert(~occupy[sw].sell_occupy>>mat_id & 1);
-            occupy[sw].sell_occupy |= (1<<mat_id);
-            Dispatch::UpdatePlan(robot_id, bst);
-        }
+        if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1)
+            Log::print("NoPlan", robot_id);
+        Log::print("UpdatePlan", robot_id, bst.buy_workbench, bst.sell_workbench);
+        Dispatch::UpdatePlan(robot_id, bst);
     }
     void Solve() {
         Input::ScanMap();
-        Dispatch::init(RobotReplan, Input::robot_num_);
+        Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
+        Dispatch::avoidCollide = true;
         // occupy.resize(K);
         // ScanFrame才初始化
         // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
         //     RobotReplan(ri); // 开始规划
         // }
         while (Input::ScanFrame()) {
-            if (occupy.size() == 0)
-                occupy.resize(K);
+            Log::print("frame", Input::frameID);
+            Dispatch::UpdateCompleted();
+            // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
-            // for (size_t ri = 0; ri < Input::robot_num_; ri++) { // 每帧重新规划，不必须
-            //     RobotReplan(ri);
-            // }
             Dispatch::ControlWalk();
             Output::Print(Input::frameID);
-            Log::print("frame", Input::frameID);
         }
     }
 }
@@ -114,31 +121,50 @@ namespace Solution2 {
     void Solve() {
         Input::ScanMap();
         using namespace Geometry;
-        std::queue<Geometry::Point> route;
+        std::vector<Geometry::Point> route;
         // Geometry::Point{10,10}, Geometry::Point{40, 10}, Geometry::Point{40, 40}, Geometry::Point{10, 40}
-        route.push(Geometry::Point{20,20});
-        route.push(Geometry::Point{25,25});
-        route.push(Geometry::Point{40,30});
-        route.push(Geometry::Point{10,40});
+        route.push_back(Geometry::Point{24.7-10,38.75}); // 4正常，2出现错误
+        route.push_back(Geometry::Point{24.7-10,38.75+2}); // 4正常，2出现错误
+        // route.push_back(Geometry::Point{25,25});
+        // route.push_back(Geometry::Point{40,30});
+        // route.push_back(Geometry::Point{10,40});
+        // std::vector<int> arrive;
+        std::vector<int> estimate;
+        std::vector<int> true_estimate;
+        std::vector<std::vector<double>> mov;
         while(Input::ScanFrame()) {
+            Log::print("frame", Input::frameID);
+
             // Solution
             Geometry::Point loc{robot[0]->x0_, robot[0]->y0_};
-            while (Geometry::Length(loc - route.front()) < 1e-1)
-                route.pop();
+            while (route.size() && Geometry::Length(loc - route.front()) < 1e-1) {
+                // Log::print("arrive", route.front().x, route.front().y);
+                // arrive.push_back(Input::frameID);
+                while (true_estimate.size() < estimate.size())
+                    true_estimate.push_back(Input::frameID - true_estimate.size());
+                route.erase(begin(route));
+            }
             if (route.size()) {
                 double forward = 0, rotate = 0;
                 robot[0]->ToPoint_3(route.front().x, route.front().y, forward, rotate);
 
                 Output::Forward(0, forward);
                 Output::Rotate(0, rotate);
+                mov.push_back({forward, rotate, robot[0]->angular_velocity_});
+                // Log::print("From", robot[0]->x0_, robot[0]->y0_);
+                // Log::print("Now", robot[0]->GetLinearVelocity(), robot[0]->angular_velocity_);
+                // Log::print("Aim", forward, rotate);
             }
-
             // Log::print(Input::frameID);
             // for (auto i : Output::Operation)
             //     Log::print(i);
             // Log::print(robot[0]->orient_);
 
             Output::Print(Input::frameID);
+        }
+        for (int i = 0; i < estimate.size(); i++) {
+            Log::print(i, estimate[i] - true_estimate[i],true_estimate[i]);
+            Log::print(mov[i][0], mov[i][1], mov[i][2]);
         }
     }
 }
@@ -376,9 +402,9 @@ namespace Solution1 {
                                             // Log::print("frame: ", frameID, "times: ", times, "k: ", k, "i: ", i, "j: ", j);
                                             if (MissingPoint(i, workbench[i] -> x0_, workbench[i] -> y0_) || MissingPoint(j, workbench[j] -> x0_, workbench[j] -> y0_)) continue ; // 针对地图忽略一些点
                                             if (should_not_plan_to_buy_[i]) continue; // 优化：别人去卖的，你不能去买
-                                            double buy_sell_frame_ = robot[id]->CalcTime(
-                                                    std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
-                                                                Geometry::Point{workbench[j]->x0_, workbench[j]->y0_}});
+                                            double buy_sell_frame_ = 50 * robot[id]->CalcTime(
+                                                    Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
+                                                                Geometry::Point{workbench[j]->x0_, workbench[j]->y0_});
                                             if (frameID + buy_sell_frame_ > total_frame) continue;  //  没时间去卖了，所以不买。
                                             // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_}});
                                             double money_per_distance = profit_[k] / (dis_[id][i + robot_num_] +
@@ -442,9 +468,11 @@ namespace Solution1 {
 
                                     if (MissingPoint(i, workbench[i] -> x0_, workbench[i] -> y0_) || MissingPoint(j, workbench[j] -> x0_, workbench[j] -> y0_)) continue ; // 针对地图忽略一些点
                                     if (should_not_plan_to_buy_[i]) continue; // 优化：别人去卖的，你不能去买
-                                    double buy_sell_frame_ = robot[id]->CalcTime(
-                                            std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
-                                                        Geometry::Point{workbench[j]->x0_, workbench[j]->y0_}});
+                                    double buy_sell_frame_ = 50 * robot[id]->CalcTime(
+                                            Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
+                                                        Geometry::Point{workbench[j]->x0_, workbench[j]->y0_});
+                                    if (frameID + buy_sell_frame_ > total_frame) continue;  //  没时间去卖了，所以不买。
+                                    // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_}});
 
                                     // if (frameID + buy_sell_frame_ + 300 < total_frame) { // 如果还有时间
                                     // if (workbench[i] -> type_id_ >= 4 && workbench[i] -> type_id_ <= 6 && AroundPoint(i)) continue; // 如果周围1,2,3的点没买，则先买。
@@ -522,6 +550,7 @@ namespace Solution1 {
  }
 
 int main() {
-    Solution1::Solve();
+    // Log::print(Geometry::MinRadius2(1,1));
+    Solution3::Solve();
     return 0;
 }

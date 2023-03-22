@@ -1,4 +1,5 @@
 #include "geometry.h"
+#include "log.h"
 
 using namespace Geometry;
 
@@ -13,13 +14,24 @@ bool Geometry::operator<(const Point& p1, const Point& p2) {
     return p1.y < p2.y;
 }
 
+Vector Geometry::Rotate(Vector A, double rad) { return Vector{A.x * cos(rad) - A.y * sin(rad), A.x * sin(rad) + A.y * cos(rad)}; }
+
 double Geometry::Dist(double x1, double y1, double x2, double y2) {
     return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 }
 
 // 匀变速运动，估计开始减速距离
 double Geometry::UniformVariableDist(double a, double v, double aim_v) {
-    return abs(v * v - aim_v * aim_v) / (2 * a);
+    return fabs(v * v - aim_v * aim_v) / (2 * a);
+}
+
+// v -> v_max -> v_max -> 0，求时间
+double Geometry::UniformVariableDist2(double a, double x, double v, double v_max) {
+    double t = fabs(2 * v_max - v) / a;
+    x -= UniformVariableDist(a, v, v_max);
+    x -= UniformVariableDist(a, v_max, 0);
+    t += x / v_max;
+    return t;
 }
 
 double Geometry::Dot(const Vector& A, const Vector& B) { return A.x * B.x + A.y * B.y; }
@@ -28,6 +40,12 @@ double Geometry::Length(const Vector& A) { return sqrt(Dot(A, A)); }
 
 double Geometry::InterAngle(const Vector& A, const Vector& B) { return acos(Dot(A, B) / Length(A) / Length(B)); }
 
+double Geometry::MinRadius2(double x, double y, double theta) {
+    const static double m = .1;
+    double r = (-2*y + sqrt(4*y*y + 4*m*m*(x*x+y*y))) / (2 * m*m * std::max(theta * theta, 1e-8));
+    Log::print("called MinRadius2");
+    return r;
+}
 double Geometry::MinRadius(double dist, double theta) {
     return dist / (2 * std::max(1e-8, sin(theta)));
 }
