@@ -211,7 +211,7 @@ namespace Solution1 {
 
     void Init() {
 
-        //
+        // 防碰撞初始化
         Dispatch::avoidCollide = true;
         Dispatch::init(nullptr, robot_num_, K);
 
@@ -276,7 +276,7 @@ namespace Solution1 {
                 robot[id]->ToPoint(dx, dy, forward, rotate);
                 break;
             default:
-                robot[id]->ToPoint_3(dx, dy, forward, rotate);
+                robot[id]->ToPoint(dx, dy, forward, rotate);
                 break;
         }
     }
@@ -360,10 +360,7 @@ namespace Solution1 {
                                             forward, rotate);
                             */
                          Choose_To_Point(id, workbench[robot[id]->workbench_sell_]->x0_, workbench[robot[id]->workbench_sell_]->y0_, forward, rotate);
-                         robot[id]->AvoidToWall(forward, rotate);
-
-                         Output::Forward(id, forward);
-                         Output::Rotate(id, rotate);
+                         movement_[id] = {forward, rotate};
                          robot[id] -> workbench_buy_ = -1;
                      }
                 }
@@ -541,22 +538,19 @@ namespace Solution1 {
 
                         double forward, rotate;
                         Choose_To_Point(id, workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward, rotate);
-
                         movement_[id] = {forward, rotate};
                     }
                 }
-
-                if (avoidCollide) AvoidCollide();
-                for(int id = 0; id < 4; ++id) {
-                    double& forward = movement_[id].first;
-                    double& rotate = movement_[id].second;
-                    robot[id]->AvoidToWall(forward, rotate);
-                    Output::Forward(id, forward);
-                    Output::Rotate(id, rotate);
-                }
-
             }
-
+            // 防碰撞
+            if (avoidCollide) AvoidCollide();
+            for(int id = 0; id < 4; ++id) {
+                double& forward = movement_[id].first;
+                double& rotate = movement_[id].second;
+                robot[id]->AvoidToWall(forward, rotate);
+                Output::Forward(id, forward);
+                Output::Rotate(id, rotate);
+            }
             Output::Print(Input::frameID);
          }
      }
@@ -564,6 +558,6 @@ namespace Solution1 {
 
 int main() {
     // Log::print(Geometry::MinRadius2(1,1));
-    Solution3::Solve();
+    Solution1::Solve();
     return 0;
 }

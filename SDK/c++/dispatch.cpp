@@ -21,6 +21,7 @@ void (*Dispatch::RobotReplan_)(int);
 
 void Dispatch::init(void (*RobotReplan)(int), int robot_num, int workbench_num) {
     RobotReplan_ = RobotReplan;
+    movement_.resize(Input::robot_num_);
     plan_.resize(robot_num);
     occupy_.resize(workbench_num);
 }
@@ -105,7 +106,6 @@ void Dispatch::ManagePlan(int robot_id, Plan& plan) {
 
 // 输出行走
 void Dispatch::ControlWalk() {
-    movement_.resize(Input::robot_num_);
     for (size_t ri = 0; ri < plan_.size(); ri++) {
         auto robot = Input::robot[ri];
         int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
