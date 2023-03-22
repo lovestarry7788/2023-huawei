@@ -143,7 +143,7 @@ void Dispatch::ControlWalk() {
 }
 
 double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<Point>& b, double mx_dist) {
-    double mx = mx_dist;
+    double mx = collide_dist_;
     for (int ti = 0; ti < forecast_num_; ti += forecast_per_) {
         double dist = Length(a[ti] - b[ti]);
         mx = std::min(mx, dist + ti * collide_time_elemit_);
@@ -169,6 +169,8 @@ void Dispatch::AvoidCollide() {
             forecast[ri] = std::vector<Point>(forecast_num_, Point{robot->x0_, robot->y0_});
         } else {
             forecast[ri] = Input::robot[ri]->ForecastToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forecast_num_);
+            // Log::print("");
+            // for (auto i : forecast[ri]) Log::print(i.x, i.y);
             // forecast[ri] = Input::robot[ri]->ForecastFixed(aim_movement[ri].first, aim_movement[ri].second, forecast_num_);
         }
     }
@@ -184,9 +186,10 @@ void Dispatch::AvoidCollide() {
             bst_dist = std::min(bst_dist, d);
             if (d < collide_dist_) {
                 collide_robot.push_back(rj);
-                Log::print("ori_collide", ri, rj);
+                // Log::print("ori_collide", ri, rj);
             }
         }
+        // Log::print("bst_dist", bst_dist);
         if (collide_robot.empty()) continue;
         // 对robot排序，从重到轻
         collide_robot.push_back(ri);
@@ -203,6 +206,7 @@ void Dispatch::AvoidCollide() {
                         double d = ForecastCollide(forecast[collide_robot[i]], forecast[collide_robot[j]], bst_dist);
                         d_min = std::min(d_min, d);
                     }
+                // Log::print("not better", bst_dist, d_min);
                 if (d_min > bst_dist) {
                     bst_dist = d_min;
                     movement_best = movement_;
@@ -212,19 +216,23 @@ void Dispatch::AvoidCollide() {
                 return true;
             }
             if (dfs(cur+1)) return true;
-            static const std::vector<std::pair<double,double>> choose= {
-                {0, 6},
-                // {PI/2, 6}, {-PI/2, 6},
-                {PI, 6}, {-PI, 6},
-                {0, 5.5},
-                // {PI/2, 3}, {-PI/2, 3},
-                // {PI, 3}, {-PI, 3},
-                // {0, 0.5},
-                // {PI, 0}, {-PI, 0},
+            std::vector<std::pair<double,double>> choose= {
+                {6, 0},
+                {6, PI}, {6, -PI},
+                {5.5, 0},
+                {5.5, PI}, {5.5, -PI},
+                // {6, PI/2}, {-6, PI/2},
+                // {3,PI/2}, {-3,PI/2},
+                // {3,PI}, 3,{-PI},
+                // {0,0.5},
+                // {0,PI}, 0,{-PI},
             }; // 从影响轻到重的顺序
+            // sort(begin(choose), end(choose), [&](std::pair<double,double> l, std::pair<double,double> r) {
+                
+            // });
             int ri = collide_robot[cur];
             auto robot = Input::robot[ri];
-            for (auto& [rotate, forward] : choose) {
+            for (auto& [forward, rotate] : choose) {
                 // if (fabs(forward - robot->GetLinearVelocity()) < 2) continue; // 要降就降猛一点，否则到时候来不及
                 forecast[ri] = robot->ForecastFixed(forward, rotate, forecast_num_);
                 movement_[ri] = {forward, rotate};

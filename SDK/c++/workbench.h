@@ -19,6 +19,7 @@ public:
 
     bool TryToBuy(int carry_id, double time_to_buy);
     bool TryToSell(int carry_id);
+    int ItemsAreMissing();
 
     friend class Robot;
 };

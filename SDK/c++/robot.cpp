@@ -12,6 +12,34 @@ Robot::Robot(int id, int workbench, int carry_id, double time_coefficient, doubl
              id_(id), workbench_(workbench), carry_id_(carry_id), time_coefficient_(time_coefficient), collide_coefficient_(collide_coefficient),
              angular_velocity_(angular_velocity), linear_velocity_x_(linear_velocity_x), linear_velocity_y_(linear_velocity_y), orient_(orient), x0_(x0), y0_(y0){}
 
+// 方案2：控制通过转向圆周控制速度，除了圆周不够，都不减速
+void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
+    double aim_rot = atan2(dy-y0_, dx-x0_);
+    double dif_rot = AngleReg(orient_ - aim_rot);
+
+    double dist = Geometry::Dist(x0_, y0_, dx, dy);
+
+
+    double cir = Geometry::MinRadius(dist, fabs(dif_rot));
+    forward = GetMaxSpeedOnCir(cir);
+
+    double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
+    if (fabs(dif_rot) < limit_r) rotate = 0; // 开始角速度减速
+    else rotate = dif_rot > 0 ? -max_rotate_velocity_ : max_rotate_velocity_;
+
+    // 不减速假设
+    // double velocity = Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
+    // double limit_v = Geometry::UniformVariableDist(max_force_ / GetMass(), velocity, 0);
+    // if (limit_v > dist) forward = 0; // 开始线速度减速
+
+    forward = std::min(forward, max_forward_velocity_);
+    // Log::print(id_, dist, dif_rot, cir, forward, rotate);
+    // static int frame = 0;
+    // Log::print("frame", ++frame);
+    // Log::print(dx, dy, x0_, y0_, forward);
+    // Log::print(orient_, aim_rot, dif_rot, rotate);
+}
+
 // 方案1：从当前点到某点，到达时速度为0（防止走过头，更容易控制）。
 void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
@@ -40,7 +68,7 @@ void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
 }
 
 // 方案2：控制通过转向圆周控制速度，除了圆周不够，都不减速
-void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
+void Robot::ToPoint_3(double dx, double dy, double& forward, double& rotate) {
     double aim_rot = atan2(dy-y0_, dx-x0_);
     double dif_rot = AngleReg(aim_rot - orient_);
     double dist = Geometry::Dist(x0_, y0_, dx, dy);
@@ -295,15 +323,15 @@ double Robot::GetMaxSpeedOnCir(double r) {
 }
 
 double Robot::CalcTime(const Point& p) {
-    bool P = Input::frameID == 135;
+    // bool P = true;
     double aim_r = atan2(p.y - y0_, p.x - x0_);
     double dif_r = fabs(AngleReg(aim_r - orient_));
     double dist = Dist(p.x, p.y, x0_, y0_);
-    double ans = UniformVariableDist2(max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_ * dcmp(dif_r));
+    double ans = UniformVariableDist2(max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_ * (dif_r > 0 ? 1 : -1));
     double linearV = GetLinearVelocity();
     double cir = std::min(1.5 * linearV / max_forward_velocity_, MinRadius(dist, dif_r)); 
     // Log::print(dist);
-    if (P) Log::print(ans);
+    // if (P) Log::print("T", ans, max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_ * dcmp(dif_r));
     dist -= 2 * cir * sin(dif_r / 2);
     // Log::print(dist);
     double t1 = ans;
@@ -313,7 +341,7 @@ double Robot::CalcTime(const Point& p) {
     double ans_up_speed = (max_forward_velocity_ - linearV) / a;
     // Log::print(ans_up_speed, ans);
     ans = 0.97 * std::max(ans, ans_up_speed) + 0.15 * std::min(ans, ans_up_speed);
-    if (P) Log::print(ans);
+    // if (P) Log::print(ans);
     dist -= UniformVariableDist(a, GetMaxSpeedOnCir(cir), max_forward_velocity_);
     // Log::print(dist);
     double t2 = ans;
@@ -340,6 +368,7 @@ double Robot::CalcTime(const Point& p1, const Point& p2) {
     a.linear_velocity_x_ = max_forward_velocity_ * cos(a.orient_);
     a.linear_velocity_y_ = max_forward_velocity_ * sin(a.orient_);
     a.carry_id_ = 1;
+    // Log::print(p1.x, p1.y, p2.x, p2.y, a.CalcTime(p2));
     ans += a.CalcTime(p2);
     return ans;
 }

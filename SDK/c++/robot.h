@@ -40,6 +40,8 @@ public:
 
     // void ToPoint_2(double dx, double dy, double& forward, double& rotate);
 
+    void ToPoint_3(double dx, double dy, double& forward, double& rotate);
+
     void AvoidToWall(double& forward, double& rotate);
 
     double DistToWall(Geometry::Point p, double orient);
