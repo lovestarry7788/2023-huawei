@@ -154,12 +154,12 @@ namespace Solution1 {
     static constexpr int can_not_buy_in_last_frame = 0;
     static constexpr double inf = 1e9;
     static constexpr int frame_to_wait_in_buy = 3;
+    double premium_coefficient[3] = {1.0, 1.0, 2.0};
     double sever_one = 2.0;
     double four_five_six_one = 1.5;
     double sever_two = 1.2;
     double four_five_six_two = 1.2;
     double sever_three = 1.0;
-    double eight = 3.0;
 
     // double time_[110][110];
     double profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
@@ -176,6 +176,10 @@ namespace Solution1 {
      */
     double dis_[110][110];
 
+    // 周围 5m 之内的点
+    std::vector<int> around_points[110];
+    const double Around_Distance = 5.0;
+
     int fac[5];
 
     void Init() {
@@ -189,6 +193,15 @@ namespace Solution1 {
                 can_plan_to_buy_[i] = true;
                 for(int j = 1; j <= 7; ++j) {
                     can_plan_to_sell_[i][j] = true;
+                }
+            }
+
+            for(int i = 0; i < K; ++i) {
+                for(int j = 0; j < K; ++j) {
+                    if(dis_[i + robot_num_][j + robot_num_] < Around_Distance) {
+                        around_points[i].emplace_back(j);
+                        around_points[j].emplace_back(i);
+                    }
                 }
             }
         }
@@ -215,6 +228,7 @@ namespace Solution1 {
                     dy = workbench[idy - robot_num_] -> y0_;
                 }
                 dis_[idx][idy] = Distance(sx, sy, dx, dy);
+                // Log::print("idx : ",idx, "idy : ", idy, " dis_[idx][idy] : ", dis_[idx][idy]);
             }
         }
 
@@ -225,11 +239,9 @@ namespace Solution1 {
         switch(Input::map_number_) {
             case 2:
                 robot[id]->ToPoint(dx, dy, forward, rotate);
-                // Log::print("Choose_ToPoint_1\n");
                 break;
             default:
                 robot[id]->ToPoint_3(dx, dy, forward, rotate);
-                // Log::print("Choose_ToPoint\n");
                 break;
         }
     }
@@ -245,6 +257,7 @@ namespace Solution1 {
                 if(x <= 7.5 && y >= 42.5) return true;
                 if(x >= 42.5 && y <= 7.5) return true;
                 if(x >= 42.5 && y >= 42.5) return true;
+
                 // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
             case 3:
                 break;
@@ -276,6 +289,15 @@ namespace Solution1 {
         sever_three = sever_three_;
         Log::print(" sever_one: ", sever_one, " four_five_six_one: ", four_five_six_one, " sever_two ", sever_two,
                    " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
+    }
+
+    bool AroundPoint(int idx) {
+        for(const auto& idy: around_points[idx]) if(dis_[robot_num_ + idx][robot_num_ + idy] < Around_Distance) {
+            if(workbench[idx] -> TryToSell(workbench[idy] -> type_id_) && workbench[idy] -> TryToBuy(workbench[idy] -> type_id_, -100)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void Solve() {
@@ -332,7 +354,7 @@ namespace Solution1 {
                     }
                 }
                 std::vector<int> ans_robot_need_to_plan_to_buy_ = robot_need_to_plan_to_buy_;
-
+                /*
                 double max_total_profit_per_total_distance_ = 0.0;
                 do {
                     if(!choose_to_enum_robot_order) break;
@@ -385,8 +407,26 @@ namespace Solution1 {
                     }
                     // Log::print("frame: ", frameID, "times: ", times, "total_profit: ", total_profit_, "total_distance: ", total_distance_);
                 }while( std::next_permutation(robot_need_to_plan_to_buy_.begin(), robot_need_to_plan_to_buy_.end()) ); // 进行全排列
+                */
 
                 // 得到机器人的顺序... 正在给机器人计划去买的 workbench。
+
+                // 给工作台设置加急等级
+                int premium_processing[10];
+                for(int i = 0; i <= 9; ++i) premium_processing[i] = 0;
+                for(int i = 0; i < K; ++i) {
+                    if(workbench[i] -> type_id_ == 7 && workbench[i] -> ItemsAreMissing() == 1) {
+                        if(!(workbench[i] -> materials_status_ & (1 << 4))) premium_processing[4] = std::max(2, premium_processing[4]);
+                        if(!(workbench[i] -> materials_status_ & (1 << 5))) premium_processing[5] = std::max(2, premium_processing[5]);
+                        if(!(workbench[i] -> materials_status_ & (1 << 6))) premium_processing[6] = std::max(2, premium_processing[6]);
+                    }
+                    if(workbench[i] -> type_id_ == 7 && workbench[i] -> ItemsAreMissing() == 2) {
+                        if(!(workbench[i] -> materials_status_ & (1 << 4))) premium_processing[4] = std::max(1, premium_processing[4]);
+                        if(!(workbench[i] -> materials_status_ & (1 << 5))) premium_processing[5] = std::max(1, premium_processing[5]);
+                        if(!(workbench[i] -> materials_status_ & (1 << 6))) premium_processing[6] = std::max(1, premium_processing[6]);
+                    }
+                }
+
                 for(int id : ans_robot_need_to_plan_to_buy_) {
                     // 根据策略，选一个东西去买
                     double mn = 0.0; // 物品获利 / 距离
@@ -402,9 +442,15 @@ namespace Solution1 {
                                     double buy_sell_frame_ = robot[id]->CalcTime(
                                             std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
                                                         Geometry::Point{workbench[j]->x0_, workbench[j]->y0_}});
-                                    if (frameID + buy_sell_frame_ > total_frame) continue;  //  没时间去卖了，所以不买。
-                                    // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_}});
 
+                                    // if (frameID + buy_sell_frame_ + 300 < total_frame) { // 如果还有时间
+                                    // if (workbench[i] -> type_id_ >= 4 && workbench[i] -> type_id_ <= 6 && AroundPoint(i)) continue; // 如果周围1,2,3的点没买，则先买。
+                                    // }
+
+                                    // if(workbench[j] -> frame_remain_ > 0 && buy_sell_frame_ < workbench[j] -> frame_remain_ && (workbench[j] -> ItemsAreMissing() == 1)) continue ;
+                                    // Log::print("buy_sell_frame: ", buy_sell_frame_, " j: ", j, " frame_remain: ", workbench[j] -> frame_remain_, " ItemsAreMissing: ", workbench[j] -> ItemsAreMissing());
+
+                                    if (frameID + buy_sell_frame_ > total_frame) continue;  //  没时间去卖了，所以不买。
                                     double money_per_distance;
 
                                     if((workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 1)) { // 如果 7 只差一点，给一个更大的值
@@ -420,6 +466,8 @@ namespace Solution1 {
                                     } else {
                                         money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     }
+
+                                    money_per_distance *= premium_coefficient[premium_processing[workbench[j] -> type_id_]];
 
                                     if (money_per_distance > mn) {
                                         mn = money_per_distance;
@@ -455,10 +503,6 @@ namespace Solution1 {
                         }
 
                         double forward, rotate;
-                        /*
-                        robot[id]->ToPoint_1(workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward,
-                                             rotate);
-                         */
                         Choose_To_Point(id, workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward, rotate);
                         robot[id]->AvoidToWall(forward, rotate);
 
