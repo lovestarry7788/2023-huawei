@@ -136,7 +136,7 @@ void Dispatch::ControlWalk() {
         double& rotate = movement_[ri].second;
         Input::robot[ri] -> AvoidToWall(forward, rotate);
 
-        Log::print(ri, forward, rotate);
+        // Log::print(ri, forward, rotate);
         Output::Forward(ri, forward);
         Output::Rotate(ri, rotate);
     }
@@ -220,7 +220,7 @@ void Dispatch::AvoidCollide() {
             std::vector<std::pair<double,double>> choose= {
                 {6, 0},
                 {6, PI}, {6, -PI},
-                {5.5, PI/4}, {5.5, -PI/4},
+                {5, PI/2}, {5, -PI/2},
                 // {5.5, PI}, {5.5, -PI},
                 // {6, PI/2}, {-6, PI/2},
                 // {3,PI/2}, {-3,PI/2},

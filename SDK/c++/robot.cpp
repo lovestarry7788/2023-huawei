@@ -105,7 +105,7 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
 // TODO：突然的急转弯难预测？本函数检查。
 std::vector<Geometry::Point> Robot::ForecastToPoint(double dx, double dy, int forecast_num){
     // bool P = Input::frameID == 926 && (id_ == 2 && fabs(rotate - 0) < 1e-6 && fabs(forward - 0) < 1e-6 || id_ == 3);
-    bool P = false;
+    // bool P = false;
     
     // 假设：加速度总是满
     std::vector<Point> forecast(forecast_num, Point{0,0});
@@ -113,7 +113,7 @@ std::vector<Geometry::Point> Robot::ForecastToPoint(double dx, double dy, int fo
     double angularV = angular_velocity_;
     double x0 = x0_, y0 = y0_;
     double orient = orient_;
-    if (P) Log::print("ForecastFixed", x0, y0, orient, linearV, angularV);
+    // if (P) Log::print("ForecastFixed", x0, y0, orient, linearV, angularV);
     for (int i = 0; i < forecast_num; i++) {
 
         linearV = std::max(1e-8, linearV);
@@ -151,7 +151,7 @@ std::vector<Geometry::Point> Robot::ForecastToPoint(double dx, double dy, int fo
         x0 = forecast[i].x;
         y0 = forecast[i].y;
         orient += angularV * 1 / 50.0;
-        if (P) Log::print(x0, y0, cir, orient, center.x, center.y, linearV, angularV);
+        // if (P) Log::print(x0, y0, cir, orient, center.x, center.y, linearV, angularV);
     }
     return forecast;
 }
@@ -273,12 +273,12 @@ std::vector<Geometry::Point> Robot::ForecastFixed(double forward, double rotate,
 
 void Robot::AvoidToWall(double &forward, double &rotate) {
     double limit = CalcMaxSlowdownDist();
-    double walld = DistToWall({x0_, y0_}, atan2(linear_velocity_y_, linear_velocity_x_));
+    double walld = DistToWall({x0_, y0_}, GetLinearVelocity() > 0.5 ? atan2(linear_velocity_y_, linear_velocity_x_) : orient_);
     // if (Input::frameID == 117 && id_ == 0) {
     //     Log::print(id_, walld, limit);
     // }
 
-    if (limit >= walld - 0.55) {
+    if (limit >= walld - 0.58) {
         forward = 0;
     }
 }
@@ -297,7 +297,7 @@ double Robot::DistToWall(Point p, double orient) {
         // if (Input::frame)
         if (Dot(sec - p, ori) > 0) {
             mind = std::min(mind, Length(sec - p));
-            // if (Input::frameID == 117 && id_ == 0) {
+            // if (Input::frameID == 1069 && id_ == 0) {
             //     Log::print(id_, Length(sec - p), ori.x, ori.y);
             //     Log::print(p.x, p.y);
             // }
@@ -342,7 +342,7 @@ double Robot::CalcTime(const Point& p) {
     // if (P) Log::print("T", ans, max_rot_force_ / GetRotInerta(), dif_r, angular_velocity_, max_rotate_velocity_ * dcmp(dif_r));
     dist -= 2 * cir * sin(dif_r / 2);
     // Log::print(dist);
-    double t1 = ans;
+    // double t1 = ans;
     // Log::print(dif_r, cir, angular_velocity_);
 
     double a = max_force_ / GetMass();
@@ -352,10 +352,10 @@ double Robot::CalcTime(const Point& p) {
     // if (P) Log::print(ans);
     dist -= UniformVariableDist(a, GetMaxSpeedOnCir(cir), max_forward_velocity_);
     // Log::print(dist);
-    double t2 = ans;
+    // double t2 = ans;
     // Log::print(dist);
-
-    ans += (dist + cir * dif_r) / max_forward_velocity_; // 这句话对圆周，非常不准确
+    // Log::print(cir, dif_r);
+    ans += (dist + cir * dif_r * 0.7) / max_forward_velocity_; // 这句话对圆周，非常不准确
     // Log::print(cir, dif_r, linearV, orient_, t1, t2, ans);
     return ans;
     // x = 1/2*a*t^2

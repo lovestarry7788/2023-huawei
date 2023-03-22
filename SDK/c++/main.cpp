@@ -18,6 +18,7 @@ namespace Solution3 {
 
     constexpr int profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
     constexpr double wait_ratio_ = 20;
+    constexpr int sell_limit_frame_ = 8980;
     int award_buy(int robot_id, int workbench_id) {
         return 0;
     }
@@ -45,8 +46,8 @@ namespace Solution3 {
             int mat_id = buy_wb->type_id_; // 购买与出售物品id
             if (rb->carry_id_ != 0 && rb->carry_id_ != mat_id) continue;
             // 仅在搭上了顺风车才买
-            bool P = Input::frameID == 2011;
-            if (P) Log::print(mat_id, Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_));
+            // bool P = Input::frameID == 2011;
+            // if (P) Log::print(mat_id, Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_));
             // if (mat_id >= 4 && Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_) > 1)
             //     continue;
 
@@ -64,6 +65,7 @@ namespace Solution3 {
                     // if (!sell_wb->product_status_ && sell_wb-> > 0) 
                     // TODO: 在生产，且填上当前物品就满了，则结束时间为max{到达，生产完成}。这样来到达送且拿。
                     sell_time = rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_});
+                    if (Input::frameID + sell_time * 50 > sell_limit_frame_) continue;
                     if (false && workbench_remain_num(sell_wb_id) == 1 && !sell_wb->product_status_) {
                         // if (sell_wb->frame_remain_ / 50.0 - sell_time > 0) continue;
                         sell_time += std::max(0.0, sell_wb->frame_remain_ / 50.0 - sell_time) * wait_ratio_;
@@ -72,6 +74,7 @@ namespace Solution3 {
                     sell_time -= rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_});
                 } else {
                     sell_time = rb->CalcTime(Point{sell_wb->x0_, sell_wb->y0_});
+                    if (Input::frameID + sell_time * 50 > sell_limit_frame_) continue;
                 }
 
                 if (Dispatch::occupy_[sell_wb_id].sell_occupy >> mat_id & 1) continue;
@@ -90,15 +93,17 @@ namespace Solution3 {
             }
 
         }
-        if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1)
+        if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1) {
             Log::print("NoPlan", robot_id);
-        Log::print("UpdatePlan", robot_id, bst.buy_workbench, bst.sell_workbench);
+            return;
+        }
+        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         Dispatch::UpdatePlan(robot_id, bst);
     }
     void Solve() {
         Input::ScanMap();
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
-        // Dispatch::avoidCollide = true;
+        Dispatch::avoidCollide = true;
         // occupy.resize(K);
         // ScanFrame才初始化
         // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
@@ -106,8 +111,8 @@ namespace Solution3 {
         // }
         while (Input::ScanFrame()) {
             Log::print("frame", Input::frameID);
-            Dispatch::UpdateCompleted();
-            // Dispatch::UpdateAll();
+            // Dispatch::UpdateCompleted();
+            Dispatch::UpdateAll();
             Dispatch::ManagePlan();
             Dispatch::ControlWalk();
             Output::Print(Input::frameID);
@@ -133,8 +138,8 @@ namespace Solution2 {
         std::vector<int> true_estimate;
         std::vector<std::vector<double>> mov;
         while(Input::ScanFrame()) {
-            Log::print("frame", Input::frameID);
-
+            if (Input::frameID < 250)
+                Log::print("frame", Input::frameID);
             // Solution
             Geometry::Point loc{robot[0]->x0_, robot[0]->y0_};
             while (route.size() && Geometry::Length(loc - route.front()) < 1e-1) {
@@ -146,8 +151,8 @@ namespace Solution2 {
             }
             if (route.size()) {
                 double forward = 0, rotate = 0;
-                robot[0]->ToPoint_3(route.front().x, route.front().y, forward, rotate);
-
+                robot[0]->ToPoint(route.front().x, route.front().y, forward, rotate);
+                estimate.push_back(round(50 * robot[0]->CalcTime(route.front())));
                 Output::Forward(0, forward);
                 Output::Rotate(0, rotate);
                 mov.push_back({forward, rotate, robot[0]->angular_velocity_});
@@ -164,7 +169,7 @@ namespace Solution2 {
         }
         for (int i = 0; i < estimate.size(); i++) {
             Log::print(i, estimate[i] - true_estimate[i],true_estimate[i]);
-            Log::print(mov[i][0], mov[i][1], mov[i][2]);
+            // Log::print(mov[i][0], mov[i][1], mov[i][2]);
         }
     }
 }
