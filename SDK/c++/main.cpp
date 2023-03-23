@@ -297,9 +297,9 @@ namespace Solution3 {
         }
         if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1) {
             Log::print("NoPlan", robot_id);
-            return;
+        } else {
+            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         }
-        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         Dispatch::UpdatePlan(robot_id, bst);
     }
     void Solve() {

@@ -79,8 +79,12 @@ void Dispatch::UpdateAll() {
         if (plan_[i].sell_workbench != -1)   
             occupy_[plan_[i].sell_workbench].sell_occupy &= 
                 ((unsigned)1 << 31) - 1 - (1<<plan_[i].mat_id);
-        RobotReplan_(i);// 手上有东西则更新sell
     }
+    std::vector<int> ord(plan_.size());
+    for (int i = 0; i < ord.size(); i++) ord[i] = i;
+    std::sort(begin(ord), end(ord), [&](int l, int r) {return Input::robot[l]->carry_id_ > Input::robot[r]->carry_id_;});
+    for (size_t i = 0; i < plan_.size(); i++)
+        RobotReplan_(ord[i]);// 手上有东西则更新sell
 }
 void Dispatch::UpdateCompleted() {
     for (size_t i = 0; i < plan_.size(); i++) {
