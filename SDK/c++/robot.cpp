@@ -4,6 +4,22 @@
 #include "robot.h"
 #include "geometry.h"
 #include "log.h"
+#include <cmath>
+#include <algorithm>
+#include <queue>
+#include <cstring>
+#include <cstdio>
+#include <unordered_map>
+#include <map>
+#include <iostream>
+#include <utility>
+#include <functional>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <set>
+#include <memory>
+#include <climits>
 
 using namespace Geometry;
 

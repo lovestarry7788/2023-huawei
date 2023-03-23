@@ -10,6 +10,16 @@
 #include <cstdio>
 #include <unordered_map>
 #include <map>
+#include <iostream>
+#include <utility>
+#include <functional>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <set>
+#include <memory>
+#include <climits>
+
 // #include <cassert>
 
 namespace Solution3 {
@@ -41,7 +51,7 @@ namespace Solution3 {
         double bst_award_pf = 0; // per frame
         for (int buy_wb_id = 0; buy_wb_id < K; buy_wb_id++) {
             auto buy_wb = workbench[buy_wb_id];
-            if (!buy_wb->product_status_ && buy_wb-> frame_remain_ == -1) continue; // 暂不考虑后后运送上的 
+            if (!buy_wb->product_status_ && buy_wb-> frame_remain_ == -1) continue; // 暂不考虑后后运送上的
             if (Dispatch::occupy_[buy_wb_id].buy_occupy) continue;
             int mat_id = buy_wb->type_id_; // 购买与出售物品id
             if (rb->carry_id_ != 0 && rb->carry_id_ != mat_id) continue;
@@ -217,8 +227,16 @@ namespace Solution1 {
     void Init() {
 
         // 防碰撞初始化
-        Dispatch::avoidCollide = true;
-        Dispatch::init(nullptr, robot_num_, K);
+        switch(map_number_) {
+            case 2:
+                Dispatch::avoidCollide = false;
+                Dispatch::init(nullptr, robot_num_, K);
+                break;
+            default:
+                Dispatch::avoidCollide = true;
+                Dispatch::init(nullptr, robot_num_, K);
+                break;
+        }
 
         // 第一帧开始初始化的
         if(frameID == 1) {
@@ -379,17 +397,9 @@ namespace Solution1 {
                 bool choose_to_enum_robot_order = false;
                 // 枚举机器人的顺序.......
                 std::vector<int> robot_need_to_plan_to_buy_;
-                if(map_number_ == 2) { // 第 2 张图倒着 for 线上成绩可能更好
-                    for(int id = 3; id >= 0; --id) { // 把没有计划的机器人记录起来，进行全排列。
-                        if(robot[id] -> carry_id_ == 0 && robot[id] -> workbench_buy_ == -1) {
-                            robot_need_to_plan_to_buy_.emplace_back(id);
-                        }
-                    }
-                } else {
-                    for (int id = 0; id < 4; ++id) { // 把没有计划的机器人记录起来，进行全排列。
-                        if (robot[id]->carry_id_ == 0 && robot[id]->workbench_buy_ == -1) {
-                            robot_need_to_plan_to_buy_.emplace_back(id);
-                        }
+                for (int id = 0; id < 4; ++id) { // 把没有计划的机器人记录起来，进行全排列。
+                    if (robot[id]->carry_id_ == 0 && robot[id]->workbench_buy_ == -1) {
+                        robot_need_to_plan_to_buy_.emplace_back(id);
                     }
                 }
                 std::vector<int> ans_robot_need_to_plan_to_buy_ = robot_need_to_plan_to_buy_;
@@ -451,18 +461,27 @@ namespace Solution1 {
                 // 得到机器人的顺序... 正在给机器人计划去买的 workbench。
 
                 // 给工作台设置加急等级
+
                 int premium_processing[10];
                 for(int i = 0; i <= 9; ++i) premium_processing[i] = 0;
-                for(int i = 0; i < K; ++i) {
-                    if(workbench[i] -> type_id_ == 7 && workbench[i] -> ItemsAreMissing() == 1) {
-                        if(!(workbench[i] -> materials_status_ & (1 << 4))) premium_processing[4] = std::max(2, premium_processing[4]);
-                        if(!(workbench[i] -> materials_status_ & (1 << 5))) premium_processing[5] = std::max(2, premium_processing[5]);
-                        if(!(workbench[i] -> materials_status_ & (1 << 6))) premium_processing[6] = std::max(2, premium_processing[6]);
-                    }
-                    if(workbench[i] -> type_id_ == 7 && workbench[i] -> ItemsAreMissing() == 2) {
-                        if(!(workbench[i] -> materials_status_ & (1 << 4))) premium_processing[4] = std::max(1, premium_processing[4]);
-                        if(!(workbench[i] -> materials_status_ & (1 << 5))) premium_processing[5] = std::max(1, premium_processing[5]);
-                        if(!(workbench[i] -> materials_status_ & (1 << 6))) premium_processing[6] = std::max(1, premium_processing[6]);
+                if(map_number_ != 2 && map_number_ != 4) {
+                    for (int i = 0; i < K; ++i) {
+                        if (workbench[i]->type_id_ == 7 && workbench[i]->ItemsAreMissing() == 1) {
+                            if (!(workbench[i]->materials_status_ & (1 << 4)))
+                                premium_processing[4] = std::max(2, premium_processing[4]);
+                            if (!(workbench[i]->materials_status_ & (1 << 5)))
+                                premium_processing[5] = std::max(2, premium_processing[5]);
+                            if (!(workbench[i]->materials_status_ & (1 << 6)))
+                                premium_processing[6] = std::max(2, premium_processing[6]);
+                        }
+                        if (workbench[i]->type_id_ == 7 && workbench[i]->ItemsAreMissing() == 2) {
+                            if (!(workbench[i]->materials_status_ & (1 << 4)))
+                                premium_processing[4] = std::max(1, premium_processing[4]);
+                            if (!(workbench[i]->materials_status_ & (1 << 5)))
+                                premium_processing[5] = std::max(1, premium_processing[5]);
+                            if (!(workbench[i]->materials_status_ & (1 << 6)))
+                                premium_processing[6] = std::max(1, premium_processing[6]);
+                        }
                     }
                 }
 
@@ -568,6 +587,6 @@ namespace Solution1 {
 
 int main() {
     // Log::print(Geometry::MinRadius2(1,1));
-    Solution3::Solve();
+    Solution1::Solve();
     return 0;
 }
