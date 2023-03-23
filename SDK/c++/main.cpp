@@ -22,6 +22,197 @@
 
 // #include <cassert>
 
+// 手玩方法，呆滞数据
+namespace Solution4 {
+    // 走路略快，有些许错配
+    std::vector<std::vector<std::pair<int,int>>> route = 
+    {
+        {
+            {5, 9},
+            {14, 12},
+            {18, 20},
+            {19, 23},
+            {28, 20},
+            {19, 21},
+            {21, 15},
+            {14, 12},
+            {13, 11},
+            {10, 9},
+            {4, 12},
+            {12, 17},
+            {18, 20},
+            {20, 15},
+            {4, 12},
+            {12, 17},
+            {18, 21},
+            {22, 20},
+            {20, 17},
+            {17, 16},
+            {14, 12},
+            {13, 9},
+            {5, 11},
+            {10, 9},
+            {9, 15},
+            {19, 21},
+            {21, 15},
+            {15, 16},
+            {18, 21},
+            {22, 23},
+            {23, 17},
+            {22, 20},
+            {20, 17},
+            {17, 16},
+            {18, 21},
+            {21, 15},
+            {25, 26},
+        },
+        {
+            {4, 12},
+            {13, 9},
+            {14, 11},
+            {14, 12},
+            {13, 9},
+            {5, 11},
+            {11, 15},
+            {18, 20},
+            {20, 17},
+            {28, 23},
+            {28, 20},
+            {19, 23},
+            {23, 15},
+            {18, 21},
+            {22, 23},
+            {27, 21},
+            {21, 15},
+            {15, 16},
+            {18, 20},
+            {19, 23},
+            {27, 21},
+            {21, 17},
+            {18, 21},
+            {22, 23},
+            {23, 17},
+            {17, 16},
+            {14, 12},
+            {12, 17},
+            {14, 11},
+            {11, 17},
+            {17, 16},
+            {14, 12},
+            {13, 11},
+            {14, 11},
+            {11, 15},
+            {15, 16},
+            {1, 3},
+            {2, 3},
+            {1, 3},
+            {2, 3},
+        },
+        {
+            {10, 9},
+            {5, 11},
+            {10, 9},
+            {9, 17},
+            {18, 21},
+            {22, 23},
+            {27, 21},
+            {28, 20},
+            {19, 23},
+            {23, 15},
+            {11, 15},
+            {15, 16},
+            {14, 11},
+            {11, 17},
+            {17, 16},
+            {5, 9},
+            {5, 11},
+            {10, 12},
+            {12, 15},
+            {10, 9},
+            {9, 17},
+            {14, 12},
+            {4, 12},
+            {13, 9},
+            {5, 11},
+            {10, 12},
+            {12, 15},
+            {18, 20},
+            {19, 23},
+            {27, 21},
+            {22, 23},
+            {23, 15},
+            {11, 15},
+            {20, 17},
+            {25, 26}
+        },
+        {
+            {18, 21},
+            {22, 23},
+            {27, 23},
+            {27, 21},
+            {22, 23},
+            {23, 15},
+            {14, 11},
+            {10, 12},
+            {12, 17},
+            {4, 9},
+            {9, 17},
+            {18, 21},
+            {21, 15},
+            {14, 12},
+            {13, 9},
+            {9, 17},
+            {18, 20},
+            {19, 23},
+            {23, 15},
+            {14, 11},
+            {11, 17},
+            {28, 20},
+            {20, 15},
+            {15, 16},
+            {18, 20},
+            {19, 23},
+            {28, 20},
+            {20, 15},
+            {14, 11},
+            {10, 9},
+            {9, 15},
+            {10, 9},
+            {4, 12},
+            {12, 17},
+            {14, 12},
+            {13, 9},
+            {9, 17},
+            {12, 17},
+            {7, 6}
+        },
+    };
+    using namespace Input;
+    void RobotReplan(int robot_id) {
+        Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
+        if (route[robot_id].size()) {
+            auto p = route[robot_id].front();
+            bst.buy_workbench = p.first - 1;
+            bst.sell_workbench = p.second - 1;
+            route[robot_id].erase(begin(route[robot_id]));
+        }
+        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+        Dispatch::UpdatePlan(robot_id, bst);
+    }
+    void Solve() {
+        Input::ScanMap();
+        Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
+        Dispatch::avoidCollide = true;
+        while (Input::ScanFrame()) {
+            Log::print("frame", Input::frameID);
+            Dispatch::UpdateCompleted();
+            // Dispatch::UpdateAll();
+            Dispatch::ManagePlan();
+            Dispatch::ControlWalk();
+            Output::Print(Input::frameID);
+        }
+    }
+}
 namespace Solution3 {
     using namespace Input;
     using namespace Geometry;
@@ -62,8 +253,9 @@ namespace Solution3 {
             //     continue;
 
             double buy_time = 0;
+            double actual_time = 0;
             if (rb->carry_id_ == 0) {
-                buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
+                actual_time = buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
                 if (!buy_wb->product_status_) // 有产品了也可以在生产时间中，故必须要此判断
                     buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * wait_ratio_; // 等待生产
             }
@@ -75,16 +267,16 @@ namespace Solution3 {
                     // if (!sell_wb->product_status_ && sell_wb-> > 0) 
                     // TODO: 在生产，且填上当前物品就满了，则结束时间为max{到达，生产完成}。这样来到达送且拿。
                     sell_time = rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_});
-                    if (Input::frameID + sell_time * 50 > sell_limit_frame_) continue;
                     if (false && workbench_remain_num(sell_wb_id) == 1 && !sell_wb->product_status_) {
                         // if (sell_wb->frame_remain_ / 50.0 - sell_time > 0) continue;
                         sell_time += std::max(0.0, sell_wb->frame_remain_ / 50.0 - sell_time) * wait_ratio_;
                         // 还要保证到了sellwb，能有地方需求该物品。即对占用的预测，不光有占用，还有清除的预测。
                     }
                     sell_time -= rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_});
+                    actual_time += sell_time;
+                    if (Input::frameID + actual_time * 50 > sell_limit_frame_) continue;
                 } else {
                     sell_time = rb->CalcTime(Point{sell_wb->x0_, sell_wb->y0_});
-                    if (Input::frameID + sell_time * 50 > sell_limit_frame_) continue;
                 }
 
                 if (Dispatch::occupy_[sell_wb_id].sell_occupy >> mat_id & 1) continue;
