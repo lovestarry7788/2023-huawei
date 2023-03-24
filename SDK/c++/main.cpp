@@ -220,7 +220,7 @@ namespace Solution1 {
 
     // 周围 5m 之内的点
     std::vector<int> around_points[110];
-    const double Around_Distance = 10.0;
+    const double Around_Distance = 15.0;
 
     int fac[5];
 
@@ -379,7 +379,7 @@ namespace Solution1 {
 
     bool FindItemsAreMissingLess(int id, int k, int i, int j) {
         if(workbench[j] -> type_id_ == 7) {
-            for (const auto &j_: around_points[j]) {
+            for (const auto& j_: around_points[j]) if(workbench[j_] -> type_id_ == 7){
                 if (Whether_Can_Buy(id, k, i, j_) &&
                     workbench[j_]->ItemsAreMissing() < workbench[j]->ItemsAreMissing())
                     return true;
@@ -431,6 +431,8 @@ namespace Solution1 {
                 sever_two = 1.2;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
+                premium_coefficient[1] = 1;
+                premium_coefficient[2] = 2;
                 break;
         }
     }
@@ -438,7 +440,7 @@ namespace Solution1 {
     void Solve() {
         Input::ScanMap();
         SetConfig(); // 针对地图设置参数
-        // Config_Read_From_Files(); // 搜参数专用
+        Config_Read_From_Files(); // 搜参数专用
         while(Input::ScanFrame()) {
             Init();
             // sell
@@ -591,7 +593,6 @@ namespace Solution1 {
                                     money_per_distance *= premium_coefficient[premium_processing[workbench[j] -> type_id_]];
 
                                     if(map_number_ == 4 && workbench[j]->type_id_ == 4 && workbench[workbench_sell]->type_id_ != 7) money_per_distance *= 2;
-
                                     if (money_per_distance > mn) {
                                         mn = money_per_distance;
                                         carry_id = k;

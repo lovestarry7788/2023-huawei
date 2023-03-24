@@ -15,8 +15,8 @@ int main() {
     fprintf(fp2, "\n");
     fflush(fp2);
 
-    for(double one = 1.0; one <= 5.1; one += 0.1) {
-        for(double two = 1.0; two <= 5.1; two += 0.1) {
+    for(double one = 1.0; one <= 1.6; one += 0.1) {
+        for(double two = 1.0; two <= 4.1; two += 0.1) {
 //            for(double sever_two = 1.0; sever_two <= 1.55; sever_two += 0.1) {
 //                for(double four_five_six_two = 1.0; four_five_six_two <= 1.55; four_five_six_two += 0.1) {
                     FILE *fp = fopen("config.txt", "w+");
