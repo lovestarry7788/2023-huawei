@@ -35,7 +35,7 @@ int main() {
                     fprintf(fp2, "Calculate! one: %f, two: %f\n", one, two);
                     fflush(fp2);
                     // sleep(2);
-                    system("./Robot -m pre_official_map/1.txt -f ./SDK/c++/build/main >> result.txt");
+                    system("./Robot -m pre_official_map/3.txt -f ./SDK/c++/build/main >> result.txt");
         }
     }
     // fclose(fp2);

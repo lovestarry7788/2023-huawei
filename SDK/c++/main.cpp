@@ -428,6 +428,7 @@ namespace Solution1 {
                 sever_three = 1.0;
                 premium_coefficient[1] = 1;
                 premium_coefficient[2] = 2;
+                break;
             default:
                 sever_one = 2.0;
                 four_five_six_one = 1.5;
@@ -443,7 +444,7 @@ namespace Solution1 {
     void Solve() {
         Input::ScanMap();
         SetConfig(); // 针对地图设置参数
-        // Config_Read_From_Files(); // 搜参数专用
+        Config_Read_From_Files(); // 搜参数专用
         while(Input::ScanFrame()) {
             Init();
             // sell
@@ -591,19 +592,18 @@ namespace Solution1 {
                                         money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     }
 
+                                    /*
                                     if(map_number_ == 3){
                                         money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     }
+                                    */
 
                                     // if(map_number_ == 1 && FindItemsAreMissingLess(id, k, i, j)) continue; // 第一张图的时候，找缺更少的物品买。
 
                                     money_per_distance *= premium_coefficient[premium_processing[workbench[j] -> type_id_]];
 
                                     if(map_number_ == 4 && workbench[j]->type_id_ == 4 && workbench[workbench_sell]->type_id_ != 7) money_per_distance *= 2;
-//                                    if(map_number_ == 3 && k > 3) money_per_distance = 2e9;
-//                                    if(map_number_ == 3 && k < 4 && workbench[j]->type_id_ == 9) money_per_distance /= 10;
-
-                                    if (money_per_distance > mn) {
+                                    if(money_per_distance > mn) {
                                         mn = money_per_distance;
                                         carry_id = k;
                                         workbench_buy = i;
