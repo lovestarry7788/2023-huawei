@@ -315,6 +315,7 @@ namespace Solution1 {
                 if(y <= 15.0 && x <= 15.0) return true;
                 if(y <= 15.0 && x >= 35.0) return true;
             case 4:
+                return x < 22.5;
                 break;
                 if(y <= 30.0) return true;
 
@@ -580,6 +581,8 @@ namespace Solution1 {
                                     // if(map_number_ == 1 && FindItemsAreMissingLess(id, k, i, j)) continue; // 第一张图的时候，找缺更少的物品买。
 
                                     money_per_distance *= premium_coefficient[premium_processing[workbench[j] -> type_id_]];
+
+                                    if(map_number_ == 4 && workbench[j]->type_id_ == 4 && workbench[workbench_sell]->type_id_ != 7) money_per_distance *= 2;
 
                                     if (money_per_distance > mn) {
                                         mn = money_per_distance;
