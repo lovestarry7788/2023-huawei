@@ -315,6 +315,7 @@ namespace Solution1 {
                 if(y <= 15.0 && x <= 15.0) return true;
                 if(y <= 15.0 && x >= 35.0) return true;
             case 4:
+                return x < 22.5;
                 break;
                 if(y <= 30.0) return true;
 
@@ -351,8 +352,30 @@ namespace Solution1 {
         return false;
     }
 
+    void SetConfig() {
+        switch (map_number_) {
+            case 1: // 加重生产 7 的速度
+                sever_one = 2.0;
+                four_five_six_one = 1.5;
+                sever_two = 1.8;
+                four_five_six_two = 1.2;
+                sever_three = 1.0;
+                premium_coefficient[1] = 1.5;
+                premium_coefficient[2] = 3;
+                break;
+            default:
+                sever_one = 2.0;
+                four_five_six_one = 1.5;
+                sever_two = 1.2;
+                four_five_six_two = 1.2;
+                sever_three = 1.0;
+                break;
+        }
+    }
+
     void Solve() {
         Input::ScanMap();
+        SetConfig(); // 针对地图设置参数
         // Config_Read_From_Files(); // 搜参数专用
         while(Input::ScanFrame()) {
             Init();
@@ -518,6 +541,8 @@ namespace Solution1 {
                                     }
 
                                     money_per_distance *= premium_coefficient[premium_processing[workbench[j] -> type_id_]];
+
+                                    if(map_number_ == 4 && workbench[j]->type_id_ == 4 && workbench[workbench_sell]->type_id_ != 7) money_per_distance *= 2;
 
                                     if (money_per_distance > mn) {
                                         mn = money_per_distance;
