@@ -327,7 +327,7 @@ namespace Solution1 {
                 if(y <= 15.0 && x <= 15.0) return true;
                 if(y <= 15.0 && x >= 35.0) return true;
             case 4:
-                return x < 22.5;
+                //return x < 22.5;
                 break;
                 if(y <= 30.0) return true;
 
@@ -442,17 +442,17 @@ namespace Solution1 {
                 break;
             case 3:
                 sever_one = 0;
-                four_five_six_one = 1.7;
+                four_five_six_one = 1.8;
                 sever_two = 0;
-                four_five_six_two = 1.3;
+                four_five_six_two = 1.4;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
             case 4:
-                sever_one = 2.0;
-                four_five_six_one = 1.5;
-                sever_two = 1.2;
+                sever_one = 1.8;
+                four_five_six_one = 1.6;
+                sever_two = 1.4;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1;
