@@ -228,10 +228,6 @@ namespace Solution1 {
 
         // 防碰撞初始化
         switch(map_number_) {
-            case 2:
-                Dispatch::avoidCollide = false;
-                Dispatch::init(nullptr, robot_num_, K);
-                break;
             default:
                 Dispatch::avoidCollide = true;
                 Dispatch::init(nullptr, robot_num_, K);
@@ -295,9 +291,6 @@ namespace Solution1 {
 
     void Choose_To_Point(int id, double dx, double dy, double& forward, double& rotate) {
         switch(Input::map_number_) {
-            case 2:
-                robot[id]->ToPoint(dx, dy, forward, rotate);
-                break;
             default:
                 robot[id]->ToPoint(dx, dy, forward, rotate);
                 break;
@@ -363,7 +356,6 @@ namespace Solution1 {
         // Config_Read_From_Files(); // 搜参数专用
         while(Input::ScanFrame()) {
             Init();
-
             // sell
             for(int id = 0; id < 4; ++id) { // 枚举机器人
                  if (robot[id] -> carry_id_) {
@@ -464,24 +456,22 @@ namespace Solution1 {
 
                 int premium_processing[10];
                 for(int i = 0; i <= 9; ++i) premium_processing[i] = 0;
-                if(map_number_ != 2 && map_number_ != 4) {
-                    for (int i = 0; i < K; ++i) {
-                        if (workbench[i]->type_id_ == 7 && workbench[i]->ItemsAreMissing() == 1) {
-                            if (!(workbench[i]->materials_status_ & (1 << 4)))
-                                premium_processing[4] = std::max(2, premium_processing[4]);
-                            if (!(workbench[i]->materials_status_ & (1 << 5)))
-                                premium_processing[5] = std::max(2, premium_processing[5]);
-                            if (!(workbench[i]->materials_status_ & (1 << 6)))
-                                premium_processing[6] = std::max(2, premium_processing[6]);
-                        }
-                        if (workbench[i]->type_id_ == 7 && workbench[i]->ItemsAreMissing() == 2) {
-                            if (!(workbench[i]->materials_status_ & (1 << 4)))
-                                premium_processing[4] = std::max(1, premium_processing[4]);
-                            if (!(workbench[i]->materials_status_ & (1 << 5)))
-                                premium_processing[5] = std::max(1, premium_processing[5]);
-                            if (!(workbench[i]->materials_status_ & (1 << 6)))
-                                premium_processing[6] = std::max(1, premium_processing[6]);
-                        }
+                for (int i = 0; i < K; ++i) {
+                    if (workbench[i]->type_id_ == 7 && workbench[i]->ItemsAreMissing() == 1) {
+                        if (!(workbench[i]->materials_status_ & (1 << 4)))
+                            premium_processing[4] = std::max(2, premium_processing[4]);
+                        if (!(workbench[i]->materials_status_ & (1 << 5)))
+                            premium_processing[5] = std::max(2, premium_processing[5]);
+                        if (!(workbench[i]->materials_status_ & (1 << 6)))
+                            premium_processing[6] = std::max(2, premium_processing[6]);
+                    }
+                    if (workbench[i]->type_id_ == 7 && workbench[i]->ItemsAreMissing() == 2) {
+                        if (!(workbench[i]->materials_status_ & (1 << 4)))
+                            premium_processing[4] = std::max(1, premium_processing[4]);
+                        if (!(workbench[i]->materials_status_ & (1 << 5)))
+                            premium_processing[5] = std::max(1, premium_processing[5]);
+                        if (!(workbench[i]->materials_status_ & (1 << 6)))
+                            premium_processing[6] = std::max(1, premium_processing[6]);
                     }
                 }
 
@@ -494,6 +484,8 @@ namespace Solution1 {
                                 for (int j = 0; j < K; ++j) if(can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k)) { // 从哪个工作站卖
                                     Log::print("map_number: ", map_number_, " i: ", i , "x: ", workbench[i] -> x0_, "y: ", workbench[i] -> y0_, " MissingPoint: ", MissingPoint(i, workbench[i] -> x0_, workbench[i] -> y0_));
                                     Log::print("map_number: ", map_number_, " j: ", j , "x: ", workbench[j] -> x0_, "y: ", workbench[j] -> y0_, " MissingPoint: ", MissingPoint(j, workbench[j] -> x0_, workbench[j] -> y0_));
+
+                                    if (map_number_ == 1 && workbench[j]->type_id_ == 9) continue;
 
                                     if (MissingPoint(i, workbench[i] -> x0_, workbench[i] -> y0_) || MissingPoint(j, workbench[j] -> x0_, workbench[j] -> y0_)) continue ; // 针对地图忽略一些点
                                     if (should_not_plan_to_buy_[i]) continue; // 优化：别人去卖的，你不能去买
@@ -521,8 +513,6 @@ namespace Solution1 {
                                         money_per_distance = profit_[k] * sever_two / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     } else if((workbench[j] -> type_id_ >= 4 && workbench[j] -> type_id_ <= 6) && workbench[j] -> ItemsAreMissing() == 2) {
                                         money_per_distance = profit_[k] * four_five_six_two / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
-                                    } else if(workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 3 && map_number_ == 1) { // 第一张图加这个优化好
-                                        money_per_distance = profit_[k] * sever_three / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     } else {
                                         money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     }
@@ -585,8 +575,46 @@ namespace Solution1 {
      }
  }
 
+ /*
+ namespace Solution4 {
+    using namespace Input;
+    using namespace Output;
+    using namespace Geometry;
+    using namespace Dispatch;
+
+    std::vector< std::pair<int,int> > route[4]; // 4个机器人的走路路径
+    void Init() {
+
+    }
+    void Solve() {
+        Init();
+        while(Input::ScanFrame) {
+            for(int i = 0; i < 4; ++i) {
+                for(const auto& u:route[i]) {
+                    if(u.second == 0) { // 规划去买
+                        if (robot[i]->carry_id_ == 0 && robot[i] -> workbench_buy_ != -1) { // 如果有则找到最优的策略，跑去买。
+                            // 身边有 workbench
+                            if (robot[i]->workbench_ == robot[i]->workbench_buy_) {
+                                Output::Buy(i);
+                                continue;
+                            }
+
+                            double forward, rotate;
+                            robot[i] -> ToPoint(i, workbench[robot[i]->workbench_buy_]->x0_, workbench[robot[i]->workbench_buy_]->y0_, forward, rotate);
+                            movement_[i] = {forward, rotate};
+                            plan_[i].buy_workbench = robot[i] -> workbench_buy_;
+                        }
+                    } else if(u.second == 1) { // 规划去卖
+
+                    }
+                }
+            }
+        }
+    }
+}
+  */
+
 int main() {
-    // Log::print(Geometry::MinRadius2(1,1));
     Solution1::Solve();
     return 0;
 }
