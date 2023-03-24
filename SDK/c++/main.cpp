@@ -298,7 +298,7 @@ namespace Solution1 {
     }
 
     // 针对地图来忽略一些点，传入一些工作台的点坐标
-    bool MissingPoint(int id, double x, double y) {
+    bool MissingPoint(int robot_id, int id, double x, double y) {
         switch(map_number_) {
             case 1:
                 break;
@@ -311,7 +311,10 @@ namespace Solution1 {
 
                 // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
             case 3:
-                //if(workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5) return true;
+                if(robot_id == 0 || robot_id == 1) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
+                if(robot_id == 2) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 6;
+                return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
+//                if(workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5) return true;
                 //if(y > 45) return true;
                 //if(x < 20) return true;
                 break;
@@ -359,8 +362,8 @@ namespace Solution1 {
         if(can_plan_to_buy_[i] && workbench[i]->TryToBuy(k, -100) && !should_not_plan_to_buy_[i]) {
             if(can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k)) {
                 if (map_number_ == 1 && workbench[j]->type_id_ == 9) return false;
-                if (MissingPoint(i, workbench[i]->x0_, workbench[i]->y0_) ||
-                    MissingPoint(j, workbench[j]->x0_, workbench[j]->y0_))
+                if (MissingPoint(id, i, workbench[i]->x0_, workbench[i]->y0_) ||
+                    MissingPoint(id, j, workbench[j]->x0_, workbench[j]->y0_))
                     return false; // 针对地图忽略一些点
                 if (should_not_plan_to_buy_[i]) return false; // 优化：别人去卖的，你不能去买
                 double buy_sell_frame_ = 50 * robot[id]->CalcTime(
@@ -592,18 +595,20 @@ namespace Solution1 {
                                         money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                     }
 
-                                    /*
-                                    if(map_number_ == 3){
-                                        money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
-                                    }
-                                    */
+//                                    if(map_number_ == 3){
+//                                        money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+//                                    }
 
                                     // if(map_number_ == 1 && FindItemsAreMissingLess(id, k, i, j)) continue; // 第一张图的时候，找缺更少的物品买。
 
                                     money_per_distance *= premium_coefficient[premium_processing[workbench[j] -> type_id_]];
 
                                     if(map_number_ == 4 && workbench[j]->type_id_ == 4 && workbench[workbench_sell]->type_id_ != 7) money_per_distance *= 2;
-                                    if(money_per_distance > mn) {
+                                        if(map_number_ == 3 && k > 3) money_per_distance = 2e9;
+//                                    if(map_number_ == 3 && k < 4 && workbench[j]->type_id_ == 9) money_per_distance /= 10;
+
+
+                                        if(money_per_distance > mn) {
                                         mn = money_per_distance;
                                         carry_id = k;
                                         workbench_buy = i;
