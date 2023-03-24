@@ -309,6 +309,12 @@ namespace Solution1 {
                 if(x >= 42.5 && y <= 7.5) return true;
                 if(x >= 42.5 && y >= 42.5) return true;
 
+            case 2:
+//                if(y < 22.5) return true;
+//                if(robot_id == 0 || robot_id == 1) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
+//                if(robot_id == 2) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 6;
+//                return workbench[id]->type_id_ == 6;
+                break;
                 // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
             case 3:
                 if(robot_id == 0 || robot_id == 1) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
@@ -330,14 +336,14 @@ namespace Solution1 {
     }
 
     void Config_Read_From_Files() {
-        double sever_one_, four_five_six_one_, sever_two_, four_five_six_two_, sever_three_;
+        //double sever_one_, four_five_six_one_, sever_two_, four_five_six_two_, sever_three_;
 
         FILE *fp = fopen("config.txt", "r+");
         if(fp == NULL) {
             Log::print("Fail to open file!");
             exit(0);
         }
-        fscanf(fp, "%lf%lf",&premium_coefficient[1], &premium_coefficient[2]);
+        fscanf(fp, "%lf%lf%lf%lf%lf", &sever_one, &four_five_six_one, &sever_two, &four_five_six_two, &sever_three);
         fclose(fp);
 
 //        sever_one = sever_one_;
@@ -406,9 +412,9 @@ namespace Solution1 {
                 premium_coefficient[2] = 3.0;
                 break;
             case 2:
-                sever_one = 2.0;
-                four_five_six_one = 1.5;
-                sever_two = 1.8;
+                sever_one = 1.8;
+                four_five_six_one = 1.6;
+                sever_two = 1.4;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1.5;
@@ -447,7 +453,6 @@ namespace Solution1 {
         //Config_Read_From_Files(); // 搜参数专用
         while(Input::ScanFrame()) {
             Init();
-            // sell
             for(int id = 0; id < 4; ++id) { // 枚举机器人
                  if (robot[id] -> carry_id_) {
                      if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
