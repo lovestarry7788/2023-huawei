@@ -417,6 +417,14 @@ namespace Solution1 {
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
+            case 4:
+                sever_one = 2.0;
+                four_five_six_one = 1.5;
+                sever_two = 1.2;
+                four_five_six_two = 1.2;
+                sever_three = 1.0;
+                premium_coefficient[1] = 1;
+                premium_coefficient[2] = 2;
             default:
                 sever_one = 2.0;
                 four_five_six_one = 1.5;
