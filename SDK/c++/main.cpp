@@ -19,6 +19,8 @@
 #include <set>
 #include <memory>
 #include <climits>
+#include <ctime>
+#include <random>
 
 // #include <cassert>
 
@@ -299,6 +301,7 @@ namespace Solution1 {
 
     // 针对地图来忽略一些点，传入一些工作台的点坐标
     bool MissingPoint(int robot_id, int id, double x, double y) {
+        int nrand;
         switch(map_number_) {
             case 1:
                 break;
@@ -311,10 +314,9 @@ namespace Solution1 {
 
                 // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
             case 3:
-                if(robot_id == 0 || robot_id == 1) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
+                if(robot_id == 0) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
                 if(robot_id == 2) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 6;
                 return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
-//                if(workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5) return true;
                 //if(y > 45) return true;
                 //if(x < 20) return true;
                 break;
@@ -324,7 +326,6 @@ namespace Solution1 {
                 return x < 22.5;
                 break;
                 if(y <= 30.0) return true;
-
         }
         return false;
     }
@@ -337,16 +338,17 @@ namespace Solution1 {
             Log::print("Fail to open file!");
             exit(0);
         }
-        fscanf(fp, "%lf%lf",&premium_coefficient[1], &premium_coefficient[2]);
+//        fscanf(fp, "%lf%lf",&premium_coefficient[1], &premium_coefficient[2]);
+        fscanf(fp, "%lf%lf%lf%lf%lf",&sever_one_, &four_five_six_one_, &sever_two_, &four_five_six_two_, &sever_three_ );
         fclose(fp);
 
-//        sever_one = sever_one_;
-//        four_five_six_one = four_five_six_one_;
-//        sever_two = sever_two_;
-//        four_five_six_two = four_five_six_two_;
-//        sever_three = sever_three_;
-//        Log::print(" sever_one: ", sever_one, " four_five_six_one: ", four_five_six_one, " sever_two ", sever_two,
-//                   " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
+        sever_one = sever_one_;
+        four_five_six_one = four_five_six_one_;
+        sever_two = sever_two_;
+        four_five_six_two = four_five_six_two_;
+        sever_three = sever_three_;
+        Log::print(" sever_one: ", sever_one, " four_five_six_one: ", four_five_six_one, " sever_two ", sever_two,
+                   " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
     }
 
     bool AroundPoint(int idx) {
@@ -406,31 +408,31 @@ namespace Solution1 {
                 premium_coefficient[2] = 3.0;
                 break;
             case 2:
-                sever_one = 2.0;
-                four_five_six_one = 1.5;
-                sever_two = 1.8;
+                sever_one = 1.8;
+                four_five_six_one = 1.6;
+                sever_two = 1.4;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
             case 3:
-                sever_one = 2.0;
-                four_five_six_one = 1.5;
-                sever_two = 1.8;
-                four_five_six_two = 1.2;
+                sever_one = 0;
+                four_five_six_one = 1.8;
+                sever_two = 0;
+                four_five_six_two = 1.4;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
             case 4:
-                sever_one = 2.0;
-                four_five_six_one = 1.5;
-                sever_two = 1.2;
+                sever_one = 1.8;
+                four_five_six_one = 1.6;
+                sever_two = 1.4;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1;
-                premium_coefficient[2] = 2;
+                premium_coefficient[2] = 2.0;
                 break;
             default:
                 sever_one = 2.0;
@@ -447,7 +449,7 @@ namespace Solution1 {
     void Solve() {
         Input::ScanMap();
         SetConfig(); // 针对地图设置参数
-        Config_Read_From_Files(); // 搜参数专用
+        // Config_Read_From_Files(); // 搜参数专用
         while(Input::ScanFrame()) {
             Init();
             // sell
@@ -604,11 +606,8 @@ namespace Solution1 {
                                     money_per_distance *= premium_coefficient[premium_processing[workbench[j] -> type_id_]];
 
                                     if(map_number_ == 4 && workbench[j]->type_id_ == 4 && workbench[workbench_sell]->type_id_ != 7) money_per_distance *= 2;
-                                        if(map_number_ == 3 && k > 3) money_per_distance = 2e9;
-//                                    if(map_number_ == 3 && k < 4 && workbench[j]->type_id_ == 9) money_per_distance /= 10;
 
-
-                                        if(money_per_distance > mn) {
+                                    if(money_per_distance > mn) {
                                         mn = money_per_distance;
                                         carry_id = k;
                                         workbench_buy = i;
@@ -719,6 +718,7 @@ namespace Solution1 {
   */
 
 int main() {
+    srand(time(0));
     Solution1::Solve();
     return 0;
 }
