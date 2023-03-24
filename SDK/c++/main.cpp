@@ -355,6 +355,26 @@ namespace Solution1 {
 //                   " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
     }
 
+    void Config_Read_From_Files2() {
+        //double sever_one_, four_five_six_one_, sever_two_, four_five_six_two_, sever_three_;
+
+        FILE *fp = fopen("config2.txt", "r+");
+        if(fp == NULL) {
+            Log::print("Fail to open file!");
+            exit(0);
+        }
+        fscanf(fp, "%lf%lf", &premium_coefficient[1], &premium_coefficient[2]);
+        fclose(fp);
+
+//        sever_one = sever_one_;
+//        four_five_six_one = four_five_six_one_;
+//        sever_two = sever_two_;
+//        four_five_six_two = four_five_six_two_;
+//        sever_three = sever_three_;
+//        Log::print(" sever_one: ", sever_one, " four_five_six_one: ", four_five_six_one, " sever_two ", sever_two,
+//                   " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
+    }
+
     bool AroundPoint(int idx) {
         for(const auto& idy: around_points[idx]) {
             if(workbench[idx] -> TryToSell(workbench[idy] -> type_id_) && workbench[idy] -> TryToBuy(workbench[idy] -> type_id_, -100)) {
@@ -421,10 +441,10 @@ namespace Solution1 {
                 premium_coefficient[2] = 3;
                 break;
             case 3:
-                sever_one = 2.0;
-                four_five_six_one = 1.5;
-                sever_two = 1.8;
-                four_five_six_two = 1.2;
+                sever_one = 0;
+                four_five_six_one = 1.7;
+                sever_two = 0;
+                four_five_six_two = 1.3;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
@@ -437,6 +457,7 @@ namespace Solution1 {
                 sever_three = 1.0;
                 premium_coefficient[1] = 1;
                 premium_coefficient[2] = 2;
+                break;
             default:
                 sever_one = 2.0;
                 four_five_six_one = 1.5;
@@ -450,7 +471,8 @@ namespace Solution1 {
     void Solve() {
         Input::ScanMap();
         SetConfig(); // 针对地图设置参数
-        //Config_Read_From_Files(); // 搜参数专用
+//        Config_Read_From_Files(); // 搜参数专用
+//        Config_Read_From_Files2();
         while(Input::ScanFrame()) {
             Init();
             for(int id = 0; id < 4; ++id) { // 枚举机器人
