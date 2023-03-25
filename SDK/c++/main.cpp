@@ -968,6 +968,6 @@ namespace Solution1 {
   */
 
 int main() {
-    Solution3::Solve();
+    Solution1::Solve();
     return 0;
 }
