@@ -202,7 +202,7 @@ namespace Solution4 {
             bst2.buy_workbench = p.first - 1;
             bst2.sell_workbench = p.second - 1;
         }
-        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+//        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         Dispatch::UpdatePlan(robot_id, bst);
         Dispatch::plan2_[robot_id] = bst2;
     }
@@ -211,7 +211,7 @@ namespace Solution4 {
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
         Dispatch::avoidCollide = true;
         while (Input::ScanFrame()) {
-            Log::print("frame", Input::frameID);
+//            Log::print("frame", Input::frameID);
             Dispatch::UpdateCompleted();
             // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
@@ -303,9 +303,9 @@ namespace Solution3 {
 
         }
         if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1) {
-            Log::print("NoPlan", robot_id);
+//            Log::print("NoPlan", robot_id);
         } else {
-            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+//            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         }
         Dispatch::UpdatePlan(robot_id, bst);
     }
@@ -320,7 +320,7 @@ namespace Solution3 {
         //     RobotReplan(ri); // 开始规划
         // }
         while (Input::ScanFrame()) {
-            Log::print("frame", Input::frameID);
+//            Log::print("frame", Input::frameID);
             Dispatch::UpdateCompleted();
             // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
@@ -353,19 +353,19 @@ namespace Solution2 {
             Geometry::Point loc{robot->x0_, robot->y0_};
             while (route.size() && Geometry::Length(loc - route.front()) < 3e-1) {
                 route.erase(begin(route));
-                Log::print("arrive");
+//                Log::print("arrive");
             }
             double f, r;
-            if (P) Log::print("frame", Input::frameID);
+//            if (P) Log::print("frame", Input::frameID);
             if (route.size() >= 2) {
                 robot->ToPointTwoPoint(route[0], route[1], f, r);
             } else if (route.size() >= 1)
                 robot->ToPoint(route[0].x, route[0].y, f, r);
             Output::Forward(0, f);
             Output::Rotate(0, r);
-            Log::print(robot->GetLinearVelocity(), robot->angular_velocity_, robot->x0_, robot->y0_);
-            if (route.size()) Log::print("K", Geometry::Dist(robot->x0_, robot->y0_, route[0].x, route[0].y));
-            Log::print("F", f, r);
+//            Log::print(robot->GetLinearVelocity(), robot->angular_velocity_, robot->x0_, robot->y0_);
+//            if (route.size()) Log::print("K", Geometry::Dist(robot->x0_, robot->y0_, route[0].x, route[0].y));
+//            Log::print("F", f, r);
             Output::Print(Input::frameID);
         }
         /*
@@ -506,7 +506,7 @@ namespace Solution1 {
                     if(dis_[i + robot_num_][j + robot_num_] < Around_Distance) {
                         around_points[i].emplace_back(j);
                         around_points[j].emplace_back(i);
-                        Log::print(" i: ", i , " -> ", " j: ", j);
+//                        Log::print(" i: ", i , " -> ", " j: ", j);
                     }
                 }
             }
@@ -517,6 +517,9 @@ namespace Solution1 {
 
     void Choose_To_Point(int id, double dx, double dy, double& forward, double& rotate) {
         switch(Input::map_number_) {
+//            case 3:
+//                robot[id]->ToPoint(dx, dy, forward, rotate);
+//                break;
             default:
                 robot[id]->ToPoint(dx, dy, forward, rotate);
                 break;
@@ -566,7 +569,7 @@ namespace Solution1 {
 
         FILE *fp = fopen("config.txt", "r+");
         if(fp == NULL) {
-            Log::print("Fail to open file!");
+//            Log::print("Fail to open file!");
             exit(0);
         }
         fscanf(fp, "%lf%lf%lf%lf%lf", &sever_one, &four_five_six_one, &sever_two, &four_five_six_two, &sever_three);
@@ -586,7 +589,7 @@ namespace Solution1 {
 
         FILE *fp = fopen("config2.txt", "r+");
         if(fp == NULL) {
-            Log::print("Fail to open file!");
+//            Log::print("Fail to open file!");
             exit(0);
         }
         fscanf(fp, "%lf%lf", &premium_coefficient[1], &premium_coefficient[2]);
@@ -649,48 +652,125 @@ namespace Solution1 {
     void SetConfig() {
         switch (map_number_) {
             case 1: // 加重生产 7 的速度
+// *               Calculate! sever_one: 2.400000, four_five_six_one: 2.400000, sever_two: 2.200000, four_five_six_two: 1.800000, sever_three: 1.400000
+//                {"status":"Successful","score":694901}
+
+//                Calculate! sever_one: 2.200000, four_five_six_one: 2.200000, sever_two: 2.000000, four_five_six_two: 1.600000, sever_three: 1.200000
+//                {"status":"Successful","score":699906}
+
+//                Calculate! sever_one: 1.400000, four_five_six_one: 1.400000, sever_two: 1.200000, four_five_six_two: 1.200000, sever_three: 1.000000
+//                {"status":"Successful","score":698949}
+
+//                Calculate! sever_one: 2.600000, four_five_six_one: 2.200000, sever_two: 2.200000, four_five_six_two: 1.400000, sever_three: 1.400000
+//                {"status":"Successful","score":695396}
+
+//                Calculate! sever_one: 1.800000, four_five_six_one: 1.400000, sever_two: 1.400000, four_five_six_two: 1.200000, sever_three: 1.000000
+//                {"status":"Successful","score":701134}
+
+//                Calculate! sever_one: 1.600000, four_five_six_one: 1.600000, sever_two: 1.200000, four_five_six_two: 1.000000, sever_three: 1.000000
+//                {"status":"Successful","score":695321}
+
                 //2.00	1.6	1.3	1	1
-                sever_one = 2.0;
-                four_five_six_one = 1.6;
-                sever_two = 1.3;
-                four_five_six_two = 1.0;
-                sever_three = 1.0;
+                sever_one = 2.4;
+                four_five_six_one = 2.4;
+                sever_two = 2.2;
+                four_five_six_two = 1.8;
+                sever_three = 1.4;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3.0;
                 break;
             case 2:
                 //1.80	1.6	1.4	1.2	1
-                sever_one = 1.8;
-                four_five_six_one = 1.6;
-                sever_two = 1.4;
+
+//                Calculate! sever_one: 1.600000, four_five_six_one: 1.600000, sever_two: 1.200000, four_five_six_two: 1.200000, sever_three: 1.200000
+//                {"status":"Successful","score":840593}
+
+//                Calculate! sever_one: 1.800000, four_five_six_one: 1.800000, sever_two: 1.800000, four_five_six_two: 1.600000, sever_three: 1.200000
+//                {"status":"Successful","score":835944}
+
+//                Calculate! sever_one: 2.000000, four_five_six_one: 2.000000, sever_two: 1.600000, four_five_six_two: 1.400000, sever_three: 1.200000
+//                {"status":"Successful","score":832875}
+
+//                Calculate! sever_one: 2.200000, four_five_six_one: 2.200000, sever_two: 2.000000, four_five_six_two: 2.000000, sever_three: 1.400000
+//                {"status":"Successful","score":843268}
+
+// *               Calculate! sever_one: 2.200000, four_five_six_one: 1.800000, sever_two: 1.200000, four_five_six_two: 1.200000, sever_three: 1.200000
+//                {"status":"Successful","score":838923}
+
+//                Calculate! sever_one: 2.400000, four_five_six_one: 1.600000, sever_two: 1.600000, four_five_six_two: 1.000000, sever_three: 1.000000
+//                {"status":"Successful","score":836454}
+
+                sever_one = 2.2;
+                four_five_six_one = 1.8;
+                sever_two = 1.2;
                 four_five_six_two = 1.2;
-                sever_three = 1.0;
+                sever_three = 1.2;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
             case 3:
+
+//  *              Calculate! sever_one: 2.000000, four_five_six_one: 1.800000, sever_two: 1.400000, four_five_six_two: 1.400000, sever_three: 1.200000
+//                {"status":"Successful","score":968483}
+
+//                Calculate! sever_one: 1.800000, four_five_six_one: 1.800000, sever_two: 1.600000, four_five_six_two: 1.400000, sever_three: 1.200000
+//                {"status":"Successful","score":968483}
+
+//                Calculate! sever_one: 2.000000, four_five_six_one: 2.000000, sever_two: 1.800000, four_five_six_two: 1.600000, sever_three: 1.200000
+//                {"status":"Successful","score":984519}
+
+//                Calculate! sever_one: 2.000000, four_five_six_one: 2.000000, sever_two: 1.600000, four_five_six_two: 1.600000, sever_three: 1.200000
+//                {"status":"Successful","score":980776}
+
+//                Calculate! sever_one: 2.200000, four_five_six_one: 2.000000, sever_two: 2.000000, four_five_six_two: 1.600000, sever_three: 1.400000
+//                {"status":"Successful","score":980776}
+
+//                Calculate! sever_one: 2.200000, four_five_six_one: 2.200000, sever_two: 2.200000, four_five_six_two: 1.600000, sever_three: 1.200000
+//                {"status":"Successful","score":964119}
+
+
+
                 sever_one = 0;
-                four_five_six_one = 1.95;
+                four_five_six_one = 1.8;
                 sever_two = 0;
-                four_five_six_two = 1.6;
-                sever_three = 1.0;
+                four_five_six_two = 1.4;
+                sever_three = 0;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
             case 4:
+
+// *               Calculate! sever_one: 2.000000, four_five_six_one: 1.800000, sever_two: 1.600000, four_five_six_two: 1.200000, sever_three: 1.000000
+//                {"status":"Successful","score":655221}
+
+//                Calculate! sever_one: 1.800000, four_five_six_one: 1.400000, sever_two: 1.400000, four_five_six_two: 1.400000, sever_three: 1.200000
+//                {"status":"Successful","score":652116}
+
+//                Calculate! sever_one: 1.800000, four_five_six_one: 1.600000, sever_two: 1.600000, four_five_six_two: 1.200000, sever_three: 1.200000
+//                {"status":"Successful","score":662356}
+
+//                Calculate! sever_one: 1.600000, four_five_six_one: 1.400000, sever_two: 1.400000, four_five_six_two: 1.400000, sever_three: 1.200000
+//                {"status":"Successful","score":652116}
+
+//                Calculate! sever_one: 2.200000, four_five_six_one: 2.000000, sever_two: 2.000000, four_five_six_two: 2.000000, sever_three: 1.600000
+//                {"status":"Successful","score":627265}
+
+//                Calculate! sever_one: 2.200000, four_five_six_one: 2.200000, sever_two: 2.000000, four_five_six_two: 1.000000, sever_three: 1.000000
+//                {"status":"Successful","score":669561}
+
                 //1.80	1.7	1.3	1	0.8	1.5	3
-                sever_one = 1.8;
-                four_five_six_one = 1.7;
-                sever_two = 1.3;
-                four_five_six_two = 1;
-                sever_three = 0.8;
+                sever_one = 2;
+                four_five_six_one = 1.8;
+                sever_two = 1.6;
+                four_five_six_two = 1.2;
+                sever_three = 1;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
             default:
-                sever_one = 2.0;
-                four_five_six_one = 1.5;
-                sever_two = 1.2;
+                sever_one = 1.8;
+                four_five_six_one = 1.6;
+                sever_two = 1.3;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
                 break;
@@ -883,7 +963,7 @@ namespace Solution1 {
                         can_plan_to_sell_[workbench_sell][carry_id] = false;
                     }
                 }
-                Log::print("\n");
+                //Log::print("\n");
                 // 给机器人买计划已完成
 
 
