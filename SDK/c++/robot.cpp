@@ -123,7 +123,7 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
         // double rate = 1;
         double rate = std::max(0.1, 1 + (fabs(dif_rot) / PI - ed/180.0) * (1 / ((ed - st) / 180.0)));
         // double rate = (1 + (fabs(dif_rot) / PI - 1.0/5) * (-5.0/4)); // 1% 优化
-        forward = std::min(max_forward_velocity_ * rate, max_rotate_velocity_ * cir); // not bad solution
+        forward = std::min(max_forward_velocity_ * rate, max_rotate_velocity_ * cir * 0.7); // not bad solution
         // forward = max_forward_velocity_;
 
         // forward = std::min(max_forward_velocity_ * std::min(1.0, rate), max_rotate_velocity_ * cir); // not bad solution
