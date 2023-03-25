@@ -312,6 +312,12 @@ namespace Solution1 {
                 if(x >= 42.5 && y <= 7.5) return true;
                 if(x >= 42.5 && y >= 42.5) return true;
 
+            case 2:
+//                if(y < 22.5) return true;
+//                if(robot_id == 0 || robot_id == 1) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
+//                if(robot_id == 2) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 6;
+//                return workbench[id]->type_id_ == 6;
+                break;
                 // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
             case 3:
                 if(robot_id == 0) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
@@ -323,7 +329,7 @@ namespace Solution1 {
                 if(y <= 15.0 && x <= 15.0) return true;
                 if(y <= 15.0 && x >= 35.0) return true;
             case 4:
-                return x < 22.5;
+                //return x < 22.5;
                 break;
                 if(y <= 30.0) return true;
         }
@@ -331,24 +337,43 @@ namespace Solution1 {
     }
 
     void Config_Read_From_Files() {
-        double sever_one_, four_five_six_one_, sever_two_, four_five_six_two_, sever_three_;
+        //double sever_one_, four_five_six_one_, sever_two_, four_five_six_two_, sever_three_;
 
         FILE *fp = fopen("config.txt", "r+");
         if(fp == NULL) {
             Log::print("Fail to open file!");
             exit(0);
         }
-//        fscanf(fp, "%lf%lf",&premium_coefficient[1], &premium_coefficient[2]);
-        fscanf(fp, "%lf%lf%lf%lf%lf",&sever_one_, &four_five_six_one_, &sever_two_, &four_five_six_two_, &sever_three_ );
+        fscanf(fp, "%lf%lf%lf%lf%lf", &sever_one, &four_five_six_one, &sever_two, &four_five_six_two, &sever_three);
         fclose(fp);
 
-        sever_one = sever_one_;
-        four_five_six_one = four_five_six_one_;
-        sever_two = sever_two_;
-        four_five_six_two = four_five_six_two_;
-        sever_three = sever_three_;
-        Log::print(" sever_one: ", sever_one, " four_five_six_one: ", four_five_six_one, " sever_two ", sever_two,
-                   " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
+//        sever_one = sever_one_;
+//        four_five_six_one = four_five_six_one_;
+//        sever_two = sever_two_;
+//        four_five_six_two = four_five_six_two_;
+//        sever_three = sever_three_;
+//        Log::print(" sever_one: ", sever_one, " four_five_six_one: ", four_five_six_one, " sever_two ", sever_two,
+//                   " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
+    }
+
+    void Config_Read_From_Files2() {
+        //double sever_one_, four_five_six_one_, sever_two_, four_five_six_two_, sever_three_;
+
+        FILE *fp = fopen("config2.txt", "r+");
+        if(fp == NULL) {
+            Log::print("Fail to open file!");
+            exit(0);
+        }
+        fscanf(fp, "%lf%lf", &premium_coefficient[1], &premium_coefficient[2]);
+        fclose(fp);
+
+//        sever_one = sever_one_;
+//        four_five_six_one = four_five_six_one_;
+//        sever_two = sever_two_;
+//        four_five_six_two = four_five_six_two_;
+//        sever_three = sever_three_;
+//        Log::print(" sever_one: ", sever_one, " four_five_six_one: ", four_five_six_one, " sever_two ", sever_two,
+//                   " four_five_six_two: ", four_five_six_two, " sever_three: ", sever_three);
     }
 
     bool AroundPoint(int idx) {
@@ -432,7 +457,7 @@ namespace Solution1 {
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1;
-                premium_coefficient[2] = 2.0;
+                premium_coefficient[2] = 2;
                 break;
             default:
                 sever_one = 2.0;
@@ -449,10 +474,10 @@ namespace Solution1 {
     void Solve() {
         Input::ScanMap();
         SetConfig(); // 针对地图设置参数
-        // Config_Read_From_Files(); // 搜参数专用
+//        Config_Read_From_Files(); // 搜参数专用
+//        Config_Read_From_Files2();
         while(Input::ScanFrame()) {
             Init();
-            // sell
             for(int id = 0; id < 4; ++id) { // 枚举机器人
                  if (robot[id] -> carry_id_) {
                      if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
