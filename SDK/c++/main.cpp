@@ -25,7 +25,7 @@
 // 手玩方法，呆滞数据
 namespace Solution4 {
     // 走路略快，有些许错配
-    std::vector<std::vector<std::pair<int,int>>> route = 
+    std::vector<std::vector<std::pair<int,int>>> route =
     {
         {
             {5, 9},
@@ -236,7 +236,7 @@ namespace Solution3 {
     int workbench_remain_num(int workbench_id) {
         int mat_id = Input::workbench[workbench_id]->type_id_;
         if (mat_id <= 3) return 0;
-        int num = __builtin_popcount(Input::workbench[workbench_id]->materials_status_) + 
+        int num = __builtin_popcount(Input::workbench[workbench_id]->materials_status_) +
                 __builtin_popcount(Dispatch::occupy_[workbench_id].sell_occupy);
         if (mat_id <= 6) return 2 - num;
         return 3 - num;
@@ -288,8 +288,8 @@ namespace Solution3 {
 
                 if (Dispatch::occupy_[sell_wb_id].sell_occupy >> mat_id & 1) continue;
 
-                int award = award_buy(robot_id, buy_wb_id) + 
-                            award_sell(robot_id, sell_wb_id, mat_id) + 
+                int award = award_buy(robot_id, buy_wb_id) +
+                            award_sell(robot_id, sell_wb_id, mat_id) +
                             profit_[mat_id];
 
                 double award_pf = award / (buy_time + sell_time);
@@ -649,6 +649,7 @@ namespace Solution1 {
     void SetConfig() {
         switch (map_number_) {
             case 1: // 加重生产 7 的速度
+                //2.00	1.6	1.3	1	1
                 sever_one = 2.0;
                 four_five_six_one = 1.6;
                 sever_two = 1.3;
@@ -658,6 +659,7 @@ namespace Solution1 {
                 premium_coefficient[2] = 3.0;
                 break;
             case 2:
+                //1.80	1.6	1.4	1.2	1
                 sever_one = 1.8;
                 four_five_six_one = 1.6;
                 sever_two = 1.4;
@@ -668,21 +670,22 @@ namespace Solution1 {
                 break;
             case 3:
                 sever_one = 0;
-                four_five_six_one = 1.8;
+                four_five_six_one = 1.95;
                 sever_two = 0;
-                four_five_six_two = 1.4;
+                four_five_six_two = 1.6;
                 sever_three = 1.0;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
             case 4:
+                //1.80	1.7	1.3	1	0.8	1.5	3
                 sever_one = 1.8;
-                four_five_six_one = 1.6;
-                sever_two = 1.4;
-                four_five_six_two = 1.2;
-                sever_three = 1.0;
-                premium_coefficient[1] = 1;
-                premium_coefficient[2] = 2;
+                four_five_six_one = 1.7;
+                sever_two = 1.3;
+                four_five_six_two = 1;
+                sever_three = 0.8;
+                premium_coefficient[1] = 1.5;
+                premium_coefficient[2] = 3;
                 break;
             default:
                 sever_one = 2.0;
@@ -833,16 +836,23 @@ namespace Solution1 {
 
                                     double money_per_distance;
 
+                                    double buy_sell_frame_ = 50 * robot[id]->CalcTime(
+                                            Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
+                                            Geometry::Point{workbench[j]->x0_, workbench[j]->y0_});
+
+                                    if(map_number_ < 3)
+                                        buy_sell_frame_ = (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+
                                     if((workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 1)) { // 如果 7 只差一点，给一个更大的值
-                                        money_per_distance = profit_[k] * sever_one / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * sever_one / buy_sell_frame_;
                                     } else if((workbench[j] -> type_id_ >= 4 && workbench[j] -> type_id_ <= 6) && workbench[j] -> ItemsAreMissing() == 1){
-                                        money_per_distance = profit_[k] * four_five_six_one / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * four_five_six_one / buy_sell_frame_;
                                     } else if(workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 2) {
-                                        money_per_distance = profit_[k] * sever_two / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * sever_two / buy_sell_frame_;
                                     } else if((workbench[j] -> type_id_ >= 4 && workbench[j] -> type_id_ <= 6) && workbench[j] -> ItemsAreMissing() == 2) {
-                                        money_per_distance = profit_[k] * four_five_six_two / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * four_five_six_two / buy_sell_frame_;
                                     } else {
-                                        money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * 1.0 / buy_sell_frame_;
                                     }
 
 //                                    if(map_number_ == 3){
