@@ -50,7 +50,7 @@ void Dispatch::init(void (*RobotReplan)(int), int robot_num, int workbench_num) 
 void Dispatch::UpdatePlan(int robot_id, Plan plan) {
     if (fakeUpdatePlan) {
         plan2_[robot_id] = plan;
-        // Log::print("updatefake");
+        Log::print("updatefake");
         return;
     }
     // occpuy plan，可只有buy or sell
@@ -83,9 +83,9 @@ ManagePlan(ClearUnoccupy) 完成则改成-1。Replan必须在下帧，本函数�
 
 void Dispatch::UpdateFake(int robot_id) {
     if (!enableTwoPlan) return;
-    fakeUpdatePlan = true;
     int i = robot_id;
     if (plan_[i].sell_workbench == -1) return;
+    fakeUpdatePlan = true;
     Robot robot_bak = *(Input::robot[i]);
     auto robot = Input::robot[i];
     robot->carry_id_ = 0;
