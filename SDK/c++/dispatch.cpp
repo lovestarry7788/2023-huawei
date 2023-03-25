@@ -25,24 +25,34 @@ using namespace Geometry;
 // std::vector<std::vector<Geometry::Point>> Dispatch::forecast_;
 std::vector<std::pair<double, double>> Dispatch::movement_;
 
-std::vector<Plan> Dispatch::plan_;
+std::vector<Plan> Dispatch::plan_, Dispatch::plan2_;
 
 std::vector<Occupy> Dispatch::occupy_;
 
 bool Dispatch::avoidCollide = false;
 
+bool Dispatch::enableTwoPlan = false;
+
 // std::function<void(int)> Dispatch::RobotReplan_;
 void (*Dispatch::RobotReplan_)(int);
+
+bool fakeUpdatePlan = false;
 
 void Dispatch::init(void (*RobotReplan)(int), int robot_num, int workbench_num) {
     RobotReplan_ = RobotReplan;
     movement_.resize(Input::robot_num_);
     plan_.resize(robot_num);
+    plan2_.resize(robot_num);
     occupy_.resize(workbench_num);
 }
 
 // 被robotReplan_调用。更新plan，否则默认继承上帧plan
 void Dispatch::UpdatePlan(int robot_id, Plan plan) {
+    if (fakeUpdatePlan) {
+        plan2_[robot_id] = plan;
+        // Log::print("updatefake");
+        return;
+    }
     // occpuy plan，可只有buy or sell
     // Log::print("UpdatePlan", robot_id, plan.buy_workbench, plan.sell_workbench);
     if (plan.buy_workbench != -1)
@@ -71,6 +81,22 @@ UpdateAll  / Update-1
 ManagePlan(ClearUnoccupy) 完成则改成-1。Replan必须在下帧，本函数无资格
 */
 
+void Dispatch::UpdateFake(int robot_id) {
+    if (!enableTwoPlan) return;
+    fakeUpdatePlan = true;
+    int i = robot_id;
+    if (plan_[i].sell_workbench == -1) return;
+    Robot robot_bak = *(Input::robot[i]);
+    auto robot = Input::robot[i];
+    robot->carry_id_ = 0;
+    auto wb = Input::workbench[plan_[i].sell_workbench];
+    robot->x0_ = wb->x0_;
+    robot->y0_ = wb->y0_;
+    // 对速度与方向暂时不调整
+    RobotReplan_(i);
+    Input::robot[i] = std::make_shared<Robot>(robot_bak);
+    fakeUpdatePlan = false;
+}
 void Dispatch::UpdateAll() {
     // unoccupy all not -1 plan
     for (size_t i = 0; i < plan_.size(); i++) {
@@ -83,14 +109,17 @@ void Dispatch::UpdateAll() {
     std::vector<int> ord(plan_.size());
     for (int i = 0; i < ord.size(); i++) ord[i] = i;
     std::sort(begin(ord), end(ord), [&](int l, int r) {return Input::robot[l]->carry_id_ > Input::robot[r]->carry_id_;});
-    for (size_t i = 0; i < plan_.size(); i++)
+    for (size_t i = 0; i < plan_.size(); i++) {
         RobotReplan_(ord[i]);// 手上有东西则更新sell
+        UpdateFake(ord[i]);
+    }
 }
 void Dispatch::UpdateCompleted() {
     for (size_t i = 0; i < plan_.size(); i++) {
         auto plan = plan_[i];
         if (plan.buy_workbench == -1 && plan.sell_workbench == -1 && RobotReplan_) {
             RobotReplan_(i);
+            UpdateFake(i);
         }
     }
 }
@@ -132,7 +161,22 @@ void Dispatch::ControlWalk() {
         double& forward = movement_[ri].first;
         double& rotate = movement_[ri].second;
         if (wi != -1) {
-            robot->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
+            int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
+            if (wi2 != -1) {
+                int frame_reach = 0;
+                if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
+                    frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
+                robot->ToPointTwoPoint(Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Point{Input::workbench[wi2]->x0_, Input::workbench[wi2]->y0_}, forward, rotate, frame_reach);
+            }
+            else {
+                Log::print("oneToPoint");
+                robot->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
+            }
+            // if (robot->carry_id_ == 0) {
+            //     robot->ToPointTwoPoint(Geometry::Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Geometry::Point{Input::workbench[plan_[ri].sell_workbench]->x0_, Input::workbench[plan_[ri].sell_workbench]->y0_}, forward, rotate);
+            // } else {
+            // }
+            
         } else {
             forward = rotate = 0;
         }
@@ -145,7 +189,7 @@ void Dispatch::ControlWalk() {
 //        if (limit >= walld - 1.1) {
 //            forward = 0;
 //        }
-        // Log::print("ControlWalk", ri, forward, rotate);
+        Log::print("ControlWalk", ri, forward, rotate);
         // if (fabs(forward - invalid) > 1e-5) Output::Forward(ri, forward);
         // if (fabs(rotate - invalid) > 1e-5) Output::Rotate(ri, rotate);
     }

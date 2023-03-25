@@ -196,8 +196,15 @@ namespace Solution4 {
             bst.sell_workbench = p.second - 1;
             route[robot_id].erase(begin(route[robot_id]));
         }
+        Dispatch::Plan bst2; bst2.buy_workbench = bst2.sell_workbench = -1;
+        if (route[robot_id].size()) {
+            auto p = route[robot_id].front();
+            bst2.buy_workbench = p.first - 1;
+            bst2.sell_workbench = p.second - 1;
+        }
         Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         Dispatch::UpdatePlan(robot_id, bst);
+        Dispatch::plan2_[robot_id] = bst2;
     }
     void Solve() {
         Input::ScanMap();
@@ -219,7 +226,7 @@ namespace Solution3 {
 
     constexpr int profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
     constexpr double wait_ratio_ = 20;
-    constexpr int sell_limit_frame_ = 8980;
+    constexpr int sell_limit_frame_ = 8960;
     int award_buy(int robot_id, int workbench_id) {
         return 0;
     }
@@ -306,6 +313,7 @@ namespace Solution3 {
         Input::ScanMap();
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
         Dispatch::avoidCollide = true;
+        Dispatch::enableTwoPlan = true;
         // occupy.resize(K);
         // ScanFrame才初始化
         // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
@@ -313,8 +321,8 @@ namespace Solution3 {
         // }
         while (Input::ScanFrame()) {
             Log::print("frame", Input::frameID);
-            // Dispatch::UpdateCompleted();
-            Dispatch::UpdateAll();
+            Dispatch::UpdateCompleted();
+            // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
             Dispatch::ControlWalk();
             Output::Print(Input::frameID);
@@ -329,16 +337,42 @@ namespace Solution2 {
         Input::ScanMap();
         using namespace Geometry;
         std::vector<Geometry::Point> route;
-        // Geometry::Point{10,10}, Geometry::Point{40, 10}, Geometry::Point{40, 40}, Geometry::Point{10, 40}
-        route.push_back(Geometry::Point{24.7-10,38.75}); // 4正常，2出现错误
-        route.push_back(Geometry::Point{24.7-10,38.75+2}); // 4正常，2出现错误
-        // route.push_back(Geometry::Point{25,25});
-        // route.push_back(Geometry::Point{40,30});
-        // route.push_back(Geometry::Point{10,40});
-        // std::vector<int> arrive;
+        route.push_back(Geometry::Point{24.75+10,38.75});
+        route.push_back(Geometry::Point{24.75,38.75});
+        route.push_back(Geometry::Point{24.75+10,38.75});
+        route.push_back(Geometry::Point{24.75,38.75});
+        // route.push_back(Geometry::Point{24.75+10,38.75-10});
+        // route.push_back(Geometry::Point{24.75+10,38.75});
+        // route.push_back(Geometry::Point{24.75+10,38.75-10});
+        // route.push_back(Geometry::Point{24.75+10,38.75});
+        // route.push_back(Geometry::Point{24.75,38.75});
+        // route.push_back(Geometry::Point{24.75+10+8.6602540378,38.75+5});
+        while(Input::ScanFrame()) {
+            bool P = Input::frameID < 500;
+            auto robot = Input::robot[0];
+            Geometry::Point loc{robot->x0_, robot->y0_};
+            while (route.size() && Geometry::Length(loc - route.front()) < 3e-1) {
+                route.erase(begin(route));
+                Log::print("arrive");
+            }
+            double f, r;
+            if (P) Log::print("frame", Input::frameID);
+            if (route.size() >= 2) {
+                robot->ToPointTwoPoint(route[0], route[1], f, r);
+            } else if (route.size() >= 1)
+                robot->ToPoint(route[0].x, route[0].y, f, r);
+            Output::Forward(0, f);
+            Output::Rotate(0, r);
+            Log::print(robot->GetLinearVelocity(), robot->angular_velocity_, robot->x0_, robot->y0_);
+            if (route.size()) Log::print("K", Geometry::Dist(robot->x0_, robot->y0_, route[0].x, route[0].y));
+            Log::print("F", f, r);
+            Output::Print(Input::frameID);
+        }
+        /*
         std::vector<int> estimate;
         std::vector<int> true_estimate;
         std::vector<std::vector<double>> mov;
+
         while(Input::ScanFrame()) {
             if (Input::frameID < 250)
                 Log::print("frame", Input::frameID);
@@ -372,7 +406,7 @@ namespace Solution2 {
         for (int i = 0; i < estimate.size(); i++) {
             Log::print(i, estimate[i] - true_estimate[i],true_estimate[i]);
             // Log::print(mov[i][0], mov[i][1], mov[i][2]);
-        }
+        }*/
     }
 }
 

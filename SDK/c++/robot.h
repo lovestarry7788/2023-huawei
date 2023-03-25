@@ -53,6 +53,8 @@ public:
 
     void ToPoint_3(double dx, double dy, double& forward, double& rotate);
 
+    void ToPointTwoPoint(Geometry::Point a, Geometry::Point b, double& forward, double& rotate, int frame_a = 0);
+
     void AvoidToWall(double& forward, double& rotate);
 
     double DistToWall(Geometry::Point p, double orient);
