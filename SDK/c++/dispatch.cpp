@@ -223,18 +223,24 @@ double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<
     // return false;
 }
 void Dispatch::AvoidCollide() {
-    std::vector<std::vector<Point>> forecast(Input::robot_num_);
+    std::vector<std::vector<std::vector<Point>>> forecast(Input::robot_num_);
 
     for (int ri = 0; ri < Input::robot_num_; ri++) {
         auto robot = Input::robot[ri];
         int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
         if (wi == -1) {
-            forecast[ri] = std::vector<Point>(forecast_num_, Point{robot->x0_, robot->y0_});
+            forecast[ri].push_back(std::vector<Point>(forecast_num_, Point{robot->x0_, robot->y0_}));
         } else {
-            forecast[ri] = Input::robot[ri]->ForecastToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forecast_num_);
-            // Log::print("");
-            // for (auto i : forecast[ri]) Log::print(i.x, i.y);
-            // forecast[ri] = Input::robot[ri]->ForecastFixed(aim_movement[ri].first, aim_movement[ri].second, forecast_num_);
+            int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
+            if (wi2 != -1) {
+                int frame_reach = 0;
+                if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
+                    frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
+                forecast[ri].push_back(robot->ForecastToPoint2(Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Point{Input::workbench[wi2]->x0_, Input::workbench[wi2]->y0_}, frame_reach, forecast_num_));
+            }
+            else {
+                forecast[ri].push_back(robot->ForecastToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forecast_num_));
+            }
         }
     }
     for (int ri = 0; ri < Input::robot_num_; ri++) {
@@ -245,7 +251,7 @@ void Dispatch::AvoidCollide() {
         std::vector<int> collide_robot;
         double bst_dist = collide_dist_;
         for (int rj = ri+1; rj < Input::robot_num_; rj++) if (rj != ri) {
-            double d = ForecastCollide(forecast[ri], forecast[rj], bst_dist);
+            double d = ForecastCollide(forecast[ri][0], forecast[rj][0], bst_dist);
             bst_dist = std::min(bst_dist, d);
             if (d < collide_dist_) {
                 collide_robot.push_back(rj);
@@ -260,13 +266,12 @@ void Dispatch::AvoidCollide() {
             return Input::robot[l]->carry_id_ > Input::robot[r]->carry_id_;
         });
         auto movement_best = movement_;
-
-        std::function<bool(int)> dfs = [&](int cur) {
+        std::function<bool(int,std::vector<int>)> dfs = [&](int cur, std::vector<int> dec) {
             if (cur == collide_robot.size()) {
                 double d_min = collide_dist_;
                 for (int i = 0; i < collide_robot.size(); i++) 
                     for (int j = i+1; j < collide_robot.size(); j++) {
-                        double d = ForecastCollide(forecast[collide_robot[i]], forecast[collide_robot[j]], bst_dist);
+                        double d = ForecastCollide(forecast[collide_robot[i]][dec[i]], forecast[collide_robot[j]][dec[j]], bst_dist);
                         if (d < bst_dist) return false;
                         d_min = std::min(d_min, d);
                     }
@@ -279,7 +284,9 @@ void Dispatch::AvoidCollide() {
                     return false;
                 return true;
             }
-            if (dfs(cur+1)) return true;
+            int ri = collide_robot[cur];
+            auto robot = Input::robot[ri];
+            if (dfs(cur+1, dec)) return true;
             std::vector<std::pair<double,double>> choose= {
                 {6, 0},
                 {6, PI}, {6, -PI},
@@ -294,18 +301,20 @@ void Dispatch::AvoidCollide() {
             // sort(begin(choose), end(choose), [&](std::pair<double,double> l, std::pair<double,double> r) {
                 
             // });
-            int ri = collide_robot[cur];
-            auto robot = Input::robot[ri];
-            for (auto& [forward, rotate] : choose) {
+            for (int ci = 0; ci < choose.size(); ci++) {
+                auto [forward, rotate] = choose[ci];
                 // if (fabs(forward - robot->GetLinearVelocity()) < 2) continue; // 要降就降猛一点，否则到时候来不及
-                forecast[ri] = robot->ForecastFixed(forward, rotate, forecast_num_);
+                if (forecast[ri].size() <= ci+1)
+                    forecast[ri].push_back(robot->ForecastFixed(forward, rotate, forecast_num_));
                 movement_[ri] = {forward, rotate};
-                if (dfs(cur+1))
+                auto dec2 = dec;
+                dec2[cur] = ci+1;
+                if (dfs(cur+1, dec2))
                     return true;
             }
             return false;
         };
-        if (dfs(0)) {
+        if (dfs(0, std::vector<int>(collide_robot.size()))) {
             Log::print("Hav_solution");
         } else {
             swap(movement_, movement_best); // 不换决策，以改变最大的决策作为最终状态，往往能让最小碰撞 变大。不采用

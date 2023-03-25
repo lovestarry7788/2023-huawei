@@ -19,8 +19,7 @@
 #include <set>
 #include <memory>
 #include <climits>
-
-// #include <cassert>
+#include <cassert>
 
 // 手玩方法，呆滞数据
 namespace Solution4 {
@@ -28,163 +27,37 @@ namespace Solution4 {
     std::vector<std::vector<std::pair<int,int>>> route =
     {
         {
-            {5, 9},
-            {14, 12},
-            {18, 20},
-            {19, 23},
-            {28, 20},
-            {19, 21},
-            {21, 15},
-            {14, 12},
-            {13, 11},
-            {10, 9},
-            {4, 12},
-            {12, 17},
-            {18, 20},
-            {20, 15},
-            {4, 12},
-            {12, 17},
-            {18, 21},
-            {22, 20},
-            {20, 17},
-            {17, 16},
-            {14, 12},
-            {13, 9},
-            {5, 11},
-            {10, 9},
-            {9, 15},
-            {19, 21},
-            {21, 15},
-            {15, 16},
-            {18, 21},
-            {22, 23},
-            {23, 17},
-            {22, 20},
-            {20, 17},
-            {17, 16},
-            {18, 21},
-            {21, 15},
-            {25, 26},
+            {16, 13},
+            {16, 14},
+            {16, 11},
+            {16, 32},
+            {16, 29},
         },
         {
-            {4, 12},
-            {13, 9},
-            {14, 11},
-            {14, 12},
-            {13, 9},
-            {5, 11},
-            {11, 15},
-            {18, 20},
-            {20, 17},
+            {28, 32},
+            {28, 22},
+            {28, 29},
+            {28, 11},
             {28, 23},
-            {28, 20},
-            {19, 23},
-            {23, 15},
-            {18, 21},
-            {22, 23},
-            {27, 21},
-            {21, 15},
-            {15, 16},
-            {18, 20},
-            {19, 23},
-            {27, 21},
-            {21, 17},
-            {18, 21},
-            {22, 23},
-            {23, 17},
-            {17, 16},
-            {14, 12},
-            {12, 17},
-            {14, 11},
-            {11, 17},
-            {17, 16},
-            {14, 12},
-            {13, 11},
-            {14, 11},
-            {11, 15},
-            {15, 16},
-            {1, 3},
-            {2, 3},
-            {1, 3},
-            {2, 3},
+            {16, 22},
+            {22, 24},
         },
         {
-            {10, 9},
-            {5, 11},
-            {10, 9},
-            {9, 17},
-            {18, 21},
-            {22, 23},
-            {27, 21},
-            {28, 20},
-            {19, 23},
-            {23, 15},
-            {11, 15},
-            {15, 16},
-            {14, 11},
-            {11, 17},
-            {17, 16},
-            {5, 9},
-            {5, 11},
-            {10, 12},
-            {12, 15},
-            {10, 9},
-            {9, 17},
-            {14, 12},
-            {4, 12},
-            {13, 9},
-            {5, 11},
-            {10, 12},
-            {12, 15},
-            {18, 20},
-            {19, 23},
-            {27, 21},
-            {22, 23},
-            {23, 15},
-            {11, 15},
-            {20, 17},
-            {25, 26}
+            {16, 22},
+            {16, 23},
+            {16, 12},
+            {16, 20},
+            {16, 34},
+            {28, 33},
+
         },
         {
-            {18, 21},
-            {22, 23},
-            {27, 23},
-            {27, 21},
-            {22, 23},
-            {23, 15},
-            {14, 11},
-            {10, 12},
-            {12, 17},
-            {4, 9},
-            {9, 17},
-            {18, 21},
-            {21, 15},
-            {14, 12},
-            {13, 9},
-            {9, 17},
-            {18, 20},
-            {19, 23},
-            {23, 15},
-            {14, 11},
-            {11, 17},
-            {28, 20},
-            {20, 15},
-            {15, 16},
-            {18, 20},
-            {19, 23},
-            {28, 20},
-            {20, 15},
-            {14, 11},
-            {10, 9},
-            {9, 15},
-            {10, 9},
-            {4, 12},
-            {12, 17},
-            {14, 12},
-            {13, 9},
-            {9, 17},
-            {12, 17},
-            {7, 6}
+            {28, 34},
+            {28, 33},
+            {28, 22},
+            {28, 25},
+            {28, 14},
+            {16, 34},
         },
     };
     using namespace Input;
@@ -192,17 +65,18 @@ namespace Solution4 {
         Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
         if (route[robot_id].size()) {
             auto p = route[robot_id].front();
-            bst.buy_workbench = p.first - 1;
-            bst.sell_workbench = p.second - 1;
+            bst.buy_workbench = p.first;
+            bst.sell_workbench = p.second;
             route[robot_id].erase(begin(route[robot_id]));
         }
         Dispatch::Plan bst2; bst2.buy_workbench = bst2.sell_workbench = -1;
         if (route[robot_id].size()) {
             auto p = route[robot_id].front();
-            bst2.buy_workbench = p.first - 1;
-            bst2.sell_workbench = p.second - 1;
+            bst2.buy_workbench = p.first;
+            bst2.sell_workbench = p.second;
         }
-        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+        if (bst.buy_workbench != -1)
+            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         Dispatch::UpdatePlan(robot_id, bst);
         Dispatch::plan2_[robot_id] = bst2;
     }
@@ -217,6 +91,9 @@ namespace Solution4 {
             Dispatch::ManagePlan();
             Dispatch::ControlWalk();
             Output::Print(Input::frameID);
+            int sum = 0;
+            for (int i = 0 ; i < 4; i++) sum += Dispatch::plan_[i].sell_workbench != -1;
+            assert(sum != 0);
         }
     }
 }
