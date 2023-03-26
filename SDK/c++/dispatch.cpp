@@ -166,6 +166,8 @@ void Dispatch::ControlWalk() {
                 int frame_reach = 0;
                 if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
                     frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
+                else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
+                    frame_reach = INT_MAX;
                 robot->ToPointTwoPoint(Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Point{Input::workbench[wi2]->x0_, Input::workbench[wi2]->y0_}, forward, rotate, frame_reach);
             }
             else {

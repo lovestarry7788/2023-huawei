@@ -142,10 +142,10 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
 void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, int frame_a) {
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
     // Log::print("Dist", Geometry::Dist(x0_, y0_, a.x, a.y));
-    if (Geometry::Dist(x0_, y0_, a.x, a.y) < std::max(0.4, Geometry::UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), 0.0)) && Input::frameID + GetLinearVelocity() / (max_force_ / GetMass()) * 50 < frame_a) {
+    if (Geometry::Dist(x0_, y0_, a.x, a.y) < std::max(0.4, Geometry::UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), 0.0)) + (frame_a == INT_MAX ? 2 : 0) && Input::frameID + GetLinearVelocity() / (max_force_ / GetMass()) * 50 < frame_a) {
         // Log::print("stop and rotate");
         forward = 0;
-        double aim_rot = atan2(b.y-y0_, b.x-x0_);
+        double aim_rot = atan2((frame_a == INT_MAX ? a.y : b.y)-y0_, (frame_a == INT_MAX ? a.x : b.x)-x0_);
         double dif_rot = AngleReg(aim_rot - orient_);
         if (fabs(dif_rot) <= limit_r) {
             rotate = 0; // 开始角速度减速
