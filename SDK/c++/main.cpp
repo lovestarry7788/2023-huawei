@@ -19,8 +19,7 @@
 #include <set>
 #include <memory>
 #include <climits>
-
-// #include <cassert>
+#include <cassert>
 
 // 手玩方法，呆滞数据
 namespace Solution4 {
@@ -215,17 +214,18 @@ namespace Solution4 {
         Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
         if (route[robot_id].size()) {
             auto p = route[robot_id].front();
-            bst.buy_workbench = p.first - 1;
-            bst.sell_workbench = p.second - 1;
+            bst.buy_workbench = p.first;
+            bst.sell_workbench = p.second;
             route[robot_id].erase(begin(route[robot_id]));
         }
         Dispatch::Plan bst2; bst2.buy_workbench = bst2.sell_workbench = -1;
         if (route[robot_id].size()) {
             auto p = route[robot_id].front();
-            bst2.buy_workbench = p.first - 1;
-            bst2.sell_workbench = p.second - 1;
+            bst2.buy_workbench = p.first;
+            bst2.sell_workbench = p.second;
         }
-//        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+        if (bst.buy_workbench != -1)
+            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         Dispatch::UpdatePlan(robot_id, bst);
         Dispatch::plan2_[robot_id] = bst2;
     }
@@ -234,7 +234,7 @@ namespace Solution4 {
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
         Dispatch::avoidCollide = true;
         while (Input::ScanFrame()) {
-//            Log::print("frame", Input::frameID);
+           Log::print("frame", Input::frameID);
             Dispatch::UpdateCompleted();
             // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
@@ -329,9 +329,9 @@ namespace Solution3 {
 
         }
         if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1) {
-//            Log::print("NoPlan", robot_id);
+            Log::print("NoPlan", robot_id);
         } else {
-//            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         }
         Dispatch::UpdatePlan(robot_id, bst);
     }
@@ -346,7 +346,7 @@ namespace Solution3 {
         //     RobotReplan(ri); // 开始规划
         // }
         while (Input::ScanFrame()) {
-//            Log::print("frame", Input::frameID);
+           Log::print("frame", Input::frameID);
             Dispatch::UpdateCompleted();
             // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
@@ -379,19 +379,19 @@ namespace Solution2 {
             Geometry::Point loc{robot->x0_, robot->y0_};
             while (route.size() && Geometry::Length(loc - route.front()) < 3e-1) {
                 route.erase(begin(route));
-//                Log::print("arrive");
+                Log::print("arrive");
             }
             double f, r;
-//            if (P) Log::print("frame", Input::frameID);
+            if (P) Log::print("frame", Input::frameID);
             if (route.size() >= 2) {
                 robot->ToPointTwoPoint(route[0], route[1], f, r);
             } else if (route.size() >= 1)
                 robot->ToPoint(route[0].x, route[0].y, f, r);
             Output::Forward(0, f);
             Output::Rotate(0, r);
-//            Log::print(robot->GetLinearVelocity(), robot->angular_velocity_, robot->x0_, robot->y0_);
-//            if (route.size()) Log::print("K", Geometry::Dist(robot->x0_, robot->y0_, route[0].x, route[0].y));
-//            Log::print("F", f, r);
+            Log::print(robot->GetLinearVelocity(), robot->angular_velocity_, robot->x0_, robot->y0_);
+            if (route.size()) Log::print("K", Geometry::Dist(robot->x0_, robot->y0_, route[0].x, route[0].y));
+            Log::print("F", f, r);
             Output::Print(Input::frameID);
         }
         /*
