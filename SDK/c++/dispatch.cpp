@@ -131,10 +131,10 @@ void Dispatch::ManagePlan() {
 
 // 是否现在可以完成，可以则调用 RobotReplan_
 void Dispatch::ManagePlan(int robot_id, Plan& plan) {
-    Log::print("ManagePlan", robot_id, plan.buy_workbench, plan.sell_workbench);
 
     auto robot = Input::robot[robot_id];
     int wi = robot->carry_id_ == 0 ? plan.buy_workbench : plan.sell_workbench;
+    Log::print("ManagePlan", robot_id, robot->workbench_, plan.buy_workbench, plan.sell_workbench);
     if (robot->workbench_ == wi && wi != -1) { // 距离可以进行买卖
         if (robot->carry_id_ == 0 && Input::workbench[wi]->product_status_) {
             Output::Buy(robot_id);

@@ -123,7 +123,7 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
         // double rate = 1;
         double rate = std::max(0.1, 1 + (fabs(dif_rot) / PI - ed/180.0) * (1 / ((ed - st) / 180.0)));
         // double rate = (1 + (fabs(dif_rot) / PI - 1.0/5) * (-5.0/4)); // 1% 优化
-        forward = std::min(max_forward_velocity_ * rate, max_rotate_velocity_ * cir * 0.7); // not bad solution
+        forward = std::min(max_forward_velocity_ * rate, max_rotate_velocity_ * cir); // not bad solution
         // forward = max_forward_velocity_;
 
         // forward = std::min(max_forward_velocity_ * std::min(1.0, rate), max_rotate_velocity_ * cir); // not bad solution
@@ -143,7 +143,7 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
     // Log::print("Dist", Geometry::Dist(x0_, y0_, a.x, a.y));
     if (Geometry::Dist(x0_, y0_, a.x, a.y) < std::max(0.4, Geometry::UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), 0.0)) + (frame_a == INT_MAX ? 2 : 0) && Input::frameID + GetLinearVelocity() / (max_force_ / GetMass()) * 50 < frame_a) {
-        // Log::print("stop and rotate");
+        Log::print("stop and rotate");
         forward = 0;
         double aim_rot = atan2((frame_a == INT_MAX ? a.y : b.y)-y0_, (frame_a == INT_MAX ? a.x : b.x)-x0_);
         double dif_rot = AngleReg(aim_rot - orient_);
@@ -186,8 +186,10 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
         // Log::print("slow_dist", dist, slow_dist);
         forward = aim_v;
     }
-    if (dist < 0.8) // 提前角速度开转
+    if (dist < 0.6) {// 提前角速度开转{
+        // Log::print("rotate_angu", dist, slow_dist);
         rotate = max_rotate_velocity_ * dcmp(atan2(b.y - a.y, b.x - a.x));
+    }
 }
 // void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate) {
 //     Point cnt{x0_, y0_};

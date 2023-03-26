@@ -91,6 +91,7 @@ namespace Solution4 {
             {12, 3},
             {3, 10},
             // {11, 12},//
+            {18, 12},
         },
         { // 1 : 5
             // 让0帮忙了
@@ -169,7 +170,7 @@ namespace Solution4 {
             
             {8, 2},
             {2, 3},
-            {6, 2},//8549
+            // {6, 2},
             
             {2, 3},      
             {5, 12},      
@@ -230,7 +231,6 @@ namespace Solution4 {
         Dispatch::plan2_[robot_id] = bst2;
     }
     void Solve() {
-        Input::ScanMap();
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
         Dispatch::avoidCollide = true;
         while (Input::ScanFrame()) {
@@ -776,7 +776,7 @@ namespace Solution1 {
     }
 
     void Solve() {
-        Input::ScanMap();
+        // Input::ScanMap();
         SetConfig(); // 针对地图设置参数
 //        Config_Read_From_Files(); // 搜参数专用
 //        Config_Read_From_Files2();
@@ -1056,6 +1056,10 @@ namespace Solution1 {
   */
 
 int main() {
-    Solution4::Solve();
+    Input::ScanMap();
+    if (Input::map_number_ == 2)
+        Solution4::Solve();
+    else 
+        Solution1::Solve();
     return 0;
 }
