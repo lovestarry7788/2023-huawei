@@ -141,8 +141,9 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
 
 void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, int frame_a) {
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
+    // Log::print("Dist", Geometry::Dist(x0_, y0_, a.x, a.y));
     if (Geometry::Dist(x0_, y0_, a.x, a.y) < std::max(0.4, Geometry::UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), 0.0)) && Input::frameID + GetLinearVelocity() / (max_force_ / GetMass()) * 50 < frame_a) {
-        Log::print("stop and rotate");
+        // Log::print("stop and rotate");
         forward = 0;
         double aim_rot = atan2(b.y-y0_, b.x-x0_);
         double dif_rot = AngleReg(aim_rot - orient_);
@@ -158,7 +159,7 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
     double alpha = InterAngle(a - cnt, b - a);
     if (alpha > PI / 2 && Geometry::Dist(x0_, y0_, a.x, a.y) > 2) {
         a = a + (a - b) / Length(a - b) * -0.4;
-        Log::print("changea", a.x, a.y);
+        // Log::print("changea", a.x, a.y);
     }
     double dx = a.x, dy = a.y;
     double dist = Geometry::Dist(x0_, y0_, dx, dy);
@@ -182,7 +183,7 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
     double aim_v = max_forward_velocity_ * rate;
     double slow_dist = UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), aim_v);
     if (dist < slow_dist) {
-        Log::print("slow_dist", dist, slow_dist);
+        // Log::print("slow_dist", dist, slow_dist);
         forward = aim_v;
     }
     if (dist < 0.8) // 提前角速度开转
