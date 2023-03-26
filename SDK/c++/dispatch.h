@@ -38,7 +38,7 @@ namespace Dispatch {
 
     void init(void (*RobotReplan)(int), int robot_num, int workbench_num);
     // void init(std::function<void(int)> RobotReplan, std::function<void(int,int)> RobotBuy, std::function<void(int,int,int)> RobotSell, int robot_num);
-    
+
     void UpdateFake(int robot_id);
 
     void UpdateAll();

@@ -546,9 +546,10 @@ namespace Solution1 {
                 break;
                 // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
             case 3:
-                if(robot_id == 0 || robot_id == 1) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
+//                if(robot_id == 2) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
+//                if(robot_id == 0 || robot_id == 1) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
                 if(robot_id == 2) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 6;
-                return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
+                if(robot_id == 3)return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
 //                if(workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5) return true;
                 //if(y > 45) return true;
                 //if(x < 20) return true;
@@ -556,6 +557,11 @@ namespace Solution1 {
                 if(y <= 15.0 && x <= 15.0) return true;
                 if(y <= 15.0 && x >= 35.0) return true;
             case 4:
+                if(workbench[id]->type_id_ == 7) return false;
+                if(robot_id == 0) return x > 15;
+                if(robot_id == 1) return x < 30;
+                return x < 15 || x > 30;
+
                 //return x < 22.5;
                 break;
                 if(y <= 30.0) return true;
@@ -572,7 +578,7 @@ namespace Solution1 {
 //            Log::print("Fail to open file!");
             exit(0);
         }
-        fscanf(fp, "%lf%lf%lf%lf%lf", &sever_one, &four_five_six_one, &sever_two, &four_five_six_two, &sever_three);
+        fscanf(fp, "%lf%lf%lf%lf%lf%lf%lf", &sever_one, &four_five_six_one, &sever_two, &four_five_six_two, &sever_three, &premium_coefficient[1], &premium_coefficient[2]);
         fclose(fp);
 
 //        sever_one = sever_one_;
@@ -652,53 +658,39 @@ namespace Solution1 {
     void SetConfig() {
         switch (map_number_) {
             case 1: // 加重生产 7 的速度
-// *               Calculate! sever_one: 2.400000, four_five_six_one: 2.400000, sever_two: 2.200000, four_five_six_two: 1.800000, sever_three: 1.400000
-//                {"status":"Successful","score":694901}
 
-//                Calculate! sever_one: 2.200000, four_five_six_one: 2.200000, sever_two: 2.000000, four_five_six_two: 1.600000, sever_three: 1.200000
-//                {"status":"Successful","score":699906}
-
-//                Calculate! sever_one: 1.400000, four_five_six_one: 1.400000, sever_two: 1.200000, four_five_six_two: 1.200000, sever_three: 1.000000
-//                {"status":"Successful","score":698949}
-
-//                Calculate! sever_one: 2.600000, four_five_six_one: 2.200000, sever_two: 2.200000, four_five_six_two: 1.400000, sever_three: 1.400000
-//                {"status":"Successful","score":695396}
-
-//                Calculate! sever_one: 1.800000, four_five_six_one: 1.400000, sever_two: 1.400000, four_five_six_two: 1.200000, sever_three: 1.000000
-//                {"status":"Successful","score":701134}
-
-//                Calculate! sever_one: 1.600000, four_five_six_one: 1.600000, sever_two: 1.200000, four_five_six_two: 1.000000, sever_three: 1.000000
-//                {"status":"Successful","score":695321}
+//                Calculate! sever_one: 2.20, four_five_six_one: 1.35, sever_two: 1.32, four_five_six_two: 1.11, sever_three: 0.17, one: 2.74, two: 11.27
+//                {"status":"Successful","score":698099}
 
                 //2.00	1.6	1.3	1	1
-                sever_one = 2.4;
-                four_five_six_one = 2.4;
-                sever_two = 2.2;
-                four_five_six_two = 1.8;
-                sever_three = 1.4;
-                premium_coefficient[1] = 1.5;
-                premium_coefficient[2] = 3.0;
+                sever_one = 2.35;
+                four_five_six_one = 1.76;
+                sever_two = 1.34;
+                four_five_six_two = 1.31;
+                sever_three = 0.15;
+                premium_coefficient[1] = 3.56;
+                premium_coefficient[2] = 10.52;
                 break;
             case 2:
                 //1.80	1.6	1.4	1.2	1
 
-//                Calculate! sever_one: 1.600000, four_five_six_one: 1.600000, sever_two: 1.200000, four_five_six_two: 1.200000, sever_three: 1.200000
-//                {"status":"Successful","score":840593}
+//                Calculate! sever_one: 2.57, four_five_six_one: 1.99, sever_two: 1.98, four_five_six_two: 1.94, sever_three: 0.50, one: 1.28, two: 2.73
+//                {"status":"Successful","score":848698}
 
-//                Calculate! sever_one: 1.800000, four_five_six_one: 1.800000, sever_two: 1.800000, four_five_six_two: 1.600000, sever_three: 1.200000
-//                {"status":"Successful","score":835944}
+//                Calculate! sever_one: 2.53, four_five_six_one: 2.13, sever_two: 1.62, four_five_six_two: 1.37, sever_three: 0.31, one: 1.09, two: 3.58
+//                {"status":"Successful","score":847658}
 
-//                Calculate! sever_one: 2.000000, four_five_six_one: 2.000000, sever_two: 1.600000, four_five_six_two: 1.400000, sever_three: 1.200000
-//                {"status":"Successful","score":832875}
+//                Calculate! sever_one: 2.83, four_five_six_one: 1.75, sever_two: 1.28, four_five_six_two: 1.21, sever_three: 0.90, one: 1.77, two: 7.04
+//                {"status":"Successful","score":850001}
 
-//                Calculate! sever_one: 2.200000, four_five_six_one: 2.200000, sever_two: 2.000000, four_five_six_two: 2.000000, sever_three: 1.400000
-//                {"status":"Successful","score":843268}
+//                Calculate! sever_one: 1.81, four_five_six_one: 1.44, sever_two: 1.17, four_five_six_two: 1.10, sever_three: 1.08, one: 1.87, two: 4.92
+//                {"status":"Successful","score":857048}
 
-// *               Calculate! sever_one: 2.200000, four_five_six_one: 1.800000, sever_two: 1.200000, four_five_six_two: 1.200000, sever_three: 1.200000
-//                {"status":"Successful","score":838923}
+//                Calculate! sever_one: 2.24, four_five_six_one: 1.37, sever_two: 1.21, four_five_six_two: 1.16, sever_three: 0.41, one: 2.08, two: 5.13
+//                {"status":"Successful","score":846210}
 
-//                Calculate! sever_one: 2.400000, four_five_six_one: 1.600000, sever_two: 1.600000, four_five_six_two: 1.000000, sever_three: 1.000000
-//                {"status":"Successful","score":836454}
+//                Calculate! sever_one: 2.76, four_five_six_one: 1.73, sever_two: 1.09, four_five_six_two: 1.02, sever_three: 0.69, one: 1.03, two: 2.88
+//                {"status":"Successful","score":836481}
 
                 sever_one = 2.2;
                 four_five_six_one = 1.8;
@@ -710,53 +702,33 @@ namespace Solution1 {
                 break;
             case 3:
 
-//  *              Calculate! sever_one: 2.000000, four_five_six_one: 1.800000, sever_two: 1.400000, four_five_six_two: 1.400000, sever_three: 1.200000
-//                {"status":"Successful","score":968483}
-
-//                Calculate! sever_one: 1.800000, four_five_six_one: 1.800000, sever_two: 1.600000, four_five_six_two: 1.400000, sever_three: 1.200000
-//                {"status":"Successful","score":968483}
-
-//                Calculate! sever_one: 2.000000, four_five_six_one: 2.000000, sever_two: 1.800000, four_five_six_two: 1.600000, sever_three: 1.200000
-//                {"status":"Successful","score":984519}
-
-//                Calculate! sever_one: 2.000000, four_five_six_one: 2.000000, sever_two: 1.600000, four_five_six_two: 1.600000, sever_three: 1.200000
-//                {"status":"Successful","score":980776}
-
-//                Calculate! sever_one: 2.200000, four_five_six_one: 2.000000, sever_two: 2.000000, four_five_six_two: 1.600000, sever_three: 1.400000
-//                {"status":"Successful","score":980776}
-
-//                Calculate! sever_one: 2.200000, four_five_six_one: 2.200000, sever_two: 2.200000, four_five_six_two: 1.600000, sever_three: 1.200000
-//                {"status":"Successful","score":964119}
-
-
-
                 sever_one = 0;
                 four_five_six_one = 1.8;
                 sever_two = 0;
                 four_five_six_two = 1.4;
                 sever_three = 0;
-                premium_coefficient[1] = 1.5;
+                premium_coefficient[1] = 1;
                 premium_coefficient[2] = 3;
                 break;
             case 4:
 
-// *               Calculate! sever_one: 2.000000, four_five_six_one: 1.800000, sever_two: 1.600000, four_five_six_two: 1.200000, sever_three: 1.000000
-//                {"status":"Successful","score":655221}
+//                Calculate! sever_one: 1.92, four_five_six_one: 1.38, sever_two: 1.25, four_five_six_two: 1.20, sever_three: 0.49, one: 1.61, two: 4.05
+//                {"status":"Successful","score":648181}
 
-//                Calculate! sever_one: 1.800000, four_five_six_one: 1.400000, sever_two: 1.400000, four_five_six_two: 1.400000, sever_three: 1.200000
-//                {"status":"Successful","score":652116}
+//                Calculate! sever_one: 3.00, four_five_six_one: 2.70, sever_two: 2.07, four_five_six_two: 1.29, sever_three: 0.19, one: 2.70, two: 6.41
+//                {"status":"Successful","score":649948}
 
-//                Calculate! sever_one: 1.800000, four_five_six_one: 1.600000, sever_two: 1.600000, four_five_six_two: 1.200000, sever_three: 1.200000
-//                {"status":"Successful","score":662356}
+//                Calculate! sever_one: 2.93, four_five_six_one: 2.01, sever_two: 1.23, four_five_six_two: 1.19, sever_three: 0.05, one: 1.05, two: 4.60
+//                {"status":"Successful","score":656815}
 
-//                Calculate! sever_one: 1.600000, four_five_six_one: 1.400000, sever_two: 1.400000, four_five_six_two: 1.400000, sever_three: 1.200000
-//                {"status":"Successful","score":652116}
+//                Calculate! sever_one: 2.88, four_five_six_one: 1.28, sever_two: 1.17, four_five_six_two: 1.08, sever_three: 0.55, one: 1.75, two: 4.64
+//                {"status":"Successful","score":661032}
 
-//                Calculate! sever_one: 2.200000, four_five_six_one: 2.000000, sever_two: 2.000000, four_five_six_two: 2.000000, sever_three: 1.600000
-//                {"status":"Successful","score":627265}
+//                Calculate! sever_one: 1.73, four_five_six_one: 1.09, sever_two: 1.08, four_five_six_two: 1.07, sever_three: 0.88, one: 1.58, two: 7.55
+//                {"status":"Successful","score":642289}
 
-//                Calculate! sever_one: 2.200000, four_five_six_one: 2.200000, sever_two: 2.000000, four_five_six_two: 1.000000, sever_three: 1.000000
-//                {"status":"Successful","score":669561}
+//                Calculate! sever_one: 2.93, four_five_six_one: 2.52, sever_two: 2.17, four_five_six_two: 2.00, sever_three: 0.46, one: 3.09, two: 13.78
+//                {"status":"Successful","score":656039}
 
                 //1.80	1.7	1.3	1	0.8	1.5	3
                 sever_one = 2;
@@ -764,8 +736,8 @@ namespace Solution1 {
                 sever_two = 1.6;
                 four_five_six_two = 1.2;
                 sever_three = 1;
-                premium_coefficient[1] = 1.5;
-                premium_coefficient[2] = 3;
+                premium_coefficient[1] = 1;
+                premium_coefficient[2] = 1;
                 break;
             default:
                 sever_one = 1.8;

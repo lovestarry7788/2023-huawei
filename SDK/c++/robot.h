@@ -63,7 +63,7 @@ public:
     double GetRadius();
 
     double GetMaxMass();
-    
+
     // 获取质量，不拿16，15加速度
     double GetMass();
 
@@ -76,14 +76,12 @@ public:
     double CalcTime(const Geometry::Point& p1, const Geometry::Point& p2);
 
     double CalcTime(const Geometry::Point& p);
-    
+
     double CalcMaxSlowdownDist();
 
     double GetLinearVelocity();
-    
-    std::vector<Geometry::Point> ForecastToPoint(double dx, double dy, int forecast_num);
 
-    std::vector<Geometry::Point> ForecastToPoint2(Geometry::Point a, Geometry::Point b, int frame_a, int forecast_num);
+    std::vector<Geometry::Point> ForecastToPoint(double dx, double dy, int forecast_num);
 
     std::vector<Geometry::Point> ForecastFixed(double forward, double rotate, int forecast_num);
 
