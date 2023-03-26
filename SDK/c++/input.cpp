@@ -25,7 +25,7 @@ void Input::ScanMap() {
         for(int j = 0; j < 100; ++j) {
             scanf("\n%c",&map_[i][j]);
             K += map_[i][j] >= '1' && map_[i][j] <= '9'; 
-            Log::print("i: ", i, "j: ", j, map_[i][j]);
+            // Log::print("i: ", i, "j: ", j, map_[i][j]);
         }
     }
     readUntilOK();

@@ -10,8 +10,9 @@
 namespace Log {
     extern std::ofstream ofs;
     template<class T, class... A> void print(T&& x, A&&... a){ 
-        // return;
-        // if (Input::frameID != 1954) return;
+        #ifndef LOG_DEBUG
+            return;
+        #endif
         ofs<<x; (int[]){(ofs<< ' '<< a,0)...}; ofs<<'\n'; 
         ofs.flush();
     }

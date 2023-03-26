@@ -20,7 +20,7 @@ namespace Dispatch {
         int mat_id = 0;
         int buy_workbench = -1, sell_workbench = -1; // -1为已完成，否则为工作台id
     };
-    extern std::vector<Plan> plan_;
+    extern std::vector<Plan> plan_, plan2_;
     extern std::vector<std::pair<double, double>> movement_;
     // 工作台占用情况
     struct Occupy {
@@ -29,6 +29,7 @@ namespace Dispatch {
     };
     extern std::vector<Occupy> occupy_;
     extern bool avoidCollide;
+    extern bool enableTwoPlan;
 
     // 完成Plan时调用委托。单独(延迟)规划用
     extern void (*RobotReplan_)(int);
@@ -37,6 +38,8 @@ namespace Dispatch {
 
     void init(void (*RobotReplan)(int), int robot_num, int workbench_num);
     // void init(std::function<void(int)> RobotReplan, std::function<void(int,int)> RobotBuy, std::function<void(int,int,int)> RobotSell, int robot_num);
+
+    void UpdateFake(int robot_id);
 
     void UpdateAll();
 

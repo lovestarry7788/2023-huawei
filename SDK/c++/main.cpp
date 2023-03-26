@@ -19,18 +19,214 @@
 #include <set>
 #include <memory>
 #include <climits>
-#include <ctime>
-#include <random>
 
 // #include <cassert>
 
+// 手玩方法，呆滞数据
+namespace Solution4 {
+    // 走路略快，有些许错配
+    std::vector<std::vector<std::pair<int,int>>> route =
+    {
+        {
+            {5, 9},
+            {14, 12},
+            {18, 20},
+            {19, 23},
+            {28, 20},
+            {19, 21},
+            {21, 15},
+            {14, 12},
+            {13, 11},
+            {10, 9},
+            {4, 12},
+            {12, 17},
+            {18, 20},
+            {20, 15},
+            {4, 12},
+            {12, 17},
+            {18, 21},
+            {22, 20},
+            {20, 17},
+            {17, 16},
+            {14, 12},
+            {13, 9},
+            {5, 11},
+            {10, 9},
+            {9, 15},
+            {19, 21},
+            {21, 15},
+            {15, 16},
+            {18, 21},
+            {22, 23},
+            {23, 17},
+            {22, 20},
+            {20, 17},
+            {17, 16},
+            {18, 21},
+            {21, 15},
+            {25, 26},
+        },
+        {
+            {4, 12},
+            {13, 9},
+            {14, 11},
+            {14, 12},
+            {13, 9},
+            {5, 11},
+            {11, 15},
+            {18, 20},
+            {20, 17},
+            {28, 23},
+            {28, 20},
+            {19, 23},
+            {23, 15},
+            {18, 21},
+            {22, 23},
+            {27, 21},
+            {21, 15},
+            {15, 16},
+            {18, 20},
+            {19, 23},
+            {27, 21},
+            {21, 17},
+            {18, 21},
+            {22, 23},
+            {23, 17},
+            {17, 16},
+            {14, 12},
+            {12, 17},
+            {14, 11},
+            {11, 17},
+            {17, 16},
+            {14, 12},
+            {13, 11},
+            {14, 11},
+            {11, 15},
+            {15, 16},
+            {1, 3},
+            {2, 3},
+            {1, 3},
+            {2, 3},
+        },
+        {
+            {10, 9},
+            {5, 11},
+            {10, 9},
+            {9, 17},
+            {18, 21},
+            {22, 23},
+            {27, 21},
+            {28, 20},
+            {19, 23},
+            {23, 15},
+            {11, 15},
+            {15, 16},
+            {14, 11},
+            {11, 17},
+            {17, 16},
+            {5, 9},
+            {5, 11},
+            {10, 12},
+            {12, 15},
+            {10, 9},
+            {9, 17},
+            {14, 12},
+            {4, 12},
+            {13, 9},
+            {5, 11},
+            {10, 12},
+            {12, 15},
+            {18, 20},
+            {19, 23},
+            {27, 21},
+            {22, 23},
+            {23, 15},
+            {11, 15},
+            {20, 17},
+            {25, 26}
+        },
+        {
+            {18, 21},
+            {22, 23},
+            {27, 23},
+            {27, 21},
+            {22, 23},
+            {23, 15},
+            {14, 11},
+            {10, 12},
+            {12, 17},
+            {4, 9},
+            {9, 17},
+            {18, 21},
+            {21, 15},
+            {14, 12},
+            {13, 9},
+            {9, 17},
+            {18, 20},
+            {19, 23},
+            {23, 15},
+            {14, 11},
+            {11, 17},
+            {28, 20},
+            {20, 15},
+            {15, 16},
+            {18, 20},
+            {19, 23},
+            {28, 20},
+            {20, 15},
+            {14, 11},
+            {10, 9},
+            {9, 15},
+            {10, 9},
+            {4, 12},
+            {12, 17},
+            {14, 12},
+            {13, 9},
+            {9, 17},
+            {12, 17},
+            {7, 6}
+        },
+    };
+    using namespace Input;
+    void RobotReplan(int robot_id) {
+        Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
+        if (route[robot_id].size()) {
+            auto p = route[robot_id].front();
+            bst.buy_workbench = p.first - 1;
+            bst.sell_workbench = p.second - 1;
+            route[robot_id].erase(begin(route[robot_id]));
+        }
+        Dispatch::Plan bst2; bst2.buy_workbench = bst2.sell_workbench = -1;
+        if (route[robot_id].size()) {
+            auto p = route[robot_id].front();
+            bst2.buy_workbench = p.first - 1;
+            bst2.sell_workbench = p.second - 1;
+        }
+//        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+        Dispatch::UpdatePlan(robot_id, bst);
+        Dispatch::plan2_[robot_id] = bst2;
+    }
+    void Solve() {
+        Input::ScanMap();
+        Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
+        Dispatch::avoidCollide = true;
+        while (Input::ScanFrame()) {
+//            Log::print("frame", Input::frameID);
+            Dispatch::UpdateCompleted();
+            // Dispatch::UpdateAll();
+            Dispatch::ManagePlan();
+            Dispatch::ControlWalk();
+            Output::Print(Input::frameID);
+        }
+    }
+}
 namespace Solution3 {
     using namespace Input;
     using namespace Geometry;
 
     constexpr int profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
     constexpr double wait_ratio_ = 20;
-    constexpr int sell_limit_frame_ = 8980;
+    constexpr int sell_limit_frame_ = 8960;
     int award_buy(int robot_id, int workbench_id) {
         return 0;
     }
@@ -40,7 +236,7 @@ namespace Solution3 {
     int workbench_remain_num(int workbench_id) {
         int mat_id = Input::workbench[workbench_id]->type_id_;
         if (mat_id <= 3) return 0;
-        int num = __builtin_popcount(Input::workbench[workbench_id]->materials_status_) + 
+        int num = __builtin_popcount(Input::workbench[workbench_id]->materials_status_) +
                 __builtin_popcount(Dispatch::occupy_[workbench_id].sell_occupy);
         if (mat_id <= 6) return 2 - num;
         return 3 - num;
@@ -64,8 +260,9 @@ namespace Solution3 {
             //     continue;
 
             double buy_time = 0;
+            double actual_time = 0;
             if (rb->carry_id_ == 0) {
-                buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
+                actual_time = buy_time = rb->CalcTime({Point{buy_wb->x0_, buy_wb->y0_}});
                 if (!buy_wb->product_status_) // 有产品了也可以在生产时间中，故必须要此判断
                     buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * wait_ratio_; // 等待生产
             }
@@ -77,22 +274,22 @@ namespace Solution3 {
                     // if (!sell_wb->product_status_ && sell_wb-> > 0) 
                     // TODO: 在生产，且填上当前物品就满了，则结束时间为max{到达，生产完成}。这样来到达送且拿。
                     sell_time = rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_}, Point{sell_wb->x0_, sell_wb->y0_});
-                    if (Input::frameID + sell_time * 50 > sell_limit_frame_) continue;
                     if (false && workbench_remain_num(sell_wb_id) == 1 && !sell_wb->product_status_) {
                         // if (sell_wb->frame_remain_ / 50.0 - sell_time > 0) continue;
                         sell_time += std::max(0.0, sell_wb->frame_remain_ / 50.0 - sell_time) * wait_ratio_;
                         // 还要保证到了sellwb，能有地方需求该物品。即对占用的预测，不光有占用，还有清除的预测。
                     }
                     sell_time -= rb->CalcTime(Point{buy_wb->x0_, buy_wb->y0_});
+                    actual_time += sell_time;
+                    if (Input::frameID + actual_time * 50 > sell_limit_frame_) continue;
                 } else {
                     sell_time = rb->CalcTime(Point{sell_wb->x0_, sell_wb->y0_});
-                    if (Input::frameID + sell_time * 50 > sell_limit_frame_) continue;
                 }
 
                 if (Dispatch::occupy_[sell_wb_id].sell_occupy >> mat_id & 1) continue;
 
-                int award = award_buy(robot_id, buy_wb_id) + 
-                            award_sell(robot_id, sell_wb_id, mat_id) + 
+                int award = award_buy(robot_id, buy_wb_id) +
+                            award_sell(robot_id, sell_wb_id, mat_id) +
                             profit_[mat_id];
 
                 double award_pf = award / (buy_time + sell_time);
@@ -106,25 +303,26 @@ namespace Solution3 {
 
         }
         if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1) {
-            Log::print("NoPlan", robot_id);
-            return;
+//            Log::print("NoPlan", robot_id);
+        } else {
+//            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         }
-        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         Dispatch::UpdatePlan(robot_id, bst);
     }
     void Solve() {
         Input::ScanMap();
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
         Dispatch::avoidCollide = true;
+        Dispatch::enableTwoPlan = true;
         // occupy.resize(K);
         // ScanFrame才初始化
         // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
         //     RobotReplan(ri); // 开始规划
         // }
         while (Input::ScanFrame()) {
-            Log::print("frame", Input::frameID);
-            // Dispatch::UpdateCompleted();
-            Dispatch::UpdateAll();
+//            Log::print("frame", Input::frameID);
+            Dispatch::UpdateCompleted();
+            // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
             Dispatch::ControlWalk();
             Output::Print(Input::frameID);
@@ -139,16 +337,42 @@ namespace Solution2 {
         Input::ScanMap();
         using namespace Geometry;
         std::vector<Geometry::Point> route;
-        // Geometry::Point{10,10}, Geometry::Point{40, 10}, Geometry::Point{40, 40}, Geometry::Point{10, 40}
-        route.push_back(Geometry::Point{24.7-10,38.75}); // 4正常，2出现错误
-        route.push_back(Geometry::Point{24.7-10,38.75+2}); // 4正常，2出现错误
-        // route.push_back(Geometry::Point{25,25});
-        // route.push_back(Geometry::Point{40,30});
-        // route.push_back(Geometry::Point{10,40});
-        // std::vector<int> arrive;
+        route.push_back(Geometry::Point{24.75+10,38.75});
+        route.push_back(Geometry::Point{24.75,38.75});
+        route.push_back(Geometry::Point{24.75+10,38.75});
+        route.push_back(Geometry::Point{24.75,38.75});
+        // route.push_back(Geometry::Point{24.75+10,38.75-10});
+        // route.push_back(Geometry::Point{24.75+10,38.75});
+        // route.push_back(Geometry::Point{24.75+10,38.75-10});
+        // route.push_back(Geometry::Point{24.75+10,38.75});
+        // route.push_back(Geometry::Point{24.75,38.75});
+        // route.push_back(Geometry::Point{24.75+10+8.6602540378,38.75+5});
+        while(Input::ScanFrame()) {
+            bool P = Input::frameID < 500;
+            auto robot = Input::robot[0];
+            Geometry::Point loc{robot->x0_, robot->y0_};
+            while (route.size() && Geometry::Length(loc - route.front()) < 3e-1) {
+                route.erase(begin(route));
+//                Log::print("arrive");
+            }
+            double f, r;
+//            if (P) Log::print("frame", Input::frameID);
+            if (route.size() >= 2) {
+                robot->ToPointTwoPoint(route[0], route[1], f, r);
+            } else if (route.size() >= 1)
+                robot->ToPoint(route[0].x, route[0].y, f, r);
+            Output::Forward(0, f);
+            Output::Rotate(0, r);
+//            Log::print(robot->GetLinearVelocity(), robot->angular_velocity_, robot->x0_, robot->y0_);
+//            if (route.size()) Log::print("K", Geometry::Dist(robot->x0_, robot->y0_, route[0].x, route[0].y));
+//            Log::print("F", f, r);
+            Output::Print(Input::frameID);
+        }
+        /*
         std::vector<int> estimate;
         std::vector<int> true_estimate;
         std::vector<std::vector<double>> mov;
+
         while(Input::ScanFrame()) {
             if (Input::frameID < 250)
                 Log::print("frame", Input::frameID);
@@ -182,7 +406,7 @@ namespace Solution2 {
         for (int i = 0; i < estimate.size(); i++) {
             Log::print(i, estimate[i] - true_estimate[i],true_estimate[i]);
             // Log::print(mov[i][0], mov[i][1], mov[i][2]);
-        }
+        }*/
     }
 }
 
@@ -282,7 +506,7 @@ namespace Solution1 {
                     if(dis_[i + robot_num_][j + robot_num_] < Around_Distance) {
                         around_points[i].emplace_back(j);
                         around_points[j].emplace_back(i);
-                        Log::print(" i: ", i , " -> ", " j: ", j);
+//                        Log::print(" i: ", i , " -> ", " j: ", j);
                     }
                 }
             }
@@ -293,6 +517,9 @@ namespace Solution1 {
 
     void Choose_To_Point(int id, double dx, double dy, double& forward, double& rotate) {
         switch(Input::map_number_) {
+//            case 3:
+//                robot[id]->ToPoint(dx, dy, forward, rotate);
+//                break;
             default:
                 robot[id]->ToPoint(dx, dy, forward, rotate);
                 break;
@@ -301,7 +528,6 @@ namespace Solution1 {
 
     // 针对地图来忽略一些点，传入一些工作台的点坐标
     bool MissingPoint(int robot_id, int id, double x, double y) {
-        int nrand;
         switch(map_number_) {
             case 1:
                 break;
@@ -320,18 +546,26 @@ namespace Solution1 {
                 break;
                 // if(x <= 7.5 || y <= 7.5 || x >= 42.5 || y >= 42.5) return true;
             case 3:
-                if(robot_id == 0) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
+//                if(robot_id == 2) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
+//                if(robot_id == 0 || robot_id == 1) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5;
                 if(robot_id == 2) return workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 6;
-                return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
+                if(robot_id == 3)return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
+//                if(workbench[id]->type_id_ == 4 || workbench[id]->type_id_ == 5) return true;
                 //if(y > 45) return true;
                 //if(x < 20) return true;
                 break;
                 if(y <= 15.0 && x <= 15.0) return true;
                 if(y <= 15.0 && x >= 35.0) return true;
             case 4:
+                if(workbench[id]->type_id_ == 7) return false;
+                if(robot_id == 0) return x > 15;
+                if(robot_id == 1) return x < 30;
+                return x < 15 || x > 30;
+
                 //return x < 22.5;
                 break;
                 if(y <= 30.0) return true;
+
         }
         return false;
     }
@@ -341,10 +575,10 @@ namespace Solution1 {
 
         FILE *fp = fopen("config.txt", "r+");
         if(fp == NULL) {
-            Log::print("Fail to open file!");
+//            Log::print("Fail to open file!");
             exit(0);
         }
-        fscanf(fp, "%lf%lf%lf%lf%lf", &sever_one, &four_five_six_one, &sever_two, &four_five_six_two, &sever_three);
+        fscanf(fp, "%lf%lf%lf%lf%lf%lf%lf", &sever_one, &four_five_six_one, &sever_two, &four_five_six_two, &sever_three, &premium_coefficient[1], &premium_coefficient[2]);
         fclose(fp);
 
 //        sever_one = sever_one_;
@@ -361,7 +595,7 @@ namespace Solution1 {
 
         FILE *fp = fopen("config2.txt", "r+");
         if(fp == NULL) {
-            Log::print("Fail to open file!");
+//            Log::print("Fail to open file!");
             exit(0);
         }
         fscanf(fp, "%lf%lf", &premium_coefficient[1], &premium_coefficient[2]);
@@ -387,7 +621,7 @@ namespace Solution1 {
 
     bool Whether_Can_Buy(int id, int k, int i, int j) {
         if(can_plan_to_buy_[i] && workbench[i]->TryToBuy(k, -100) && !should_not_plan_to_buy_[i]) {
-            if(can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k)) {
+            if(can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k) ) {
                 if (map_number_ == 1 && workbench[j]->type_id_ == 9) return false;
                 if (MissingPoint(id, i, workbench[i]->x0_, workbench[i]->y0_) ||
                     MissingPoint(id, j, workbench[j]->x0_, workbench[j]->y0_))
@@ -424,49 +658,93 @@ namespace Solution1 {
     void SetConfig() {
         switch (map_number_) {
             case 1: // 加重生产 7 的速度
-                sever_one = 2.0;
-                four_five_six_one = 1.6;
-                sever_two = 1.3;
-                four_five_six_two = 1.0;
-                sever_three = 1.0;
-                premium_coefficient[1] = 1.5;
-                premium_coefficient[2] = 3.0;
+
+//                Calculate! sever_one: 2.20, four_five_six_one: 1.35, sever_two: 1.32, four_five_six_two: 1.11, sever_three: 0.17, one: 2.74, two: 11.27
+//                {"status":"Successful","score":698099}
+
+                //2.00	1.6	1.3	1	1
+                sever_one = 2.35;
+                four_five_six_one = 1.76;
+                sever_two = 1.34;
+                four_five_six_two = 1.31;
+                sever_three = 0.15;
+                premium_coefficient[1] = 3.56;
+                premium_coefficient[2] = 10.52;
                 break;
             case 2:
-                sever_one = 1.8;
-                four_five_six_one = 1.6;
-                sever_two = 1.4;
+                //1.80	1.6	1.4	1.2	1
+
+//                Calculate! sever_one: 2.57, four_five_six_one: 1.99, sever_two: 1.98, four_five_six_two: 1.94, sever_three: 0.50, one: 1.28, two: 2.73
+//                {"status":"Successful","score":848698}
+
+//                Calculate! sever_one: 2.53, four_five_six_one: 2.13, sever_two: 1.62, four_five_six_two: 1.37, sever_three: 0.31, one: 1.09, two: 3.58
+//                {"status":"Successful","score":847658}
+
+//                Calculate! sever_one: 2.83, four_five_six_one: 1.75, sever_two: 1.28, four_five_six_two: 1.21, sever_three: 0.90, one: 1.77, two: 7.04
+//                {"status":"Successful","score":850001}
+
+//                Calculate! sever_one: 1.81, four_five_six_one: 1.44, sever_two: 1.17, four_five_six_two: 1.10, sever_three: 1.08, one: 1.87, two: 4.92
+//                {"status":"Successful","score":857048}
+
+//                Calculate! sever_one: 2.24, four_five_six_one: 1.37, sever_two: 1.21, four_five_six_two: 1.16, sever_three: 0.41, one: 2.08, two: 5.13
+//                {"status":"Successful","score":846210}
+
+//                Calculate! sever_one: 2.76, four_five_six_one: 1.73, sever_two: 1.09, four_five_six_two: 1.02, sever_three: 0.69, one: 1.03, two: 2.88
+//                {"status":"Successful","score":836481}
+
+                sever_one = 2.2;
+                four_five_six_one = 1.8;
+                sever_two = 1.2;
                 four_five_six_two = 1.2;
-                sever_three = 1.0;
+                sever_three = 1.2;
                 premium_coefficient[1] = 1.5;
                 premium_coefficient[2] = 3;
                 break;
             case 3:
+
                 sever_one = 0;
                 four_five_six_one = 1.8;
                 sever_two = 0;
                 four_five_six_two = 1.4;
-                sever_three = 1.0;
-                premium_coefficient[1] = 1.5;
+                sever_three = 0;
+                premium_coefficient[1] = 1;
                 premium_coefficient[2] = 3;
                 break;
             case 4:
-                sever_one = 1.8;
-                four_five_six_one = 1.6;
-                sever_two = 1.4;
+
+//                Calculate! sever_one: 1.92, four_five_six_one: 1.38, sever_two: 1.25, four_five_six_two: 1.20, sever_three: 0.49, one: 1.61, two: 4.05
+//                {"status":"Successful","score":648181}
+
+//                Calculate! sever_one: 3.00, four_five_six_one: 2.70, sever_two: 2.07, four_five_six_two: 1.29, sever_three: 0.19, one: 2.70, two: 6.41
+//                {"status":"Successful","score":649948}
+
+//                Calculate! sever_one: 2.93, four_five_six_one: 2.01, sever_two: 1.23, four_five_six_two: 1.19, sever_three: 0.05, one: 1.05, two: 4.60
+//                {"status":"Successful","score":656815}
+
+//                Calculate! sever_one: 2.88, four_five_six_one: 1.28, sever_two: 1.17, four_five_six_two: 1.08, sever_three: 0.55, one: 1.75, two: 4.64
+//                {"status":"Successful","score":661032}
+
+//                Calculate! sever_one: 1.73, four_five_six_one: 1.09, sever_two: 1.08, four_five_six_two: 1.07, sever_three: 0.88, one: 1.58, two: 7.55
+//                {"status":"Successful","score":642289}
+
+//                Calculate! sever_one: 2.93, four_five_six_one: 2.52, sever_two: 2.17, four_five_six_two: 2.00, sever_three: 0.46, one: 3.09, two: 13.78
+//                {"status":"Successful","score":656039}
+
+                //1.80	1.7	1.3	1	0.8	1.5	3
+                sever_one = 2;
+                four_five_six_one = 1.8;
+                sever_two = 1.6;
                 four_five_six_two = 1.2;
-                sever_three = 1.0;
+                sever_three = 1;
                 premium_coefficient[1] = 1;
-                premium_coefficient[2] = 2;
+                premium_coefficient[2] = 1;
                 break;
             default:
-                sever_one = 2.0;
-                four_five_six_one = 1.5;
-                sever_two = 1.2;
+                sever_one = 1.8;
+                four_five_six_one = 1.6;
+                sever_two = 1.3;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
-                premium_coefficient[1] = 1;
-                premium_coefficient[2] = 2;
                 break;
         }
     }
@@ -610,16 +888,23 @@ namespace Solution1 {
 
                                     double money_per_distance;
 
+                                    double buy_sell_frame_ = 50 * robot[id]->CalcTime(
+                                            Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
+                                            Geometry::Point{workbench[j]->x0_, workbench[j]->y0_});
+
+                                    if(map_number_ < 3)
+                                        buy_sell_frame_ = (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+
                                     if((workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 1)) { // 如果 7 只差一点，给一个更大的值
-                                        money_per_distance = profit_[k] * sever_one / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * sever_one / buy_sell_frame_;
                                     } else if((workbench[j] -> type_id_ >= 4 && workbench[j] -> type_id_ <= 6) && workbench[j] -> ItemsAreMissing() == 1){
-                                        money_per_distance = profit_[k] * four_five_six_one / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * four_five_six_one / buy_sell_frame_;
                                     } else if(workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 2) {
-                                        money_per_distance = profit_[k] * sever_two / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * sever_two / buy_sell_frame_;
                                     } else if((workbench[j] -> type_id_ >= 4 && workbench[j] -> type_id_ <= 6) && workbench[j] -> ItemsAreMissing() == 2) {
-                                        money_per_distance = profit_[k] * four_five_six_two / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * four_five_six_two / buy_sell_frame_;
                                     } else {
-                                        money_per_distance = profit_[k] * 1.0 / (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        money_per_distance = profit_[k] * 1.0 / buy_sell_frame_;
                                     }
 
 //                                    if(map_number_ == 3){
@@ -631,8 +916,10 @@ namespace Solution1 {
                                     money_per_distance *= premium_coefficient[premium_processing[workbench[j] -> type_id_]];
 
                                     if(map_number_ == 4 && workbench[j]->type_id_ == 4 && workbench[workbench_sell]->type_id_ != 7) money_per_distance *= 2;
+//                                    if(map_number_ == 3 && k > 3) money_per_distance = 2e9;
+//                                    if(map_number_ == 3 && k < 4 && workbench[j]->type_id_ == 9) money_per_distance /= 10;
 
-                                    if(money_per_distance > mn) {
+                                    if (money_per_distance > mn) {
                                         mn = money_per_distance;
                                         carry_id = k;
                                         workbench_buy = i;
@@ -648,7 +935,7 @@ namespace Solution1 {
                         can_plan_to_sell_[workbench_sell][carry_id] = false;
                     }
                 }
-                Log::print("\n");
+                //Log::print("\n");
                 // 给机器人买计划已完成
 
 
@@ -743,7 +1030,6 @@ namespace Solution1 {
   */
 
 int main() {
-    srand(time(0));
     Solution1::Solve();
     return 0;
 }
