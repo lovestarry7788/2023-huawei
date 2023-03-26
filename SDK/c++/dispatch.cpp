@@ -233,10 +233,18 @@ void Dispatch::AvoidCollide() {
         if (wi == -1) {
             forecast[ri] = std::vector<Point>(forecast_num_, Point{robot->x0_, robot->y0_});
         } else {
-            forecast[ri] = Input::robot[ri]->ForecastToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forecast_num_);
-            // Log::print("");
-            // for (auto i : forecast[ri]) Log::print(i.x, i.y);
-            // forecast[ri] = Input::robot[ri]->ForecastFixed(aim_movement[ri].first, aim_movement[ri].second, forecast_num_);
+            int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
+            if (wi2 != -1) {
+                int frame_reach = 0;
+                if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
+                    frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
+                else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
+                    frame_reach = INT_MAX;
+                forecast[ri].push_back(robot->ForecastToPoint2(Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Point{Input::workbench[wi2]->x0_, Input::workbench[wi2]->y0_}, frame_reach, forecast_num_));
+            }
+            else {
+                forecast[ri].push_back(robot->ForecastToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forecast_num_));
+            }
         }
     }
     for (int ri = 0; ri < Input::robot_num_; ri++) {
