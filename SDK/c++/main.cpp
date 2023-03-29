@@ -19,172 +19,195 @@
 #include <set>
 #include <memory>
 #include <climits>
-
-// #include <cassert>
+#include <cassert>
 
 // 手玩方法，呆滞数据
 namespace Solution4 {
     // 走路略快，有些许错配
     std::vector<std::vector<std::pair<int,int>>> route =
     {
-        {
-            {5, 9},
-            {14, 12},
-            {18, 20},
-            {19, 23},
-            {28, 20},
-            {19, 21},
-            {21, 15},
-            {14, 12},
-            {13, 11},
-            {10, 9},
+        /*
+        4 1000 2个 负责卖7
+        5 1600 2个 
+        6 2300 2个 or 1100 1个 * 2 -> 1100 2个
+        */
+        { // 0 : 4
+            {7, 9},
+            {11, 9},
+            {11, 9},
+
             {4, 12},
-            {12, 17},
-            {18, 20},
-            {20, 15},
+            {18, 12},
             {4, 12},
-            {12, 17},
-            {18, 21},
-            {22, 20},
-            {20, 17},
-            {17, 16},
-            {14, 12},
-            {13, 9},
-            {5, 11},
-            {10, 9},
-            {9, 15},
-            {19, 21},
-            {21, 15},
-            {15, 16},
-            {18, 21},
-            {22, 23},
-            {23, 17},
-            {22, 20},
-            {20, 17},
-            {17, 16},
-            {18, 21},
-            {21, 15},
-            {25, 26},
+
+            //rep
+
+            {18, 12},
+            {12, 21},
+            {20, 12},
+            {6, 12},
+            {12,  3},
+            { 4, 12}, // 
+
+            {18, 12},
+            {12, 21},
+            {20, 12},
+            {6, 12},
+            {12,  3},
+            { 4, 12}, // 3667
+
+            {18, 12},
+            {12, 21},
+            {21, 10},
+            {11, 12},
+            {5, 12},
+            {12, 3},
+            {3, 10},
+            {11, 12},//5011
+
+            {18, 12},
+            {12, 21},
+            {21, 10},
+            {11, 12},
+            {5, 12},
+            {12, 3},
+            {3, 10},
+            {11, 12},
+
+            {18, 12},
+            {12, 21},
+            {21, 10},
+            {11, 12},
+            {5, 12},
+            {12, 3},
+            {3, 10},
+            {11, 12},//7706
+
+            {18, 12},
+            {12, 21},
+            {21, 10},
+            {11, 12},
+            // {5, 12},
+            {12, 3},
+            {3, 10},
+            // {11, 12},//
+            {18, 12},
         },
-        {
-            {4, 12},
-            {13, 9},
-            {14, 11},
-            {14, 12},
-            {13, 9},
-            {5, 11},
-            {11, 15},
-            {18, 20},
-            {20, 17},
-            {28, 23},
-            {28, 20},
-            {19, 23},
-            {23, 15},
-            {18, 21},
-            {22, 23},
-            {27, 21},
-            {21, 15},
-            {15, 16},
-            {18, 20},
-            {19, 23},
-            {27, 21},
-            {21, 17},
-            {18, 21},
-            {22, 23},
-            {23, 17},
-            {17, 16},
-            {14, 12},
-            {12, 17},
-            {14, 11},
-            {11, 17},
-            {17, 16},
-            {14, 12},
-            {13, 11},
-            {14, 11},
-            {11, 15},
-            {15, 16},
-            {1, 3},
+        { // 1 : 5
+            // 让0帮忙了
+            // {11, 9},
+            // {7, 9},
+            // {11, 9},
+            
+            {4, 1},
+            {7, 1},
+            {7, 1},
+
+            //rep
+            {4, 1}, 
+            {7, 9},
+            {9, 21},
+            {20, 9},
+            {7, 1},
+            {1, 3},//2793
+
+            {4, 1}, 
+            {7, 9},
+            {9, 21},
+            {20, 9},
+            {7, 1},
+            {1, 3},//4353
+
+            {4, 1}, 
+            {7, 9},
+            {9, 21},
+            {20, 9},
+            {7, 1},
+            {1, 3},//5926
+
+            {4, 1}, 
+            {7, 9},
+            {9, 21},
+            {20, 9},
+            {7, 1},
+            {1, 3},//7504
+
+            {4, 1}, 
+            {7, 9},
+            {9, 21}, // 8306
+            {21, 10},// 清理库存
+            // {16, 9}, // 就近买卖
+            {9, 21},
+        },
+        { // 2: 6
+            {6, 2},
+            {8, 2},
+            {6, 2},
+
+            //rep
+            {8, 2},
             {2, 3},
-            {1, 3},
+            {6, 2},
+            
+            {8, 2},
             {2, 3},
+            {6, 2},//3568
+
+            {8, 2},
+            {2, 3},
+            {6, 2},
+            
+            {4, 1}, 
+            {7, 9},
+            {9, 21},
+            {20, 9},
+            {7, 1},
+            {1, 3},
+            
+            {8, 2},
+            {2, 3},
+            {6, 2},
+            
+            {8, 2},
+            {2, 3},
+            // {6, 2},
+            
+            {2, 3},      
+            {5, 12},      
         },
-        {
-            {10, 9},
-            {5, 11},
-            {10, 9},
-            {9, 17},
-            {18, 21},
-            {22, 23},
-            {27, 21},
-            {28, 20},
-            {19, 23},
-            {23, 15},
-            {11, 15},
-            {15, 16},
-            {14, 11},
-            {11, 17},
-            {17, 16},
-            {5, 9},
-            {5, 11},
-            {10, 12},
-            {12, 15},
-            {10, 9},
-            {9, 17},
-            {14, 12},
-            {4, 12},
-            {13, 9},
-            {5, 11},
-            {10, 12},
-            {12, 15},
-            {18, 20},
-            {19, 23},
-            {27, 21},
-            {22, 23},
-            {23, 15},
-            {11, 15},
-            {20, 17},
-            {25, 26}
-        },
-        {
-            {18, 21},
-            {22, 23},
-            {27, 23},
-            {27, 21},
-            {22, 23},
-            {23, 15},
-            {14, 11},
-            {10, 12},
-            {12, 17},
-            {4, 9},
-            {9, 17},
-            {18, 21},
-            {21, 15},
-            {14, 12},
-            {13, 9},
-            {9, 17},
-            {18, 20},
-            {19, 23},
-            {23, 15},
-            {14, 11},
-            {11, 17},
-            {28, 20},
-            {20, 15},
-            {15, 16},
-            {18, 20},
-            {19, 23},
-            {28, 20},
-            {20, 15},
-            {14, 11},
-            {10, 9},
-            {9, 15},
-            {10, 9},
-            {4, 12},
-            {12, 17},
-            {14, 12},
-            {13, 9},
-            {9, 17},
-            {12, 17},
-            {7, 6}
+        { // 3: 6
+            {19, 24},
+            {17, 24},
+            {19, 24},
+
+            //rep
+            {17, 24},
+            {24, 21},
+            {19, 24},
+
+            {17, 24},
+            {24, 21},
+            {19, 24},//3605
+
+            {17, 24},
+            {24, 21},
+            {19, 24},//4713
+
+            {17, 24},
+            {24, 21},
+            {19, 24},//5818
+
+            {17, 24},
+            {24, 21},
+            {19, 24},//6935
+
+            {17, 24},
+            {24, 21},
+            {18, 24},//8051
+
+            {24, 21},
+            {1, 3},
+            // {4, 12},
         },
     };
     using namespace Input;
@@ -192,31 +215,34 @@ namespace Solution4 {
         Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
         if (route[robot_id].size()) {
             auto p = route[robot_id].front();
-            bst.buy_workbench = p.first - 1;
-            bst.sell_workbench = p.second - 1;
+            bst.buy_workbench = p.first;
+            bst.sell_workbench = p.second;
             route[robot_id].erase(begin(route[robot_id]));
         }
         Dispatch::Plan bst2; bst2.buy_workbench = bst2.sell_workbench = -1;
         if (route[robot_id].size()) {
             auto p = route[robot_id].front();
-            bst2.buy_workbench = p.first - 1;
-            bst2.sell_workbench = p.second - 1;
+            bst2.buy_workbench = p.first;
+            bst2.sell_workbench = p.second;
         }
-//        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+        if (bst.buy_workbench != -1)
+            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         Dispatch::UpdatePlan(robot_id, bst);
         Dispatch::plan2_[robot_id] = bst2;
     }
     void Solve() {
-        Input::ScanMap();
         Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
         Dispatch::avoidCollide = true;
         while (Input::ScanFrame()) {
-//            Log::print("frame", Input::frameID);
+           Log::print("frame", Input::frameID);
             Dispatch::UpdateCompleted();
             // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
             Dispatch::ControlWalk();
             Output::Print(Input::frameID);
+            // int sum = 0;
+            // for (int i = 0 ; i < 4; i++) sum += Dispatch::plan_[i].sell_workbench != -1;
+            // assert(sum != 0);
         }
     }
 }
@@ -303,9 +329,9 @@ namespace Solution3 {
 
         }
         if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1) {
-//            Log::print("NoPlan", robot_id);
+            Log::print("NoPlan", robot_id);
         } else {
-//            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+            Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
         }
         Dispatch::UpdatePlan(robot_id, bst);
     }
@@ -320,7 +346,7 @@ namespace Solution3 {
         //     RobotReplan(ri); // 开始规划
         // }
         while (Input::ScanFrame()) {
-//            Log::print("frame", Input::frameID);
+           Log::print("frame", Input::frameID);
             Dispatch::UpdateCompleted();
             // Dispatch::UpdateAll();
             Dispatch::ManagePlan();
@@ -353,19 +379,19 @@ namespace Solution2 {
             Geometry::Point loc{robot->x0_, robot->y0_};
             while (route.size() && Geometry::Length(loc - route.front()) < 3e-1) {
                 route.erase(begin(route));
-//                Log::print("arrive");
+                Log::print("arrive");
             }
             double f, r;
-//            if (P) Log::print("frame", Input::frameID);
+            if (P) Log::print("frame", Input::frameID);
             if (route.size() >= 2) {
                 robot->ToPointTwoPoint(route[0], route[1], f, r);
             } else if (route.size() >= 1)
                 robot->ToPoint(route[0].x, route[0].y, f, r);
             Output::Forward(0, f);
             Output::Rotate(0, r);
-//            Log::print(robot->GetLinearVelocity(), robot->angular_velocity_, robot->x0_, robot->y0_);
-//            if (route.size()) Log::print("K", Geometry::Dist(robot->x0_, robot->y0_, route[0].x, route[0].y));
-//            Log::print("F", f, r);
+            Log::print(robot->GetLinearVelocity(), robot->angular_velocity_, robot->x0_, robot->y0_);
+            if (route.size()) Log::print("K", Geometry::Dist(robot->x0_, robot->y0_, route[0].x, route[0].y));
+            Log::print("F", f, r);
             Output::Print(Input::frameID);
         }
         /*
@@ -750,7 +776,7 @@ namespace Solution1 {
     }
 
     void Solve() {
-        Input::ScanMap();
+        // Input::ScanMap();
         SetConfig(); // 针对地图设置参数
 //        Config_Read_From_Files(); // 搜参数专用
 //        Config_Read_From_Files2();
@@ -1030,6 +1056,10 @@ namespace Solution1 {
   */
 
 int main() {
-    Solution1::Solve();
+    Input::ScanMap();
+    if (Input::map_number_ == 2)
+        Solution4::Solve();
+    else 
+        Solution1::Solve();
     return 0;
 }

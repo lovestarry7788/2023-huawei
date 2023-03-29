@@ -123,7 +123,7 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
         // double rate = 1;
         double rate = std::max(0.1, 1 + (fabs(dif_rot) / PI - ed/180.0) * (1 / ((ed - st) / 180.0)));
         // double rate = (1 + (fabs(dif_rot) / PI - 1.0/5) * (-5.0/4)); // 1% 优化
-        forward = std::min(max_forward_velocity_ * rate, max_rotate_velocity_ * cir * 0.7); // not bad solution
+        forward = std::min(max_forward_velocity_ * rate, max_rotate_velocity_ * cir); // not bad solution
         // forward = max_forward_velocity_;
 
         // forward = std::min(max_forward_velocity_ * std::min(1.0, rate), max_rotate_velocity_ * cir); // not bad solution
@@ -141,10 +141,11 @@ void Robot::ToPoint(double dx, double dy, double& forward, double& rotate) {
 
 void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, int frame_a) {
     double limit_r = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
-    if (Geometry::Dist(x0_, y0_, a.x, a.y) < std::max(0.4, Geometry::UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), 0.0)) && Input::frameID + GetLinearVelocity() / (max_force_ / GetMass()) * 50 < frame_a) {
+    // Log::print("Dist", Geometry::Dist(x0_, y0_, a.x, a.y));
+    if (Geometry::Dist(x0_, y0_, a.x, a.y) < std::max(0.4, Geometry::UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), 0.0)) + (frame_a == INT_MAX ? 2 : 0) && Input::frameID + GetLinearVelocity() / (max_force_ / GetMass()) * 50 < frame_a) {
         Log::print("stop and rotate");
         forward = 0;
-        double aim_rot = atan2(b.y-y0_, b.x-x0_);
+        double aim_rot = atan2((frame_a == INT_MAX ? a.y : b.y)-y0_, (frame_a == INT_MAX ? a.x : b.x)-x0_);
         double dif_rot = AngleReg(aim_rot - orient_);
         if (fabs(dif_rot) <= limit_r) {
             rotate = 0; // 开始角速度减速
@@ -158,7 +159,7 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
     double alpha = InterAngle(a - cnt, b - a);
     if (alpha > PI / 2 && Geometry::Dist(x0_, y0_, a.x, a.y) > 2) {
         a = a + (a - b) / Length(a - b) * -0.4;
-        Log::print("changea", a.x, a.y);
+        // Log::print("changea", a.x, a.y);
     }
     double dx = a.x, dy = a.y;
     double dist = Geometry::Dist(x0_, y0_, dx, dy);
@@ -175,18 +176,20 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
         double rate = std::max(0.1, 1 + (fabs(dif_rot) / PI - ed/180.0) * (1 / ((ed - st) / 180.0)));
         // double rate = (1 + (fabs(dif_rot) / PI - 1.0/5) * (-5.0/4)); // 1% 优化
         // double rate = 1;
-        forward = std::min(max_forward_velocity_ * rate, max_rotate_velocity_ * cir); // not bad solution
+        forward = std::min(max_forward_velocity_ * rate, max_rotate_velocity_ * cir * 0.85); // not bad solution
         rotate *= dcmp(dif_rot);
     }
     double rate = std::max(0.1, 1 + (fabs(alpha) / PI - ed/180.0) * (1 / ((ed - st) / 180.0)));
     double aim_v = max_forward_velocity_ * rate;
     double slow_dist = UniformVariableDist(max_force_ / GetMass(), GetLinearVelocity(), aim_v);
     if (dist < slow_dist) {
-        Log::print("slow_dist", dist, slow_dist);
+        // Log::print("slow_dist", dist, slow_dist);
         forward = aim_v;
     }
-    if (dist < 0.8) // 提前角速度开转
+    if (dist < 0.6) {// 提前角速度开转{
+        // Log::print("rotate_angu", dist, slow_dist);
         rotate = max_rotate_velocity_ * dcmp(atan2(b.y - a.y, b.x - a.x));
+    }
 }
 // void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate) {
 //     Point cnt{x0_, y0_};
@@ -327,6 +330,60 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
 //     Log::print(Length(cnt - center) - r);
 // }
 // TODO：突然的急转弯难预测？本函数检查。
+std::vector<Geometry::Point> Robot::ForecastToPoint2(Point a, Point b, int frame_a, int forecast_num){
+    // bool P = Input::frameID == 926 && (id_ == 2 && fabs(rotate - 0) < 1e-6 && fabs(forward - 0) < 1e-6 || id_ == 3);
+    // bool P = false;
+    
+    // 假设：加速度总是满
+    std::vector<Point> forecast(forecast_num, Point{0,0});
+    double linearV = GetLinearVelocity();
+    double angularV = angular_velocity_;
+    double x0 = x0_, y0 = y0_;
+    double orient = orient_;
+    // if (P) Log::print("ForecastFixed", x0, y0, orient, linearV, angularV);
+    for (int i = 0; i < forecast_num; i++) {
+
+        linearV = std::max(1e-8, linearV);
+        angularV = std::max(1e-8, fabs(angularV)) * (angularV > 0 ? 1 : -1);
+
+        double cir = linearV / fabs(angularV);
+        Point center = {x0, y0};
+        Vector mov = Vector{-sin(orient), cos(orient)} * cir;
+        center = center + mov;
+        forecast[i] = center - Rotate(mov, 1 / 50.0 * linearV / cir);
+        // if (P) Log::print(forecast_[ri][i].x, forecast_[ri][i].y);
+        
+        double forward, rotate;
+        ToPointTwoPoint(a, b, forward, rotate, frame_a);
+        // ToPoint(dx, dy, forward, rotate);
+        // update
+        if (fabs(linearV - forward) > 1e-3) {
+            double add = (forward - linearV > 0 ? 1 : -1) * 1 / 50.0 * max_force_ / GetMass();
+            if ((linearV - forward) * (linearV + add - forward) < 0) {
+                linearV = 0;
+            } else {
+                linearV += add;
+                linearV = std::min(linearV, max_forward_velocity_);
+            }
+        }
+        if (fabs(angularV - rotate) > 1e-3) {
+            double add = (rotate - angularV > 0 ? 1 : -1) * 1 / 50.0 * max_rot_force_ / GetRotInerta();
+            if ((angularV - rotate) * (angularV + add - rotate) < 0) {
+                angularV = 0;
+            } else {
+                angularV += add;
+                angularV = std::min(max_rotate_velocity_, fabs(angularV)) * (angularV > 0 ? 1 : -1);
+            }
+        }
+        
+        x0 = forecast[i].x;
+        y0 = forecast[i].y;
+        orient += angularV * 1 / 50.0;
+        // if (P) Log::print(x0, y0, cir, orient, center.x, center.y, linearV, angularV);
+    }
+    return forecast;
+}
+
 std::vector<Geometry::Point> Robot::ForecastToPoint(double dx, double dy, int forecast_num){
     // bool P = Input::frameID == 926 && (id_ == 2 && fabs(rotate - 0) < 1e-6 && fabs(forward - 0) < 1e-6 || id_ == 3);
     // bool P = false;
