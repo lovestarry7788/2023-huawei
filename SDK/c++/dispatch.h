@@ -14,7 +14,7 @@ namespace Dispatch {
     constexpr int forecast_num_ = 75;
     constexpr int forecast_per_ = 8;
     constexpr double collide_dist_ = 1.7;
-    constexpr double collide_time_elemit_ = 0.02; // collide(dist, t) = dist < collide_dist_ - t * collide_time_elemit_;
+    constexpr double collide_time_elemit_ = 0.01; // collide(dist, t) = dist < collide_dist_ - t * collide_time_elemit_;
     struct Plan {
         // int robot_id;
         int mat_id = 0;
