@@ -3,7 +3,7 @@
 #include "IDA.h"
 
 int Input::frameID, Input::coins, Input::K;
-char Input::map_[100][100];
+char Input::map_[map_size_][map_size_];
 int Input::map_number_;
 std::vector<std::shared_ptr<Workbench> > Input::workbench;
 std::vector<std::shared_ptr<Robot> > Input::robot;        
@@ -22,8 +22,8 @@ bool Input::readUntilOK() {
 void Input::ScanMap() {
     K = 0;
     // 地图输入开始
-    for(int i = 0; i < 100; ++i) {
-        for(int j = 0; j < 100; ++j) {
+    for(int i = 0; i < map_size_; ++i) {
+        for(int j = 0; j < map_size_; ++j) {
             scanf("\n%c",&map_[i][j]);
             K += map_[i][j] >= '1' && map_[i][j] <= '9'; 
             // Log::print("i: ", i, "j: ", j, map_[i][j]);

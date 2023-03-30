@@ -2,17 +2,28 @@
 #define HW2023_WAYFINDING_H
 
 #include "geometry.h"
+#include "input.h"
 
 using Route = std::vector<Geometry::Point>;
-struct WayFindding {
-    char (*map_)[100];
-    std::vector<double> dijk_d_;
-    std::vector<Geometry::Point> joint_;
-    std::vector<Route> routes_;
+namespace WayFindding {
+    constexpr int map_size_ = Input::map_size_;
+    extern std::vector<double> dijk_d_;
+    extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos;
+    extern std::vector<int> edges_;
+    extern std::vector<std::vector<Route>> routes_;
 
-    WayFindding(char (*map)[100]);
     void dijkstra(int s);
-    void calc_all_route();
+
+    struct Status  {
+        int p;
+        // int orient; // 离散化
+        double d;
+        
+        bool operator<(const Status& rhs) const {
+            return d > rhs.d;
+        }
+    };
+
 };
 
 #endif

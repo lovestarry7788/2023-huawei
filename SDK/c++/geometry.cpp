@@ -58,6 +58,14 @@ Point Geometry::GetLineIntersection2(Point P, Vector v, Point Q, Vector w) {
     return P + v * t;
 }
 
+double Geometry::DistanceToSegment(const Point& P, const Point& A, const Point& B) {
+    if(A == B) return Length(P-A);
+    Vector v1 = B - A, v2 = P - A, v3 = P - B;
+    if(dcmp(Dot(v1, v2)) < 0) return Length(v2);
+    else if(dcmp(Dot(v1, v3)) > 0) return Length(v3);
+    else return fabs(Cross(v1, v2)) / Length(v1);
+}
+
 double Geometry::Cross(const Vector& A, const Vector& B) { return A.x * B.y - A.y * B.x; }
 
 // 求点 u 到线段 AB 的距离
