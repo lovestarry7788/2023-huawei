@@ -60,6 +60,32 @@ Point Geometry::GetLineIntersection2(Point P, Vector v, Point Q, Vector w) {
 
 double Geometry::Cross(const Vector& A, const Vector& B) { return A.x * B.y - A.y * B.x; }
 
+// 求点 u 到线段 AB 的距离
+double Geometry::DistanceToSegment(const Point& P, const Point& A, const Point& B) {
+    if(A == B) return Length(P-A);
+    Vector v1 = B - A, v2 = P - A, v3 = P - B;
+    if(dcmp(Dot(v1, v2)) < 0) return Length(v2);
+    else if(dcmp(Dot(v1, v3)) > 0) return Length(v3);
+    else return fabs(Cross(v1, v2)) / Length(v1);
+}
+
+/*
+ * 判断会不会碰撞时，需要考虑 机器人的半径 < 墙到机器人的距离，才算能到。
+ * 传入的 v 是墙的四个角。
+ * r 是机器人半径
+ */
+bool CheckCross(const Point& A, const Point& B, std::vector<Geometry::Point> v, double r) {
+    for(int i = 1; i < (int)v.size(); ++i) { // 点都在一边
+        if(dcmp(Cross({A - v[i-1]}, {B - v[i-1]})) * dcmp(Cross({A - v[i-1]}, {B - v[i-1]})) < 0) return true;
+    }
+
+    for(const auto& u: v) {
+        if(DistanceToSegment(u, A, B) <= r) return true;
+    }
+
+    return false;
+}
+
 
 // Geometry::Angle::Angle(double r) { this->r = reg(r); }
 // double Geometry::Angle::reg(double r) {if (r > PI) r -= 2*PI; else if (r < -PI) r += 2*PI; return r;}

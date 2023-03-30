@@ -362,7 +362,7 @@ inline void HandleFrame()
     auto g_robotsResult = g_robots;
     const auto buyCountCopy = g_buyCount;
     vector<int> robotIndex{0, 1, 2, 3};
-    do {
+    do { // 枚举机器人的顺序，搜索 4! 种方案。
         for (int i = 0; i < g_stationCount; ++i) {
             g_sellLock[i].reset();
         }

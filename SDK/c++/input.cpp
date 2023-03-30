@@ -1,5 +1,6 @@
 #include "input.h"
 #include "log.h"
+#include "IDA.h"
 
 int Input::frameID, Input::coins, Input::K;
 char Input::map_[101][101];
@@ -26,12 +27,15 @@ void Input::ScanMap() {
             scanf("\n%c",&map_[i][j]);
             K += map_[i][j] >= '1' && map_[i][j] <= '9'; 
             // Log::print("i: ", i, "j: ", j, map_[i][j]);
+            if(map_[i][j] == '#') is_obstacle_[i][j] = true;
+            else is_obstacle_[i][j] = false;
         }
     }
     readUntilOK();
     puts("OK");
     fflush(stdout);
     Identify_Map_Number();
+    IDA::Init();
 }
 
 bool Input::ScanFrame() { 
@@ -92,4 +96,32 @@ void Input::Identify_Map_Number() {
     else if(map_[7][49] == '7' && map_[97][49] == '4') map_number_ = 4;
     else map_number_ = -1;
     Log::print("Identify_Map_Number: ", map_number_);
+}
+
+
+void Input::Planned_Route() {
+
+    for(int idx = 0; idx < robot_num_ + K; ++idx) {
+        for(int idy = 0; idy < robot_num_ + K; ++idy) {
+            double sx, sy, dx, dy;
+            std::vector<Geometry::Point> planned_route;
+            if(idx < 4) {
+                sx = robot[idx] -> x0_;
+                sy = robot[idx] -> y0_;
+            } else {
+                sx = workbench[idx - robot_num_] -> x0_;
+                sy = workbench[idx - robot_num_] -> y0_;
+            }
+            if(idy < 4) {
+                dx = robot[idy] -> x0_;
+                dy = robot[idy] -> y0_;
+            } else {
+                dx = workbench[idy - robot_num_] -> x0_;
+                dy = workbench[idy - robot_num_] -> y0_;
+            }
+
+            swap(planned_route_[idx][idy], planned_route);
+        }
+    }
+
 }

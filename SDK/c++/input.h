@@ -1,6 +1,7 @@
 #ifndef HW2023_INPUT_H
 #define HW2023_INPUT_H
 
+#include "geometry.h"
 #include "workbench.h"
 #include "robot.h"
 #include <vector>
@@ -10,9 +11,10 @@
 namespace Input {
     extern int frameID, coins, K;
     extern char map_[101][101];
+    extern bool is_obstacle_[101][101];
     extern std::vector<std::shared_ptr<Workbench> > workbench;
     extern std::vector<std::shared_ptr<Robot> > robot;        
-    constexpr int robot_num_ = 4;
+    extern constexpr int robot_num_ = 4;
     extern int map_number_; // 是哪张地图，-1 = unknown
 
     bool readUntilOK();

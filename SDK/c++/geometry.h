@@ -53,6 +53,10 @@ namespace Geometry {
 
     Point GetLineIntersection2(Point P, Vector v, Point Q, Vector w);
 
+    double DistanceToSegment(const Point& P, const Point& A, const Point& B);
+
+    bool CheckCross(const Vector& A, const Vector& B, std::vector<Geometry::Point> v);
+
     // struct Angle {
     //     double r; // [-pi, pi]
     //     Angle(double r = 0);
