@@ -2,7 +2,7 @@
 #include "log.h"
 
 int Input::frameID, Input::coins, Input::K;
-char Input::map_[101][101];
+char Input::map_[100][100];
 int Input::map_number_;
 std::vector<std::shared_ptr<Workbench> > Input::workbench;
 std::vector<std::shared_ptr<Robot> > Input::robot;        

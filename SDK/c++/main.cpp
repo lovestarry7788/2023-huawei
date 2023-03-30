@@ -1057,9 +1057,9 @@ namespace Solution1 {
 
 int main() {
     Input::ScanMap();
-    if (Input::map_number_ == 2)
-        Solution4::Solve();
-    else 
+    // if (Input::map_number_ == 2)
+    //     Solution4::Solve();
+    // else 
         Solution1::Solve();
     return 0;
 }
