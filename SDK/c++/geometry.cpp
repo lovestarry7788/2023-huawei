@@ -68,15 +68,6 @@ double Geometry::DistanceToSegment(const Point& P, const Point& A, const Point& 
 
 double Geometry::Cross(const Vector& A, const Vector& B) { return A.x * B.y - A.y * B.x; }
 
-// 求点 u 到线段 AB 的距离
-double Geometry::DistanceToSegment(const Point& P, const Point& A, const Point& B) {
-    if(A == B) return Length(P-A);
-    Vector v1 = B - A, v2 = P - A, v3 = P - B;
-    if(dcmp(Dot(v1, v2)) < 0) return Length(v2);
-    else if(dcmp(Dot(v1, v3)) > 0) return Length(v3);
-    else return fabs(Cross(v1, v2)) / Length(v1);
-}
-
 /*
  * 判断会不会碰撞时，需要考虑 机器人的半径 < 墙到机器人的距离，才算能到。
  * 传入的 v 是墙的四个角。

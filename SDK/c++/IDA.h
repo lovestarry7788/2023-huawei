@@ -23,7 +23,7 @@ namespace IDA {
     bool Connection(double sx, double sy, double dx, double dy);
     double gCalcTime(double sx, double sy, double dx, double dy);
     std::pair<int,int> InWhichCell(double sx, double sy);
-    void Bfs(double sx, double sy);
+    void Bfs(int sx, int sy);
     void Init();
 }
 

@@ -1,25 +1,30 @@
 #include "wayfinding.h"
 #include "geometry.h"
+#include "input.h"
 #include <algorithm>
 #include <queue>
+#include <vector>
+#include <utility>
+#include <iostream>
 
 using namespace Geometry;
+using namespace Input;
 
 std::vector<double> dijk_d_;
 std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos;
 std::vector<int> edges_;
 std::vector<std::vector<Route>> routes_;
 
-WayFindding::WayFindding(char (*map)[map_size_]): map_(map) {
+void WayFinding::Init() {
     for (int i = 0; i < map_size_; i++) for (int j = 0; j < map_size_; j++) {
-        if ('1' <= map[i][j] && map[i][j] <= '9') {
+        if ('1' <= map_[i][j] && map_[i][j] <= '9') {
             workbench_pos.push_back({i * 0.5 + 0.25, j * 0.5 + 0.25});
         }
-        if (map[i][j] != '#') continue;
-        for (auto [di, dj] : {{1, -1},{1, 1},{-1, -1},{-1, 1}}) {
+        if (map_[i][j] != '#') continue;
+        for (const auto& [di, dj] : {{1, -1},{1, 1},{-1, -1},{-1, 1}}) {
             int ni = di+i, nj = dj+j;
             if (ni < 0 || ni >= map_size_ || nj < 0 || nj >= map_size_) continue;
-            if (!(map[ni][nj] != '#' || map[ni][j] != '#' || map[i][nj] != '#')) continue;
+            if (!(map_[ni][nj] != '#' || map_[ni][j] != '#' || map_[i][nj] != '#')) continue;
             double pi = i * 0.5 + 0.25 + di * 0.25;
             double pj = j * 0.5 + 0.25 + dj * 0.25;
             joint_obs_.push_back({pi, pj});
@@ -66,14 +71,14 @@ WayFindding::WayFindding(char (*map)[map_size_]): map_(map) {
     }
 }
 
-Point WayFindding::GetGraphPoint(int i) {
+Point WayFinding::GetGraphPoint(int i) {
     return i < joint_walk_.size() ? joint_walk_[i] : workbench_pos[i - joint_walk_.size()];
 }
 
-double WayFindding::DistBetweenPoints(Point a, Point b) {
+double WayFinding::DistBetweenPoints(Point a, Point b) {
     return Geometry::Dist(a, b) + 1e-3; // 走直线则只走端点
 }
-void WayFindding::Dijkstra(int s) {
+void WayFinding::Dijkstra(int s) {
     // TODO：将方向放入状态
     dijk_d_.resize(joint_.size());
     static const double INF = 1e18;
@@ -93,5 +98,3 @@ void WayFindding::Dijkstra(int s) {
         }
     }
 }
-
-

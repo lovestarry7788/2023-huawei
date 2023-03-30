@@ -3,16 +3,24 @@
 
 #include "geometry.h"
 #include "input.h"
+#include <algorithm>
+#include <queue>
+#include <vector>
+#include <utility>
+#include <iostream>
 
 using Route = std::vector<Geometry::Point>;
-namespace WayFindding {
+namespace WayFinding {
     constexpr int map_size_ = Input::map_size_;
     extern std::vector<double> dijk_d_;
     extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos;
     extern std::vector<int> edges_;
     extern std::vector<std::vector<Route>> routes_;
 
-    void dijkstra(int s);
+    void Init();
+    Geometry::Point GetGraphPoint(int i);
+    double DistBetweenPoints(Geometry::Point a, Geometry::Point b);
+    void Dijkstra(int s);
 
     struct Status  {
         int p;

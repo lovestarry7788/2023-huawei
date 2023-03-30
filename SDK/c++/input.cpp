@@ -1,12 +1,16 @@
 #include "input.h"
 #include "log.h"
 #include "IDA.h"
+#include "wayfinding.h"
+
+using namespace WayFinding;
 
 int Input::frameID, Input::coins, Input::K;
 char Input::map_[map_size_][map_size_];
+bool Input::is_obstacle_[map_size_][map_size_];
 int Input::map_number_;
 std::vector<std::shared_ptr<Workbench> > Input::workbench;
-std::vector<std::shared_ptr<Robot> > Input::robot;        
+std::vector<std::shared_ptr<Robot> > Input::robot;
 
 bool Input::readUntilOK() {
     char line[1024];
@@ -35,7 +39,7 @@ void Input::ScanMap() {
     puts("OK");
     fflush(stdout);
     Identify_Map_Number();
-    IDA::Init();
+    WayFinding::Init();
 }
 
 bool Input::ScanFrame() { 
@@ -98,7 +102,7 @@ void Input::Identify_Map_Number() {
     Log::print("Identify_Map_Number: ", map_number_);
 }
 
-
+/*
 void Input::Planned_Route() {
 
     for(int idx = 0; idx < robot_num_ + K; ++idx) {
@@ -125,3 +129,4 @@ void Input::Planned_Route() {
     }
 
 }
+ */
