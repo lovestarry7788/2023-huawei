@@ -11,15 +11,18 @@
 
 using Route = std::vector<Geometry::Point>;
 namespace WayFinding {
+    using namespace Input;
+    using namespace Geometry;
+
     constexpr int map_size_ = Input::map_size_;
     extern std::vector<double> dijk_d_;
-    extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos;
-    extern std::vector<int> edges_;
+    extern std::vector<Point> joint_walk_[2], joint_obs_, workbench_pos;
+    extern std::vector<int> edges_[2][10001];
     extern std::vector<std::vector<Route>> routes_;
 
     void Init();
-    Geometry::Point GetGraphPoint(int i);
-    double DistBetweenPoints(Geometry::Point a, Geometry::Point b);
+    Point GetGraphPoint(int i);
+    double DistBetweenPoints(Point a, Point b);
     void Dijkstra(int s);
 
     struct Status  {

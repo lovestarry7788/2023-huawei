@@ -28,6 +28,7 @@ namespace Geometry {
     
     // 两点间距离
     double Dist(double x1, double y1, double x2, double y2);
+    double Dist(Point a, Point b);
 
     // 匀变速运动距离/角度
     double UniformVariableDist(double a, double v, double aim_v);

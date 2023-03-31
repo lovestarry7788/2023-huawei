@@ -20,6 +20,10 @@ double Geometry::Dist(double x1, double y1, double x2, double y2) {
     return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
 }
 
+double Geometry::Dist(Point a, Point b) {
+    return sqrt((a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y));
+}
+
 // 匀变速运动，估计开始减速距离
 double Geometry::UniformVariableDist(double a, double v, double aim_v) {
     return fabs(v * v - aim_v * aim_v) / (2 * a);

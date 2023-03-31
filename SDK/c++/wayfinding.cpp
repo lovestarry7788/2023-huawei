@@ -11,11 +11,12 @@ using namespace Geometry;
 using namespace Input;
 
 std::vector<double> dijk_d_;
-std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos;
-std::vector<int> edges_;
+std::vector<Geometry::Point> joint_walk_[2], joint_obs_, workbench_pos;
+std::vector<int> edges_[2][10001];
 std::vector<std::vector<Route>> routes_;
 
 void WayFinding::Init() {
+    double r[2] = {0.47, 0.53};
     for (int i = 0; i < map_size_; i++) for (int j = 0; j < map_size_; j++) {
         if ('1' <= map_[i][j] && map_[i][j] <= '9') {
             workbench_pos.push_back({i * 0.5 + 0.25, j * 0.5 + 0.25});
@@ -30,29 +31,36 @@ void WayFinding::Init() {
             joint_obs_.push_back({pi, pj});
             pi += di * 0.5;
             pj += dj * 0.5;
-            joint_walk_.push_back({pi, pj});
+            joint_walk_[0].emplace_back({pi, pj});
+            pi += di * 0.25;
+            pj += dj * 0.25;
+            joint_walk_[1].emplace_back({pi, pj});
         }
     }
     for (auto& uni : {joint_walk_, joint_obs_}) {
         std::sort(begin(uni), end(uni));
         uni.resize(std::unique(begin(uni), end(uni)) - begin(uni));
     }
-    for (size_t i = 0; i < joint_walk_.size() + workbench_pos.size(); i++) for (size_t j = 0; j < i; j++) {
-        auto& a = GetGraphPoint(i);
-        auto& b = GetGraphPoint(j);
-        bool valid = true;
-        for (auto& k : joint_obs_) {
-            double d = DistanceToSegment(k, a, b);
-            if (d < 0.5 - 1e-3) {
-                valid = false;
-                break;
+
+    for(int k = 0; k < 2; ++k) {
+        for (size_t i = 0; i < joint_walk_.size() + workbench_pos.size(); i++) for (size_t j = 0; j < i; j++) {
+            auto a = GetGraphPoint(i);
+            auto b = GetGraphPoint(j);
+            bool valid = true;
+            for (const auto& u : joint_obs_) {
+                double d = DistanceToSegment(u, a, b);
+                if (d <= r[k] + 1e-3) {
+                    valid = false;
+                    break;
+                }
             }
+            if (!valid) continue;
+            // 暂不考虑单行道
+            edges_[k][i].push_back(j);
+            edges_[k][j].push_back(i);
         }
-        if (!valid) continue;
-        // 暂不考虑单行道
-        edges_[i].push_back(j);
-        edges_[j].push_back(i);
     }
+
     size_t workbench_num = workbench_pos.size();
     routes_.resize(workbench_num, std::vector<Route>(workbench_num));
     for (size_t i = 0; i < workbench_pos.size(); i++) {
@@ -78,6 +86,7 @@ Point WayFinding::GetGraphPoint(int i) {
 double WayFinding::DistBetweenPoints(Point a, Point b) {
     return Geometry::Dist(a, b) + 1e-3; // 走直线则只走端点
 }
+
 void WayFinding::Dijkstra(int s) {
     // TODO：将方向放入状态
     dijk_d_.resize(joint_.size());
@@ -86,10 +95,10 @@ void WayFinding::Dijkstra(int s) {
     std::priority_queue<Status> Q;
     dijk_d_[s] = 0.0;
     Q.push({s, dijk_d_[s]});
-    while (Q.size()) {
+    while (!Q.empty()) {
         auto [u, du] = Q.top(); Q.pop();
         if (dijk_d_[u] != du) continue;
-        for (auto v : edges_[u]) {
+        for (const auto& v: edges_[u]) {
             double d = distBetweenPoints(GetGraphPoint(u), GetGraphPoint(v)); 
             if (dijk_d_[v] > dijk_d_[u] + d) {
                 dijk_d_[v] = dijk_d_[u] + d;
