@@ -15,7 +15,7 @@ namespace WayFinding {
     using namespace Geometry;
 
     constexpr int map_size_ = Input::map_size_;
-    extern std::vector<double> dijk_d_;
+    extern std::vector<double> dijk_d_[10001];
     extern std::vector<Point> joint_walk_[2], joint_obs_, workbench_pos;
     extern std::vector<int> edges_[2][10001];
     extern std::vector<std::vector<Route>> routes_;

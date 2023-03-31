@@ -13,7 +13,7 @@ using namespace Input;
 std::vector<double> dijk_d_;
 std::vector<Geometry::Point> joint_walk_[2], joint_obs_, workbench_pos;
 std::vector<int> edges_[2][10001];
-std::vector<std::vector<Route>> routes_;
+std::vector<std::vector<Route> > routes_;
 
 void WayFinding::Init() {
     double r[2] = {0.47, 0.53};
@@ -99,7 +99,7 @@ void WayFinding::Dijkstra(int s) {
         auto [u, du] = Q.top(); Q.pop();
         if (dijk_d_[u] != du) continue;
         for (const auto& v: edges_[u]) {
-            double d = distBetweenPoints(GetGraphPoint(u), GetGraphPoint(v)); 
+            double d = DistBetweenPoints(GetGraphPoint(u), GetGraphPoint(v));
             if (dijk_d_[v] > dijk_d_[u] + d) {
                 dijk_d_[v] = dijk_d_[u] + d;
                 Q.push({v, dijk_d_[v]});
