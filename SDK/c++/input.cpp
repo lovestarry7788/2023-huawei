@@ -37,10 +37,11 @@ void Input::ScanMap() {
         }
     }
     readUntilOK();
+    Log::print("Input ScanMap OK!");
+    WayFinding::Init();
     puts("OK");
     fflush(stdout);
     Identify_Map_Number();
-    WayFinding::Init();
 }
 
 bool Input::ScanFrame() { 

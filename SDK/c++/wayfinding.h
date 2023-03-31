@@ -13,7 +13,7 @@ using Route = std::vector<Geometry::Point>;
 namespace WayFinding {
     using namespace Input;
     using namespace Geometry;
-
+    constexpr double INF = 1e18;
     constexpr int map_size_ = Input::map_size_;
 
     struct Edge {
@@ -30,7 +30,7 @@ namespace WayFinding {
     extern std::vector<Edge> edge;
     extern std::vector<int> head;
 
-    extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos;
+    extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos, robot_pos;
     extern std::vector<std::vector<Route>> routes_;
 
     int FreeSpace(int x, int y, int dx, int dy, int mx);

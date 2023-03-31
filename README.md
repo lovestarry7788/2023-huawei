@@ -10,7 +10,7 @@
 >make
 
 #### 2. 判题器使用 simple
-> ./Robot -m pre_official_map/1.txt ./SDK/c++/build/main
+> ./Robot_GUI -m maps/1.txt ./SDK/c++/build/main
 > ./Robot_linux -m pre_official_map/1.txt ./build/main -f -s 1
 
 #### 2.1 参数解释

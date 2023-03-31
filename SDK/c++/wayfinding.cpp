@@ -18,7 +18,7 @@ std::vector<int> WayFinding::pre;
 std::vector<Edge> WayFinding::edge;
 std::vector<int> WayFinding::head;
 
-std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::joint_obs_, WayFinding::workbench_pos;
+std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::joint_obs_, WayFinding::workbench_pos, WayFinding::robot_pos;
 std::vector<std::vector<Route> > WayFinding::routes_;
 
 void WayFinding::Insert_Edge(int u, int v, int dis, int dis_to_wall) {
@@ -47,9 +47,13 @@ void WayFinding::Init() {
         for (int j = 0; j < map_size_; j++) {
             double px = j * 0.5 + 0.25;
             double py = (map_size_ - i - 1) * 0.5 + 0.25;
-            if ('1' <= map_[i][j] && map_[i][j] <= '9') {
+
+            if (map_[i][j] == 'A') {
+                robot_pos.push_back({px, py});
+            } else if ('1' <= map_[i][j] && map_[i][j] <= '9') {
                 workbench_pos.push_back({px, py});
             }
+
             if (map_[i][j] != '#') continue;
             joint_obs_.push_back({px + 0.25, py + 0.25});
             joint_obs_.push_back({px + 0.25, py - 0.25});
@@ -75,6 +79,9 @@ void WayFinding::Init() {
         }
     }
 
+    /*
+     * 对所有的点集进行去重
+     */
     auto unique = [](std::vector<Point> &uni) {
         std::sort(begin(uni), end(uni));
         auto p = std::unique(begin(uni), end(uni));
@@ -83,10 +90,12 @@ void WayFinding::Init() {
 
     unique(joint_obs_);
     unique(joint_walk_);
-    // for (auto i : joint_walk_) {
-    //     Log::print("joint_walk_", i.x, i.y);
-    // }
-    N = joint_walk_.size() + workbench_pos.size();
+
+    /*
+     * 离散化的点包括：机器人初始位置 + 工作台 + 障碍的拐角所拓展的点
+     * 对于所有离散化的点进行通过测试。
+     */
+    N = robot_pos.size() + workbench_pos.size() + joint_walk_.size();
     head.assign(N, -1); // 清空邻接表
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < i; j++) {
@@ -111,25 +120,37 @@ void WayFinding::Init() {
         }
     }
 
-    int workbench_num = workbench_pos.size();
-    routes_.resize(workbench_num, std::vector<Route>(workbench_num));
-    for (int i = 0; i < workbench_num; i++) {
-        int s = i + joint_walk_.size();
+    /*
+     * M 表示 机器人 + 工作台 的数量
+     * 规划 M * M 的走法
+     * route_[i][j] 表示从 i 到 j 的路径集合。
+     */
+    int M = robot_pos.size() + workbench_pos.size();
+    Log::print(N, M);
+    routes_.resize(M, std::vector<Route>(M));
+    for (int s = 0; s < M; s++) {
         Dijkstra(s);
-        for (int j = 0; j < workbench_num; j++) {
-            int t = j + joint_walk_.size();
-            auto& route = routes_[i][j];
+        for (int j = 0; j < M; j++) if(dist[j] < INF) {
+            int t = j;
+            auto& route = routes_[s][t];
             route.clear();
+            // 从终点一直添加路径到起点
+            Log::print(s, t);
             while (t != s) {
                 route.push_back(GetGraphPoint(t));
                 t = edge[pre[t]].u;
             }
+            std::reverse(route.begin(), route.end());
         }
     }
+
+    Log::print("WayFinding Ready!");
 }
 
 Point WayFinding::GetGraphPoint(int i) { // 函数内部
-    return i < joint_walk_.size() ? joint_walk_[i] : workbench_pos[i - joint_walk_.size()];
+    if(i < robot_pos.size()) return robot_pos[i];
+    else if(i < workbench_pos.size()) return workbench_pos[i - robot_pos.size()];
+    return joint_walk_[i - robot_pos.size() - workbench_pos.size()];
 }
 
 double WayFinding::DistBetweenPoints(Point a, Point b) {
@@ -138,7 +159,6 @@ double WayFinding::DistBetweenPoints(Point a, Point b) {
 
 void WayFinding::Dijkstra(int s) {
     // TODO：将方向放入状态
-    static const double INF = 1e18;
     pre.assign(N, -1);
     dist.assign(N, INF);
     std::priority_queue<std::pair<double, int> > Q;
@@ -147,7 +167,7 @@ void WayFinding::Dijkstra(int s) {
     while (!Q.empty()) {
         auto x = Q.top(); Q.pop();
         if (dist[x.second] != x.first) continue;
-        for (int k = head[x.first]; k != -1; k = edge[k].nex) {
+        for (int k = head[x.second]; k != -1; k = edge[k].nex) {
             if (dist[edge[k].v] > dist[edge[k].u] + edge[k].dis) {
                 dist[edge[k].v] = dist[edge[k].u] + edge[k].dis;
                 pre[edge[k].v] = k;

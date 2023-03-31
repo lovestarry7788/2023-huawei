@@ -25,37 +25,42 @@
 #include <memory>
 #include <climits>
 
-/*
+
 // 测试wayfindding
 namespace Solution6 {
     using namespace Input;
     using namespace Output;
+    using namespace Geometry;
+    using namespace WayFinding;
+
     void Solve() {
         Input::ScanMap();
-        using namespace Geometry;
-        using namespace WayFinding;
+        int u = 0; // 表示第 0 号机器人
+        int v = robot_num_; // 去第 0 号工作台
+        auto route = routes_[u][v];
+        Log::print("routes_size: ", route.size());
+        for(const auto& point: route) {
+            Log::print(point.x, point.y);
+        }
 
         while(Input::ScanFrame()) {
-            bool P = Input::frameID < 500;
-            auto robot = Input::robot[0];
-            Geometry::Point loc{robot->x0_, robot->y0_};
-            while (route.size() && Geometry::Length(loc - route.front()) < 3e-1) {
+            Point robot_pos = {robot[0] -> x0_, robot[0] -> y0_};
+            while (route.size() && Geometry::Length(robot_pos - route.front()) < 3e-1) { // 机器人到达某个点，则删掉。
                 route.erase(begin(route));
             }
-            double f, r;
-            if (route.size() >= 2) {
-                robot->ToPointTwoPoint(route[0], route[1], f, r);
-            } else if (route.size() >= 1)
-                robot->ToPoint(route[0].x, route[0].y, f, r);
-            Output::Forward(0, f);
-            Output::Rotate(0, r);
-
+            double forward, rotate;
+//            if (route.size() >= 2) {
+//                robot->ToPointTwoPoint(route[0], route[1], f, r);
+//            } else if (route.size() >= 1)
+            robot[0]->ToPoint(route.front().x, route.front().y, forward, rotate);
+            Output::Forward(0, forward);
+            Output::Rotate(0, rotate);
             Output::Print(Input::frameID);
         }
 
     }
 }
-*/
+
 
 namespace Solution1 {
     using namespace Input;
@@ -458,6 +463,6 @@ namespace Solution1 {
 }
 
 int main() {
-    Solution1::Solve();
+    Solution6::Solve();
     return 0;
 }
