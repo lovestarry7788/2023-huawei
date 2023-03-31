@@ -17,47 +17,53 @@ std::vector<std::vector<Route> > routes_;
 
 void WayFinding::Init() {
     double r[2] = {0.47, 0.53};
-    for (int i = 0; i < map_size_; i++) for (int j = 0; j < map_size_; j++) {
-        if ('1' <= map_[i][j] && map_[i][j] <= '9') {
-            workbench_pos.push_back({i * 0.5 + 0.25, j * 0.5 + 0.25});
-        }
-        if (map_[i][j] != '#') continue;
-        for (const auto& [di, dj] : {{1, -1},{1, 1},{-1, -1},{-1, 1}}) {
-            int ni = di+i, nj = dj+j;
-            if (ni < 0 || ni >= map_size_ || nj < 0 || nj >= map_size_) continue;
-            if (!(map_[ni][nj] != '#' || map_[ni][j] != '#' || map_[i][nj] != '#')) continue;
-            double pi = i * 0.5 + 0.25 + di * 0.25;
-            double pj = j * 0.5 + 0.25 + dj * 0.25;
-            joint_obs_.push_back({pi, pj});
-            pi += di * 0.5;
-            pj += dj * 0.5;
-            joint_walk_[0].emplace_back({pi, pj});
-            pi += di * 0.25;
-            pj += dj * 0.25;
-            joint_walk_[1].emplace_back({pi, pj});
+    for (int i = 0; i < map_size_; i++) {
+        for (int j = 0; j < map_size_; j++) {
+            if ('1' <= map_[i][j] && map_[i][j] <= '9') { // 添加 workbench 的位置。
+                workbench_pos.push_back({i * 0.5 + 0.25, j * 0.5 + 0.25});
+            }
+
+            if (map_[i][j] != '#') continue;
+            std::vector<std::pair<int,int> > d;
+            for (const auto &[di, dj]: d) { // map_[i][j] == '#'
+                int ni = di + i, nj = dj + j;
+                if (ni < 0 || ni >= map_size_ || nj < 0 || nj >= map_size_) continue;
+                if (map_[ni][nj] == '#' && map_[ni][j] == '#' && map_[i][nj] == '#') continue;
+                double pi = i * 0.5 + 0.25 + di * 0.25;
+                double pj = j * 0.5 + 0.25 + dj * 0.25; // 障碍点的角落坐标
+                joint_obs_.push_back({pi, pj});
+                pi += di * 0.5;
+                pj += dj * 0.5;
+                joint_walk_[0].push_back({pi, pj});
+                pi += di * 0.25;
+                pj += dj * 0.25;
+                joint_walk_[1].push_back({pi, pj});
+            }
         }
     }
-    for (auto& uni : {joint_walk_, joint_obs_}) {
+    for (const auto& uni: {joint_walk_[0], joint_walk_[1], joint_obs_}) {
         std::sort(begin(uni), end(uni));
         uni.resize(std::unique(begin(uni), end(uni)) - begin(uni));
     }
 
     for(int k = 0; k < 2; ++k) {
-        for (size_t i = 0; i < joint_walk_.size() + workbench_pos.size(); i++) for (size_t j = 0; j < i; j++) {
-            auto a = GetGraphPoint(i);
-            auto b = GetGraphPoint(j);
-            bool valid = true;
-            for (const auto& u : joint_obs_) {
-                double d = DistanceToSegment(u, a, b);
-                if (d <= r[k] + 1e-3) {
-                    valid = false;
-                    break;
+        for (size_t i = 0; i < joint_walk_[k].size() + workbench_pos.size(); i++) {
+            for (size_t j = 0; j < i; j++) {
+                auto a = GetGraphPoint(i);
+                auto b = GetGraphPoint(j);
+                bool valid = true;
+                for (const auto &u: joint_obs_) {
+                    double d = DistanceToSegment(u, a, b);
+                    if (d <= r[k] + 1e-3) {
+                        valid = false;
+                        break;
+                    }
                 }
+                if (!valid) continue;
+                // 暂不考虑单行道
+                edges_[k][i].push_back(j);
+                edges_[k][j].push_back(i);
             }
-            if (!valid) continue;
-            // 暂不考虑单行道
-            edges_[k][i].push_back(j);
-            edges_[k][j].push_back(i);
         }
     }
 
