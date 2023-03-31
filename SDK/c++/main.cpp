@@ -7,6 +7,7 @@
 #include "dispatch.h"
 #include "input.h"
 #include "output.h"
+#include "wayfinding.h"
 #include <cmath>
 #include <algorithm>
 #include <queue>
@@ -24,6 +25,7 @@
 #include <memory>
 #include <climits>
 
+/*
 // 测试wayfindding
 namespace Solution6 {
     using namespace Input;
@@ -31,7 +33,8 @@ namespace Solution6 {
     void Solve() {
         Input::ScanMap();
         using namespace Geometry;
-        /*
+        using namespace WayFinding;
+
         while(Input::ScanFrame()) {
             bool P = Input::frameID < 500;
             auto robot = Input::robot[0];
@@ -49,9 +52,11 @@ namespace Solution6 {
 
             Output::Print(Input::frameID);
         }
-        */
+
     }
 }
+*/
+
 namespace Solution1 {
     using namespace Input;
     using namespace Output;
@@ -453,6 +458,6 @@ namespace Solution1 {
 }
 
 int main() {
-    Solution6::Solve();
+    Solution1::Solve();
     return 0;
 }
