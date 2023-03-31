@@ -15,16 +15,27 @@ namespace WayFinding {
     using namespace Geometry;
 
     constexpr int map_size_ = Input::map_size_;
-    extern std::vector<double> dijk_d_[10001];
-    extern std::vector<Point> joint_walk_[2], joint_obs_, workbench_pos;
-    extern std::vector<int> edges_[2][10001];
+
+    struct Edge {
+        int u, v;
+        double dist;
+        double dist_wall; // 离墙4端点最近距离
+    };
+
+    extern size_t dijk_siz_;
+    extern std::vector<double> dijk_d_;
+    extern std::vector<int> dijk_p_;
+    extern std::vector<std::vector<int>> E_;
+    extern std::vector<Edge> edges_;
+
+    extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos;
     extern std::vector<std::vector<Route>> routes_;
 
+    int FreeSpace(int x, int y, int dx, int dy, int mx);
     void Init();
     Point GetGraphPoint(int i);
     double DistBetweenPoints(Point a, Point b);
     void Dijkstra(int s);
-
     struct Status  {
         int p;
         // int orient; // 离散化

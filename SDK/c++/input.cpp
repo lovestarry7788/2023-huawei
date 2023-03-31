@@ -1,6 +1,6 @@
 #include "input.h"
 #include "log.h"
-#include "IDA.h"
+// #include "IDA.h"
 #include "wayfinding.h"
 
 using namespace WayFinding;
@@ -25,6 +25,7 @@ bool Input::readUntilOK() {
 
 void Input::ScanMap() {
     K = 0;
+    memset(map_, 0, sizeof(map_));
     // 地图输入开始
     for(int i = 0; i < map_size_; ++i) {
         for(int j = 0; j < map_size_; ++j) {

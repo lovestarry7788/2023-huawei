@@ -24,6 +24,34 @@
 #include <memory>
 #include <climits>
 
+// 测试wayfindding
+namespace Solution6 {
+    using namespace Input;
+    using namespace Output;
+    void Solve() {
+        Input::ScanMap();
+        using namespace Geometry;
+        /*
+        while(Input::ScanFrame()) {
+            bool P = Input::frameID < 500;
+            auto robot = Input::robot[0];
+            Geometry::Point loc{robot->x0_, robot->y0_};
+            while (route.size() && Geometry::Length(loc - route.front()) < 3e-1) {
+                route.erase(begin(route));
+            }
+            double f, r;
+            if (route.size() >= 2) {
+                robot->ToPointTwoPoint(route[0], route[1], f, r);
+            } else if (route.size() >= 1)
+                robot->ToPoint(route[0].x, route[0].y, f, r);
+            Output::Forward(0, f);
+            Output::Rotate(0, r);
+
+            Output::Print(Input::frameID);
+        }
+        */
+    }
+}
 namespace Solution1 {
     using namespace Input;
     using namespace Output;
@@ -425,6 +453,6 @@ namespace Solution1 {
 }
 
 int main() {
-    Solution1::Solve();
+    Solution6::Solve();
     return 0;
 }
