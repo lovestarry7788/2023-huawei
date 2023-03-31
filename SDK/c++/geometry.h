@@ -12,7 +12,7 @@ namespace Geometry {
 
     struct Point{
         double x, y;
-        Point(double x_, double y_) : x(x_), y(y_){}
+        Point(double x_ = 0, double y_ = 0) : x(x_), y(y_){}
     };
     using Vector = Point;
 
