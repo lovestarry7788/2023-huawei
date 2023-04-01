@@ -13,6 +13,7 @@ using namespace Input;
 using namespace WayFinding;
 
 size_t WayFinding::N;
+int WayFinding::map_id_[map_size_][map_size_];
 std::vector<double> WayFinding::dist;
 std::vector<int> WayFinding::pre;
 std::vector<Edge> WayFinding::edge;
@@ -21,7 +22,7 @@ std::vector<int> WayFinding::head;
 std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::joint_obs_, WayFinding::workbench_pos, WayFinding::robot_pos;
 std::vector<std::vector<Route> > WayFinding::routes_;
 
-void WayFinding::Insert_Edge(int u, int v, int dis, int dis_to_wall) {
+void WayFinding::Insert_Edge(int u, int v, double dis, double dis_to_wall) {
     edge.push_back(Edge{u, v, head[u], dis, dis_to_wall});
     int edge_num = edge.size() - 1;
     head[u] = edge_num;
@@ -43,6 +44,8 @@ int WayFinding::FreeSpace(int x, int y, int dx, int dy, int mx) {
 
 void WayFinding::Init() {
 //    double Radius[2] = {0.47, 0.53};
+    memset(map_id_, -1, sizeof(map_id_));
+    int cnt_robot = 0, cnt_workbench = 0;
     for (int i = 0; i < map_size_; i++) {
         for (int j = 0; j < map_size_; j++) {
             double px = j * 0.5 + 0.25;
@@ -50,8 +53,10 @@ void WayFinding::Init() {
 
             if (map_[i][j] == 'A') {
                 robot_pos.push_back({px, py});
+                map_id_[i][j] = cnt_robot++;
             } else if ('1' <= map_[i][j] && map_[i][j] <= '9') {
                 workbench_pos.push_back({px, py});
+                map_id_[i][j] = cnt_workbench++;
             }
 
             if (map_[i][j] != '#') continue;
@@ -72,8 +77,8 @@ void WayFinding::Init() {
                 // Log::print("angle", ni, nj, px, py, minsp);
 
                 // 每个90度点只生成一个路径点，视两侧最小宽度，为2则移动一格，大于等于3则移动1.5格。由于最短路，如果不想进入2格宽的路，就不会经过移动1格生成的点而撞。
-                double px2 = px + dj * 0.25 * (minsp + 1);
-                double py2 = py + -di * 0.25 * (minsp + 1);
+                double px2 = px + dj * 0.25 * (minsp + 0);
+                double py2 = py + -di * 0.25 * (minsp + 0);
                 joint_walk_.push_back({px2, py2});
             }
         }
@@ -112,8 +117,9 @@ void WayFinding::Init() {
                     break;
                 }
             }
-            if (!valid) continue;
             double d = DistBetweenPoints(a, b);
+            // Log::print(i, j, a.x, a.y, b.x, b.y, d, mind, valid);
+            if (!valid) continue;
             // 暂不考虑单行道，存了mind供将来判断道路宽度使用
             Insert_Edge(i, j, d, mind);
             Insert_Edge(j, i, d, mind);
@@ -126,16 +132,17 @@ void WayFinding::Init() {
      * route_[i][j] 表示从 i 到 j 的路径集合。
      */
     int M = robot_pos.size() + workbench_pos.size();
-    Log::print(N, M);
+    // Log::print(N, M);
     routes_.resize(M, std::vector<Route>(M));
     for (int s = 0; s < M; s++) {
         Dijkstra(s);
+        // Log::print(s, GetGraphPoint(s).x, GetGraphPoint(s).y);
         for (int j = 0; j < M; j++) if(dist[j] < INF) {
             int t = j;
             auto& route = routes_[s][t];
             route.clear();
             // 从终点一直添加路径到起点
-            Log::print(s, t);
+            // Log::print(s, t);
             while (t != s) {
                 route.push_back(GetGraphPoint(t));
                 t = edge[pre[t]].u;
@@ -161,18 +168,29 @@ void WayFinding::Dijkstra(int s) {
     // TODO：将方向放入状态
     pre.assign(N, -1);
     dist.assign(N, INF);
-    std::priority_queue<std::pair<double, int> > Q;
+    std::priority_queue<Status> Q;
     dist[s] = 0.0;
-    Q.push({dist[s], s});
+    Q.push(Status{s, dist[s]});
     while (!Q.empty()) {
         auto x = Q.top(); Q.pop();
-        if (dist[x.second] != x.first) continue;
-        for (int k = head[x.second]; k != -1; k = edge[k].nex) {
+        int u = x.u;
+        if (dist[u] != x.d) continue;
+        for (int k = head[u]; k != -1; k = edge[k].nex) {
             if (dist[edge[k].v] > dist[edge[k].u] + edge[k].dis) {
                 dist[edge[k].v] = dist[edge[k].u] + edge[k].dis;
                 pre[edge[k].v] = k;
-                Q.push({dist[edge[k].v], edge[k].v});
+                Q.push(Status{edge[k].v, dist[edge[k].v]});
             }
         }
     }
+}
+
+bool WayFinding::GetRoute(Point cnt, int workbench_id, Route& output) {
+    int pi = int((50 - cnt.y) / 0.5), pj = int(cnt.x / 0.5);
+    int from = map_id_[pi][pj];
+    if (from == -1) return false;
+    if ('1' <= map_[pi][pj] && map_[pi][pj] <= '9')
+        from += robot_pos.size();
+    output = routes_[from][workbench_id + robot_pos.size()];
+    return true;
 }

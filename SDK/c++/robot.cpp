@@ -63,25 +63,23 @@ void Robot::ToPoint_1(double dx, double dy, double& forward, double& rotate) {
 
     // static int frame = 0;
     // Log::print("frame", ++frame);
+    rotate = 0;
+    // Log::print("change forward");
+    double vel = Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
+    double limit = Geometry::UniformVariableDist(max_force_ / GetMass(), vel, 0);
+    double d = Geometry::Dist(x0_, y0_, dx, dy);
+    if (limit > d) forward = 0;
+    else forward = Robot::max_forward_velocity_;
     if (fabs(dif_rot) > max_orient_diff_) {
         // 2 max
         // 2.6
-        if (fabs(dif_rot) > 1.5) forward = 0; // 角度太大就停下再转，防止绕圈圈
-        else forward = max_forward_velocity_;
+        if (fabs(dif_rot) > 0.1) forward = 0; // 角度太大就停下再转，防止绕圈圈
         // else forward = max_forward_velocity_ * std::max(0.0, 3.5-1 / 0.6 * fabs(dif_rot));
         // Log::print("change rot");
         double limit = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
         // Log::print("rot limit", limit);
         if (fabs(dif_rot) < limit) rotate = 0; // 开始减速
         else rotate = dif_rot > 0 ? -max_rotate_velocity_ : max_rotate_velocity_;
-    } else {
-        rotate = 0;
-        // Log::print("change forward");
-        double vel = Geometry::Length(Geometry::Vector{linear_velocity_x_, linear_velocity_y_});
-        double limit = Geometry::UniformVariableDist(max_force_ / GetMass(), vel, 0);
-        double d = Geometry::Dist(x0_, y0_, dx, dy);
-        if (limit > d) forward = 0;
-        else forward = Robot::max_forward_velocity_;
     }
     // Log::print(dx, dy, x0_, y0_, forward);
     // Log::print(orient_, aim_rot, dif_rot, rotate);
