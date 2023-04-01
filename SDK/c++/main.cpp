@@ -60,7 +60,8 @@ namespace Solution6 {
 //            if (route.size() >= 2) {
 //                robot->ToPointTwoPoint(route[0], route[1], f, r);
 //            } else if (route.size() >= 1)
-            robot[0]->ToPoint_1(route.front(), forward, rotate);
+            if (route.size())
+                robot[0]->ToPoint_1(route.front(), forward, rotate);
             Output::Forward(0, forward);
             Output::Rotate(0, rotate);
             Output::Print(Input::frameID);
