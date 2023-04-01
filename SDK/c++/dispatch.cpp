@@ -90,8 +90,7 @@ void Dispatch::UpdateFake(int robot_id) {
     auto robot = Input::robot[i];
     robot->carry_id_ = 0;
     auto wb = Input::workbench[plan_[i].sell_workbench];
-    robot->x0_ = wb->x0_;
-    robot->y0_ = wb->y0_;
+    robot->pos_ = wb->pos_;
     // 对速度与方向暂时不调整
     RobotReplan_(i);
     Input::robot[i] = std::make_shared<Robot>(robot_bak);
@@ -168,11 +167,11 @@ void Dispatch::ControlWalk() {
                     frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
                 else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
                     frame_reach = INT_MAX;
-                robot->ToPointTwoPoint(Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Point{Input::workbench[wi2]->x0_, Input::workbench[wi2]->y0_}, forward, rotate, frame_reach);
+                robot->ToPointTwoPoint(Input::workbench[wi]->pos_, Input::workbench[wi2]->pos_, forward, rotate, frame_reach);
             }
             else {
                 Log::print("oneToPoint");
-                robot->ToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forward, rotate);
+                robot->ToPoint(Input::workbench[wi]->pos_, forward, rotate);
             }
             // if (robot->carry_id_ == 0) {
             //     robot->ToPointTwoPoint(Geometry::Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Geometry::Point{Input::workbench[plan_[ri].sell_workbench]->x0_, Input::workbench[plan_[ri].sell_workbench]->y0_}, forward, rotate);
@@ -231,7 +230,7 @@ void Dispatch::AvoidCollide() {
         auto robot = Input::robot[ri];
         int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
         if (wi == -1) {
-            forecast[ri].push_back(std::vector<Point>(forecast_num_, Point{robot->x0_, robot->y0_}));
+            forecast[ri].push_back(std::vector<Point>(forecast_num_, robot->pos_));
         } else {
             int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
             if (wi2 != -1) {
@@ -240,10 +239,10 @@ void Dispatch::AvoidCollide() {
                     frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
                 else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
                     frame_reach = INT_MAX;
-                forecast[ri].push_back(robot->ForecastToPoint2(Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Point{Input::workbench[wi2]->x0_, Input::workbench[wi2]->y0_}, frame_reach, forecast_num_));
+                forecast[ri].push_back(robot->ForecastToPoint2(Input::workbench[wi]->pos_, Input::workbench[wi2]->pos_, frame_reach, forecast_num_));
             }
             else {
-                forecast[ri].push_back(robot->ForecastToPoint(Input::workbench[wi]->x0_, Input::workbench[wi]->y0_, forecast_num_));
+                forecast[ri].push_back(robot->ForecastToPoint(Input::workbench[wi]->pos_, forecast_num_));
             }
         }
     }

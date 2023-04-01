@@ -26,32 +26,35 @@
 
 struct Robot {
 public:
+    static constexpr double seed_random_rate = 1 + 1.1e-4;
     static constexpr double radius_ = 0.45;
     static constexpr double radius_with_thing_ = 0.53;
-    static constexpr double max_forward_velocity_ = 6;
-    static constexpr double max_backward_velocity_ = -2;
+    static constexpr double max_forward_velocity_ = 6 * seed_random_rate;
+    static constexpr double max_backward_velocity_ = -2 * seed_random_rate;
     static constexpr double density_ = 50;
     static constexpr double max_force_ = 250;
     static constexpr double max_rot_force_ = 50;
     static constexpr double max_orient_diff_ = 3e-2; // 最大角度偏差
-    const double max_rotate_velocity_ = Geometry::PI;
+    static constexpr double max_rotate_velocity_ = Geometry::PI * seed_random_rate;
 
     int id_, workbench_, carry_id_; // 机器人的 id, 所属工作台id(-1不属工作台）,所携带的物品 id(0没有带物品)
     int workbench_buy_, workbench_sell_; // 买的工作台，卖的工作台。
     double time_coefficient_, collide_coefficient_; // 机器人的坐标, 时间系数, 碰撞系数
-    double angular_velocity_, linear_velocity_x_, linear_velocity_y_, orient_, x0_, y0_; // 角速度, 线速度, 朝向, x坐标, y坐标
+    double angular_velocity_, orient_;// 角速度, 朝向
+    Geometry::Point pos_; // x坐标, y坐标
+    Geometry::Vector linear_velocity_;// 线速度
 
     Robot(int id, int workbench_, int carry_id, double time_coefficient, double collide_coefficient,
           double angular_velocity, double linear_velocity_x, double linear_velocity_y, double orient, double x0, double y0);
 
     // 通过调整当前帧的姿态 (forward, rotate) 使机器人去到 (dx, dy)
-    void ToPoint(double dx, double dy, double& forward, double& rotate);
+    void ToPoint(Geometry::Point p, double& forward, double& rotate);
 
-    void ToPoint_1(double dx, double dy, double& forward, double& rotate);
+    void ToPoint_1(Geometry::Point p, double& forward, double& rotate);
 
     // void ToPoint_2(double dx, double dy, double& forward, double& rotate);
 
-    void ToPoint_3(double dx, double dy, double& forward, double& rotate);
+    void ToPoint_3(Geometry::Point p, double& forward, double& rotate);
 
     void ToPointTwoPoint(Geometry::Point a, Geometry::Point b, double& forward, double& rotate, int frame_a = 0);
 
@@ -81,7 +84,7 @@ public:
 
     double GetLinearVelocity();
 
-    std::vector<Geometry::Point> ForecastToPoint(double dx, double dy, int forecast_num);
+    std::vector<Geometry::Point> ForecastToPoint(Geometry::Point p, int forecast_num);
 
     std::vector<Geometry::Point> ForecastToPoint2(Geometry::Point a, Geometry::Point b, int frame_a, int forecast_num);
 

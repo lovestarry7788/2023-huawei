@@ -7,7 +7,7 @@
 // double UniformVariableDist(double a, double v, double aim_v);
 
 namespace Geometry {
-    const double PI = acos(-1);
+    static constexpr double PI = acos(-1);
     static constexpr double eps = 1e-10;
 
     struct Point{
@@ -55,6 +55,8 @@ namespace Geometry {
     Point GetLineIntersection2(Point P, Vector v, Point Q, Vector w);
 
     double DistanceToSegment(const Point& P, const Point& A, const Point& B);
+
+    double Angle(const Vector& a);
 
     bool CheckCross(const Vector& A, const Vector& B, std::vector<Geometry::Point> v);
 

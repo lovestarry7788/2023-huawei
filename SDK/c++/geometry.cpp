@@ -72,6 +72,7 @@ double Geometry::DistanceToSegment(const Point& P, const Point& A, const Point& 
 
 double Geometry::Cross(const Vector& A, const Vector& B) { return A.x * B.y - A.y * B.x; }
 
+double Geometry::Angle(const Vector& a) { return atan2(a.y, a.x);}
 /*
  * 判断会不会碰撞时，需要考虑 机器人的半径 < 墙到机器人的距离，才算能到。
  * 传入的 v 是墙的四个角。

@@ -195,3 +195,7 @@ bool WayFinding::GetRoute(Point cnt, int workbench_id, Route& output) {
     output = routes_[from][workbench_id + robot_pos.size()];
     return true;
 }
+
+// double WayFinding::DistToWall(Point p, double ori) {
+
+// }

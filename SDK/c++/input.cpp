@@ -57,8 +57,8 @@ bool Input::ScanFrame() {
                 workbench[i] = std::make_shared<Workbench>(type_id, x0, y0, frame_remain, materials_status, product_status);
             else {
                 workbench[i]->type_id_ = type_id;
-                workbench[i]->x0_ = x0;
-                workbench[i]->y0_ = y0;
+                workbench[i]->pos_.x = x0;
+                workbench[i]->pos_.y = y0;
                 workbench[i]->frame_remain_ = frame_remain;
                 workbench[i]->materials_status_ = materials_status;
                 workbench[i]->product_status_ = product_status;
@@ -81,11 +81,9 @@ bool Input::ScanFrame() {
                 robot[id]->time_coefficient_ = time_coefficient;
                 robot[id]->collide_coefficient_ = collide_coefficient;
                 robot[id]->angular_velocity_ = angular_velocity;
-                robot[id]->linear_velocity_x_ = linear_velocity_x;
-                robot[id]->linear_velocity_y_ = linear_velocity_y;
+                robot[id]->linear_velocity_ = {linear_velocity_x, linear_velocity_y};
                 robot[id]->orient_ = orient;
-                robot[id]->x0_ = x0;
-                robot[id]->y0_ = y0;
+                robot[id]->pos_ = {x0, y0};
             }
         }
 

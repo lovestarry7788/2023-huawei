@@ -42,14 +42,14 @@ namespace Solution6 {
         while(Input::ScanFrame()) {
             Log::print("frame", Input::frameID);
             if (route.empty()) {
-                if (v.empty() || !GetRoute(Point{robot[u]->x0_, robot[u]->y0_}, v.front(), route))
+                if (v.empty() || !GetRoute(robot[u]->pos_, v.front(), route))
                     Log::print("find route failed");
                 Log::print("routes_size: ", route.size());
                 for(const auto& point: route) {
                     Log::print(point.x, point.y);
                 }
             }
-            Point robot_pos = {robot[0] -> x0_, robot[0] -> y0_};
+            Point robot_pos = robot[0] -> pos_;
             while (route.size() && Geometry::Length(robot_pos - route.front()) < 1e-1) { // 机器人到达某个点，则删掉。
                 Log::print("reach");
                 route.erase(begin(route)); // 不能直接删除，可能需要回滚
@@ -60,7 +60,7 @@ namespace Solution6 {
 //            if (route.size() >= 2) {
 //                robot->ToPointTwoPoint(route[0], route[1], f, r);
 //            } else if (route.size() >= 1)
-            robot[0]->ToPoint_1(route.front().x, route.front().y, forward, rotate);
+            robot[0]->ToPoint_1(route.front(), forward, rotate);
             Output::Forward(0, forward);
             Output::Rotate(0, rotate);
             Output::Print(Input::frameID);
@@ -141,18 +141,18 @@ namespace Solution1 {
             for(int idy = 0; idy < robot_num_ + K; ++idy) {
                 double sx, sy, dx, dy;
                 if(idx < 4) {
-                    sx = robot[idx] -> x0_;
-                    sy = robot[idx] -> y0_;
+                    sx = robot[idx] -> pos_.x;
+                    sy = robot[idx] -> pos_.y;
                 } else {
-                    sx = workbench[idx - robot_num_] -> x0_;
-                    sy = workbench[idx - robot_num_] -> y0_;
+                    sx = workbench[idx - robot_num_] -> pos_.x;
+                    sy = workbench[idx - robot_num_] -> pos_.y;
                 }
                 if(idy < 4) {
-                    dx = robot[idy] -> x0_;
-                    dy = robot[idy] -> y0_;
+                    dx = robot[idy] -> pos_.x;
+                    dy = robot[idy] -> pos_.y;
                 } else {
-                    dx = workbench[idy - robot_num_] -> x0_;
-                    dy = workbench[idy - robot_num_] -> y0_;
+                    dx = workbench[idy - robot_num_] -> pos_.x;
+                    dy = workbench[idy - robot_num_] -> pos_.y;
                 }
                 dis_[idx][idy] = Distance(sx, sy, dx, dy);
             }
@@ -175,7 +175,7 @@ namespace Solution1 {
     void Choose_To_Point(int id, double dx, double dy, double& forward, double& rotate) {
         switch(Input::map_number_) {
             default:
-                robot[id]->ToPoint(dx, dy, forward, rotate);
+                robot[id]->ToPoint(Geometry::Point{dx, dy}, forward, rotate);
                 break;
         }
     }
@@ -249,15 +249,15 @@ namespace Solution1 {
         if(can_plan_to_buy_[i] && workbench[i]->TryToBuy(k, -100) && !should_not_plan_to_buy_[i]) {
             if(can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k) ) {
                 if (map_number_ == 1 && workbench[j]->type_id_ == 9) return false;
-                if (MissingPoint(id, i, workbench[i]->x0_, workbench[i]->y0_) ||
-                    MissingPoint(id, j, workbench[j]->x0_, workbench[j]->y0_))
+                if (MissingPoint(id, i, workbench[i]->pos_.x, workbench[i]->pos_.y) ||
+                    MissingPoint(id, j, workbench[j]->pos_.x, workbench[j]->pos_.y))
                     return false; // 针对地图忽略一些点
                 if (should_not_plan_to_buy_[i]) return false; // 优化：别人去卖的，你不能去买
                 double buy_sell_frame_ = 50 * robot[id]->CalcTime(
-                        Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
-                        Geometry::Point{workbench[j]->x0_, workbench[j]->y0_});
+                        Geometry::Point{workbench[i]->pos_.x, workbench[i]->pos_.y},
+                        Geometry::Point{workbench[j]->pos_.x, workbench[j]->pos_.y});
                 if (frameID + buy_sell_frame_ > total_frame) return false;  //  没时间去卖了，所以不买。
-                // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->x0_, workbench[i]->y0_}});
+                // double frame_to_buy_ = robot[id] -> CalcTime(std::vector{Geometry::Point{workbench[i]->pos_.x, workbench[i]->pos_.y}});
 
                 // if (frameID + buy_sell_frame_ + 300 < total_frame) { // 如果还有时间
                 // if (workbench[i] -> type_id_ >= 4 && workbench[i] -> type_id_ <= 6 && AroundPoint(i)) continue; // 如果周围1,2,3的点没买，则先买。
@@ -315,10 +315,10 @@ namespace Solution1 {
                         }
                         double forward, rotate;
                         /*
-                        robot[id]->ToPoint_1(workbench[robot[id]->workbench_sell_]->x0_, workbench[robot[id]->workbench_sell_]->y0_,
+                        robot[id]->ToPoint_1(workbench[robot[id]->workbench_sell_]->pos_.x, workbench[robot[id]->workbench_sell_]->pos_.y,
                                            forward, rotate);
                            */
-                        Choose_To_Point(id, workbench[robot[id]->workbench_sell_]->x0_, workbench[robot[id]->workbench_sell_]->y0_, forward, rotate);
+                        Choose_To_Point(id, workbench[robot[id]->workbench_sell_]->pos_.x, workbench[robot[id]->workbench_sell_]->pos_.y, forward, rotate);
                         movement_[id] = {forward, rotate};
                         plan_[id].sell_workbench = robot[id] -> workbench_sell_;
                         robot[id] -> workbench_buy_ = -1;
@@ -369,16 +369,16 @@ namespace Solution1 {
                     for (int k = 1; k <= 7; ++k) { // 枚举要买的物品
                         for (int i = 0; i < K; ++i) if(can_plan_to_buy_[i] && workbench[i]->TryToBuy(k, -100) && !should_not_plan_to_buy_[i]) { // 从哪个工作站买 优化：别人去卖的，你不能去买
                                 for (int j = 0; j < K; ++j) if(can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k)) { // 从哪个工作站卖
-//                                    Log::print("map_number: ", map_number_, " i: ", i , "x: ", workbench[i] -> x0_, "y: ", workbench[i] -> y0_, " MissingPoint: ", MissingPoint(i, workbench[i] -> x0_, workbench[i] -> y0_));
-//                                    Log::print("map_number: ", map_number_, " j: ", j , "x: ", workbench[j] -> x0_, "y: ", workbench[j] -> y0_, " MissingPoint: ", MissingPoint(j, workbench[j] -> x0_, workbench[j] -> y0_));
+//                                    Log::print("map_number: ", map_number_, " i: ", i , "x: ", workbench[i] -> pos_.x, "y: ", workbench[i] -> pos_.y, " MissingPoint: ", MissingPoint(i, workbench[i] -> pos_.x, workbench[i] -> pos_.y));
+//                                    Log::print("map_number: ", map_number_, " j: ", j , "x: ", workbench[j] -> pos_.x, "y: ", workbench[j] -> pos_.y, " MissingPoint: ", MissingPoint(j, workbench[j] -> pos_.x, workbench[j] -> pos_.y));
 
                                         if(!Whether_Can_Buy(id, k, i, j)) continue;
 
                                         double money_per_distance;
 
                                         double buy_sell_frame_ = 50 * robot[id]->CalcTime(
-                                                Geometry::Point{workbench[i]->x0_, workbench[i]->y0_},
-                                                Geometry::Point{workbench[j]->x0_, workbench[j]->y0_});
+                                                Geometry::Point{workbench[i]->pos_.x, workbench[i]->pos_.y},
+                                                Geometry::Point{workbench[j]->pos_.x, workbench[j]->pos_.y});
 
 //                                        if(map_number_ < 3)
 //                                            buy_sell_frame_ = (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
@@ -434,7 +434,7 @@ namespace Solution1 {
                         }
 
                         double forward, rotate;
-                        Choose_To_Point(id, workbench[robot[id]->workbench_buy_]->x0_, workbench[robot[id]->workbench_buy_]->y0_, forward, rotate);
+                        Choose_To_Point(id, workbench[robot[id]->workbench_buy_]->pos_.x, workbench[robot[id]->workbench_buy_]->pos_.y, forward, rotate);
                         movement_[id] = {forward, rotate};
                         plan_[id].buy_workbench = robot[id] -> workbench_buy_;
                     }
@@ -448,7 +448,7 @@ namespace Solution1 {
 //                        }
 //                        if(workbench_id != -1) {
 //                            double forward, rotate;
-//                            Choose_To_Point(id, workbench[workbench_id]->x0_, workbench[workbench_id]->y0_, forward, rotate);
+//                            Choose_To_Point(id, workbench[workbench_id]->pos_.x, workbench[workbench_id]->pos_.y, forward, rotate);
 //                            movement_[id] = {forward, rotate};
 //                            plan_[id].buy_workbench = workbench_id;
 //                        }
