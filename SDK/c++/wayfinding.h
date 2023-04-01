@@ -48,8 +48,9 @@ namespace WayFinding {
     void Init();
     Point GetGraphPoint(int i);
     double DistBetweenPoints(Point a, Point b);
-    void Dijkstra(int s);
-    bool GetRoute(Point cnt, int workbench_id, Route& output);
+    void Dijkstra(int s, bool(*valid)(int t) = nullptr);
+    bool GetOfflineRoute(Point cnt, int workbench_id, Route& output);
+    Route GetOnlineRoute(int s, int t);
 };
 
 #endif

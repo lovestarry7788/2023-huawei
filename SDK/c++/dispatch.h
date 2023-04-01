@@ -13,6 +13,7 @@ namespace Dispatch {
     // extern std::vector<std::vector<Geometry::Point>> forecast_;
     constexpr int forecast_num_ = 75;
     constexpr int forecast_per_ = 8;
+    constexpr int forecast_sampling_ = 1; // 高了精度误差
     constexpr double collide_dist_ = 1.7;
     constexpr double collide_time_elemit_ = 0.01; // collide(dist, t) = dist < collide_dist_ - t * collide_time_elemit_;
     struct Plan {
@@ -58,6 +59,8 @@ namespace Dispatch {
     void ControlWalk();
 
     void AvoidCollide();
+
+    std::pair<double,double> ChooseToPoint(int ri);
 
     double ForecastCollide(const std::vector<Point>& a, const std::vector<Point>& b, double mx_dist);
     // 外部主循环中，manageplan(), controlwalk()。决策中，如果是完成任务再规划，则robotReplan_调用addplan；如果要每时每刻重新单独规划，则在manageplan前调用一遍robotReplan_；如果每时每刻整体规划，则直接调用UpdatePlan；如果固定时间规划一次，则固定时间调用

@@ -3,6 +3,7 @@
 #include "output.h"
 #include "log.h"
 #include "geometry.h"
+#include "simulator.h"
 #include <cmath>
 #include <algorithm>
 #include <queue>
@@ -151,48 +152,40 @@ void Dispatch::ManagePlan(int robot_id, Plan& plan) {
     }
 }
 
+std::pair<double,double> Dispatch::ChooseToPoint(int ri) {
+    auto robot = Input::robot[ri];
+    double forward, rotate;
+    int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
+    // Log::print("ControlWalk", ri, plan_[ri].buy_workbench, plan_[ri].sell_workbench);
+    if (wi != -1) {
+        int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
+        if (wi2 != -1) {
+            int frame_reach = 0;
+            if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
+                frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
+            else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
+                frame_reach = INT_MAX;
+            robot->ToPointTwoPoint(Input::workbench[wi]->pos_, Input::workbench[wi2]->pos_, forward, rotate, frame_reach);
+        }
+        else {
+            // Log::print("oneToPoint");
+            robot->ToPoint(Input::workbench[wi]->pos_, forward, rotate);
+        }
+        // if (robot->carry_id_ == 0) {
+        //     robot->ToPointTwoPoint(Geometry::Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Geometry::Point{Input::workbench[plan_[ri].sell_workbench]->x0_, Input::workbench[plan_[ri].sell_workbench]->y0_}, forward, rotate);
+        // } else {
+        // }
+        
+    } else {
+        forward = rotate = 0;
+    }
+    return std::make_pair(forward, rotate);
+}
 // 输出行走
 void Dispatch::ControlWalk() {
     for (size_t ri = 0; ri < plan_.size(); ri++) {
-        auto robot = Input::robot[ri];
-        int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
-        // Log::print("ControlWalk", ri, plan_[ri].buy_workbench, plan_[ri].sell_workbench);
-        double& forward = movement_[ri].first;
-        double& rotate = movement_[ri].second;
-        if (wi != -1) {
-            int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
-            if (wi2 != -1) {
-                int frame_reach = 0;
-                if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
-                    frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
-                else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
-                    frame_reach = INT_MAX;
-                robot->ToPointTwoPoint(Input::workbench[wi]->pos_, Input::workbench[wi2]->pos_, forward, rotate, frame_reach);
-            }
-            else {
-                Log::print("oneToPoint");
-                robot->ToPoint(Input::workbench[wi]->pos_, forward, rotate);
-            }
-            // if (robot->carry_id_ == 0) {
-            //     robot->ToPointTwoPoint(Geometry::Point{Input::workbench[wi]->x0_, Input::workbench[wi]->y0_}, Geometry::Point{Input::workbench[plan_[ri].sell_workbench]->x0_, Input::workbench[plan_[ri].sell_workbench]->y0_}, forward, rotate);
-            // } else {
-            // }
-            
-        } else {
-            forward = rotate = 0;
-        }
-        // Log::print(ri, forward, rotate);
-        // double v = robot->GetLinearVelocity();
-        // if (fabs(v - forward) > 1 && robot->on_cir < 2) rotate /= 4;
-//        double limit = robot->CalcSlowdownDist();
-//        double walld = DistToWall({robot->x0_, robot->y0_}, robot->orient_);
-//        Log::print(ri, limit, walld, robot->GetLinearVelocity(), robot->GetMass());
-//        if (limit >= walld - 1.1) {
-//            forward = 0;
-//        }
-        Log::print("ControlWalk", ri, forward, rotate);
-        // if (fabs(forward - invalid) > 1e-5) Output::Forward(ri, forward);
-        // if (fabs(rotate - invalid) > 1e-5) Output::Rotate(ri, rotate);
+        movement_[ri] = ChooseToPoint(ri);
+        Log::print("ControlWalk", ri, movement_[ri].first, movement_[ri].second);
     }
     if (avoidCollide) AvoidCollide();
     for (size_t ri = 0; ri < plan_.size(); ri++) {
@@ -211,7 +204,6 @@ double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<
     for (int ti = 0; ti < forecast_num_; ti += forecast_per_) {
         double dist = Length(a[ti] - b[ti]);
         mx = std::min(mx, dist + ti * collide_time_elemit_);
-        // TODO: 手动设置多个距离层级，
         if (mx < mx_dist) return mx;
         // 2 - 0 * t
         // if (dist < 1.7 - ti * 0.03) { // 越小对路线估计要求越高，越大越浪费时间 
@@ -227,24 +219,28 @@ void Dispatch::AvoidCollide() {
     std::vector<std::vector<std::vector<Point>>> forecast(Input::robot_num_);
     // t
     for (int ri = 0; ri < Input::robot_num_; ri++) {
-        auto robot = Input::robot[ri];
-        int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
-        if (wi == -1) {
-            forecast[ri].push_back(std::vector<Point>(forecast_num_, robot->pos_));
-        } else {
-            int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
-            if (wi2 != -1) {
-                int frame_reach = 0;
-                if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
-                    frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
-                else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
-                    frame_reach = INT_MAX;
-                forecast[ri].push_back(robot->ForecastToPoint2(Input::workbench[wi]->pos_, Input::workbench[wi2]->pos_, frame_reach, forecast_num_));
-            }
-            else {
-                forecast[ri].push_back(robot->ForecastToPoint(Input::workbench[wi]->pos_, forecast_num_));
-            }
-        }
+        std::function<std::pair<double,double>()> action = [&]() {
+            return ChooseToPoint(ri);
+        };
+        forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
+        // auto robot = Input::robot[ri];
+        // int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
+        // if (wi == -1) {
+        //     forecast[ri].push_back(std::vector<Point>(forecast_num_, robot->pos_));
+        // } else {
+        //     int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
+        //     if (wi2 != -1) {
+        //         int frame_reach = 0;
+        //         if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
+        //             frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
+        //         else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
+        //             frame_reach = INT_MAX;
+        //         forecast[ri].push_back(robot->ForecastToPoint2(Input::workbench[wi]->pos_, Input::workbench[wi2]->pos_, frame_reach, forecast_num_));
+        //     }
+        //     else {
+        //         forecast[ri].push_back(robot->ForecastToPoint(Input::workbench[wi]->pos_, forecast_num_));
+        //     }
+        // }
     }
     for (int ri = 0; ri < Input::robot_num_; ri++) {
         // if (Input::frameID >= 244 && Input::frameID <= 244+50 && ri == 0) {
@@ -307,8 +303,12 @@ void Dispatch::AvoidCollide() {
             for (int ci = 0; ci < choose.size(); ci++) {
                 auto [forward, rotate] = choose[ci];
                 // if (fabs(forward - robot->GetLinearVelocity()) < 2) continue; // 要降就降猛一点，否则到时候来不及
-                if (forecast[ri].size() <= ci+1)
-                    forecast[ri].push_back(robot->ForecastFixed(forward, rotate, forecast_num_));
+                if (forecast[ri].size() <= ci+1) {
+                    std::function<std::pair<double,double>()> action = [&]() {
+                        return std::make_pair(forward, rotate);
+                    };
+                    forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
+                }
                 movement_[ri] = {forward, rotate};
                 auto dec2 = dec;
                 dec2[cur] = ci+1;

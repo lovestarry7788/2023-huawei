@@ -84,7 +84,6 @@ void WayFinding::Init() {
             }
         }
     }
-
     /*
      * 对所有的点集进行去重
      */
@@ -126,29 +125,19 @@ void WayFinding::Init() {
             Insert_Edge(j, i, d, mind);
         }
     }
-
     /*
      * M 表示 机器人 + 工作台 的数量
      * 规划 M * M 的走法
      * route_[i][j] 表示从 i 到 j 的路径集合。
      */
     int M = robot_pos.size() + workbench_pos.size();
-    // Log::print(N, M);
+    Log::print("map size is ", N, edge.size());
     routes_.resize(M, std::vector<Route>(M));
     for (int s = 0; s < M; s++) {
         Dijkstra(s);
         // Log::print(s, GetGraphPoint(s).x, GetGraphPoint(s).y);
         for (int j = 0; j < M; j++) if(dist[j] < INF) {
-            int t = j;
-            auto& route = routes_[s][t];
-            route.clear();
-            // 从终点一直添加路径到起点
-            // Log::print(s, t);
-            while (t != s) {
-                route.push_back(GetGraphPoint(t));
-                t = edge[pre[t]].u;
-            }
-            std::reverse(route.begin(), route.end());
+            routes_[s][j] = GetOnlineRoute(s, j);
         }
     }
 
@@ -157,7 +146,7 @@ void WayFinding::Init() {
 
 Point WayFinding::GetGraphPoint(int i) { // 函数内部
     if(i < robot_pos.size()) return robot_pos[i];
-    else if(i < workbench_pos.size()) return workbench_pos[i - robot_pos.size()];
+    else if(i < workbench_pos.size() + robot_pos.size()) return workbench_pos[i - robot_pos.size()];
     return joint_walk_[i - robot_pos.size() - workbench_pos.size()];
 }
 
@@ -165,7 +154,18 @@ double WayFinding::DistBetweenPoints(Point a, Point b) {
     return Geometry::Length(a - b) + 1e-3; // 走直线则只走端点
 }
 
-void WayFinding::Dijkstra(int s) {
+Route WayFinding::GetOnlineRoute(int s, int t) {
+    Route route;
+    while (t != s) {
+        route.push_back(GetGraphPoint(t));
+        t = edge[pre[t]].u;
+    }
+    route.push_back(GetGraphPoint(s)); // 用于回退后到路径
+    std::reverse(route.begin(), route.end());
+    return route;
+}
+
+void WayFinding::Dijkstra(int s, bool(*valid)(int t)) {
     // TODO：将方向放入状态
     pre.assign(N, -1);
     dist.assign(N, INF);
@@ -176,6 +176,7 @@ void WayFinding::Dijkstra(int s) {
         auto x = Q.top(); Q.pop();
         int u = x.u;
         if (dist[u] != x.d) continue;
+        if (valid && valid(u)) return;
         for (int k = head[u]; k != -1; k = edge[k].nex) {
             if (dist[edge[k].v] > dist[edge[k].u] + edge[k].dis) {
                 dist[edge[k].v] = dist[edge[k].u] + edge[k].dis;
@@ -186,7 +187,8 @@ void WayFinding::Dijkstra(int s) {
     }
 }
 
-bool WayFinding::GetRoute(Point cnt, int workbench_id, Route& output) {
+// 实时找躲避路径，但不实时找到工作台路径。
+bool WayFinding::GetOfflineRoute(Point cnt, int workbench_id, Route& output) {
     int pi = int((50 - cnt.y) / 0.5), pj = int(cnt.x / 0.5);
     int from = map_id_[pi][pj];
     if (from == -1) return false;
