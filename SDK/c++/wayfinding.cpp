@@ -140,8 +140,8 @@ void WayFinding::Init() {
     for (int s = 0; s < M; s++) {
         Dijkstra(s);
         // Log::print(s, GetGraphPoint(s).x, GetGraphPoint(s).y);
-        for (int j = 0; j < M; j++) if(dist[j] < INF) {
-            routes_[s][j] = GetOnlineRoute(s, j);
+        for (int t = 0; t < M; t++) if(dist[s][t] < INF) {
+            GetOnlineRoute(s, t);
         }
     }
 
@@ -200,7 +200,7 @@ Route WayFinding::GetOnlineRoute(int s, int t) {
     Route route;
     while (t != s) {
         route.push_back(GetGraphPoint(t));
-        t = edge[pre[t]].u;
+        t = edge[pre[s][t]].u;
     }
     route.push_back(GetGraphPoint(s)); // 用于回退后到路径
     std::reverse(route.begin(), route.end());

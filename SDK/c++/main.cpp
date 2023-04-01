@@ -26,6 +26,7 @@
 #include <memory>
 #include <climits>
 
+/*
 // 测试Simulator
 namespace Solution7 {
     using namespace Input;
@@ -54,6 +55,8 @@ namespace Solution7 {
         }
     }
 }
+*/
+
 // 测试wayfindding
 namespace Solution6 {
     using namespace Input;
@@ -459,7 +462,7 @@ namespace Solution1 {
                         robot[id]->workbench_buy_ = workbench_buy;
                         robot[id]->workbench_sell_ = workbench_sell;
                         Log::print("robot_id: ", id, "workbench_buy: ", workbench_buy, "workbench_sell: ", workbench_sell, "dis: ", mn);
-                        WayFinding::GetRoute(robot[id]->pos_, robot[id]->workbench_buy_, robot[id] -> route_);
+                        WayFinding::GetOfflineRoute(robot[id]->pos_, robot[id]->workbench_buy_, robot[id] -> route_);
                         can_plan_to_buy_[workbench_buy] = false;
                         can_plan_to_sell_[workbench_sell][carry_id] = false;
                     }
@@ -481,9 +484,8 @@ namespace Solution1 {
                             can_plan_to_buy_[robot[id] -> workbench_buy_] = true;
                             workbench[robot[id] -> workbench_sell_] -> product_status_ = 0;
                             robot[id] -> workbench_buy_ = -1;
-                            WayFinding::GetRoute(robot[id] -> pos_, robot[id] -> workbench_sell_, robot[id] -> route_);
-
-                            Log::print("robot_id: ", id, "plan_to_sell: ", robot[id] -> workbench_sell_);
+                            WayFinding::GetOfflineRoute(robot[id] -> pos_, robot[id] -> workbench_sell_, robot[id] -> route_);
+                            Log::print("robot_id: ", id, "plan_to_sell: ", robot[id] -> workbench_sell_, "end.x: ",workbench[robot[id] -> workbench_sell_] -> pos_.x, "end.y: ",workbench[robot[id] -> workbench_sell_] -> pos_.y);
                             for(const auto& u: robot[id] -> route_) {
                                 Log::print(u.x, u.y);
                             }

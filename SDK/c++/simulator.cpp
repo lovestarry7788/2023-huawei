@@ -2,7 +2,7 @@
 #include "log.h"
 
 using namespace Geometry;
-
+/*
 void Simulator::SimuAFrame(Robot& robot, double forward, double rotate, double per) {
     double linearV = Geometry::Length(robot.linear_velocity_);
     double angularV = robot.angular_velocity_;
@@ -56,3 +56,4 @@ std::vector<Geometry::Point> Simulator::SimuFrames(Robot robot, std::function<st
     }
     return ans;
 }
+ */

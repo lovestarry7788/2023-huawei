@@ -181,6 +181,7 @@ std::pair<double,double> Dispatch::ChooseToPoint(int ri) {
     }
     return std::make_pair(forward, rotate);
 }
+/*
 // 输出行走
 void Dispatch::ControlWalk() {
     for (size_t ri = 0; ri < plan_.size(); ri++) {
@@ -198,6 +199,7 @@ void Dispatch::ControlWalk() {
         Output::Rotate(ri, rotate);
     }
 }
+ */
 
 double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<Point>& b, double mx_dist) {
     double mx = collide_dist_;
@@ -215,6 +217,7 @@ double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<
     return mx;
     // return false;
 }
+/*
 void Dispatch::AvoidCollide() {
     std::vector<std::vector<std::vector<Point>>> forecast(Input::robot_num_);
     // t
@@ -301,7 +304,8 @@ void Dispatch::AvoidCollide() {
                 
             // });
             for (int ci = 0; ci < choose.size(); ci++) {
-                auto [forward, rotate] = choose[ci];
+                auto forward = choose[ci].first;
+                auto rotate = choose[ci].second;
                 // if (fabs(forward - robot->GetLinearVelocity()) < 2) continue; // 要降就降猛一点，否则到时候来不及
                 if (forecast[ri].size() <= ci+1) {
                     std::function<std::pair<double,double>()> action = [&]() {
@@ -325,3 +329,4 @@ void Dispatch::AvoidCollide() {
         }
     }
 }
+ */

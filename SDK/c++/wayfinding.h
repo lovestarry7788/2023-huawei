@@ -44,11 +44,10 @@ namespace WayFinding {
     void Init_Frame();
     Geometry::Point GetGraphPoint(int i);
     double DistBetweenPoints(Geometry::Point a, Geometry::Point b);
-    bool GetRoute(Geometry::Point point, int workbench_id, Route& output);
     double CalcDistance(int id, int workbench_i, int workbench_j);
     double CalcFrame(int id, int i, int j);
     void Dijkstra(int s, bool(*valid)(int t) = nullptr);
-    bool GetOfflineRoute(Point cnt, int workbench_id, Route& output);
+    bool GetOfflineRoute(Geometry::Point cnt, int workbench_id, Route& output);
     Route GetOnlineRoute(int s, int t);
 };
 
