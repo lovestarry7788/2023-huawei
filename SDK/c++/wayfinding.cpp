@@ -77,8 +77,9 @@ void WayFinding::Init() {
                 // Log::print("angle", ni, nj, px, py, minsp);
 
                 // 每个90度点只生成一个路径点，视两侧最小宽度，为2则移动一格，大于等于3则移动1.5格。由于最短路，如果不想进入2格宽的路，就不会经过移动1格生成的点而撞。
-                double px2 = px + dj * 0.25 * (minsp + 0);
-                double py2 = py + -di * 0.25 * (minsp + 0);
+                double pad = std::min(2.5, minsp + 0.0);
+                double px2 = px + dj * 0.25 * (1 + pad);
+                double py2 = py + -di * 0.25 * (1 + pad);
                 joint_walk_.push_back({px2, py2});
             }
         }
