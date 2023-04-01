@@ -4,7 +4,7 @@
 
 #ifndef HW2023_ROBOT_H
 #define HW2023_ROBOT_H
-
+#include "wayfinding.h"
 #include "workbench.h"
 #include "geometry.h"
 #include <cmath>
@@ -43,6 +43,7 @@ public:
     double angular_velocity_, orient_;// 角速度, 朝向
     Geometry::Point pos_; // x坐标, y坐标
     Geometry::Vector linear_velocity_;// 线速度
+    WayFinding::Route route_; // 当前保存的路线
 
     Robot(int id, int workbench_, int carry_id, double time_coefficient, double collide_coefficient,
           double angular_velocity, double linear_velocity_x, double linear_velocity_y, double orient, double x0, double y0);

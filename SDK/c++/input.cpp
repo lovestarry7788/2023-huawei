@@ -1,7 +1,8 @@
 #include "input.h"
 #include "log.h"
-// #include "IDA.h"
 #include "wayfinding.h"
+#include "robot.h"
+#include "workbench.h"
 
 using namespace WayFinding;
 
@@ -53,8 +54,11 @@ bool Input::ScanFrame() {
             double x0, y0;
             scanf("%d%lf%lf%d%d%d",&type_id, &x0, &y0, &frame_remain, &materials_status, &product_status);
             // Log::print(frameID, coins, type_id, x0, y0, frame_remain, materials_status, product_status);
-            if (!workbench[i])
-                workbench[i] = std::make_shared<Workbench>(type_id, x0, y0, frame_remain, materials_status, product_status);
+            if (!workbench[i]) {
+                workbench[i] = std::make_shared<Workbench>(type_id, x0, y0, frame_remain, materials_status,
+                                                           product_status);
+                Log::print("i: ", i, "x: ", x0, "y: ", y0, "type_id: ",type_id);
+            }
             else {
                 workbench[i]->type_id_ = type_id;
                 workbench[i]->pos_.x = x0;

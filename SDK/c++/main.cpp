@@ -50,7 +50,7 @@ namespace Solution6 {
                 }
             }
             Point robot_pos = robot[0] -> pos_;
-            while (route.size() && Geometry::Length(robot_pos - route.front()) < 1e-1) { // 机器人到达某个点，则删掉。
+            while (route.size() && Geometry::Length(robot_pos - route.front()) < 0.1) { // 机器人到达某个点，则删掉。
                 Log::print("reach");
                 route.erase(begin(route)); // 不能直接删除，可能需要回滚
                 if (route.empty()) 
@@ -114,7 +114,7 @@ namespace Solution1 {
         // 防碰撞初始化
         switch(map_number_) {
             default:
-                Dispatch::avoidCollide = true;
+                Dispatch::avoidCollide = false;
                 Dispatch::init(nullptr, robot_num_, K);
                 break;
         }
@@ -137,6 +137,8 @@ namespace Solution1 {
         for(int i = 0; i < K; ++i) {
             should_not_plan_to_buy_[i] = false;
         }
+
+        /*
         for(int idx = 0; idx < robot_num_ + K; ++idx) {
             for(int idy = 0; idy < robot_num_ + K; ++idy) {
                 double sx, sy, dx, dy;
@@ -157,6 +159,8 @@ namespace Solution1 {
                 dis_[idx][idy] = Distance(sx, sy, dx, dy);
             }
         }
+        */
+        WayFinding::Init_Frame();
 
         if(frameID == 1) {
             for(int i = 0; i < K; ++i) {
@@ -304,6 +308,10 @@ namespace Solution1 {
                 if (robot[id] -> carry_id_) {
                     if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
                         should_not_plan_to_buy_[robot[id] -> workbench_sell_] = true;
+                        while (robot[id] -> route_.size() && Geometry::Length(robot[id] -> pos_ - robot[id] -> route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
+                            Log::print("1, robot_id: ", id, "plan_to_sell: ", robot[id] -> workbench_sell_, "px: ", robot[id] -> pos_.x, "py: ", robot[id] -> pos_.y, "route.x: ", robot[id] -> route_.front().x, "route.y: ", robot[id] -> route_.front().y, "dis: ",Geometry::Length(robot[id] -> pos_ - robot[id] -> route_.front()));
+                            robot[id] -> route_.erase(begin(robot[id] -> route_)); // 不能直接删除，可能需要回滚
+                        }
                         // 身边有 workbench
                         if (robot[id]->workbench_ == robot[id] -> workbench_sell_) {
                             Output::Sell(id);
@@ -314,14 +322,20 @@ namespace Solution1 {
                             continue;
                         }
                         double forward, rotate;
-                        /*
-                        robot[id]->ToPoint_1(workbench[robot[id]->workbench_sell_]->pos_.x, workbench[robot[id]->workbench_sell_]->pos_.y,
-                                           forward, rotate);
-                           */
-                        Choose_To_Point(id, workbench[robot[id]->workbench_sell_]->pos_.x, workbench[robot[id]->workbench_sell_]->pos_.y, forward, rotate);
-                        movement_[id] = {forward, rotate};
-                        plan_[id].sell_workbench = robot[id] -> workbench_sell_;
-                        robot[id] -> workbench_buy_ = -1;
+                        if(robot[id] -> route_.size()) {
+                            Log::print("robot_id: ", id, "plan_to_sell: ", robot[id]->workbench_sell_, "px: ",
+                                       robot[id]->pos_.x, "py: ", robot[id]->pos_.y, "route.x: ",
+                                       robot[id]->route_.front().x, "route.y: ", robot[id]->route_.front().y, "dis: ",
+                                       Geometry::Length(robot[id]->pos_ - robot[id]->route_.front()));
+                            for (const auto &u: robot[id]->route_) {
+                                Log::print(u.x, u.y);
+                            }
+                            Choose_To_Point(id, robot[id]->route_.front().x, robot[id]->route_.front().y, forward,
+                                            rotate);
+                            movement_[id] = {forward, rotate};
+                            plan_[id].sell_workbench = robot[id]->workbench_sell_;
+                            robot[id]->workbench_buy_ = -1;
+                        }
                     }
                 }
             }
@@ -375,13 +389,17 @@ namespace Solution1 {
                                         if(!Whether_Can_Buy(id, k, i, j)) continue;
 
                                         double money_per_distance;
-
+                                        /*
                                         double buy_sell_frame_ = 50 * robot[id]->CalcTime(
                                                 Geometry::Point{workbench[i]->pos_.x, workbench[i]->pos_.y},
                                                 Geometry::Point{workbench[j]->pos_.x, workbench[j]->pos_.y});
 
-//                                        if(map_number_ < 3)
-//                                            buy_sell_frame_ = (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        if(map_number_ < 3)
+                                            buy_sell_frame_ = (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
+                                        */
+                                        double buy_sell_frame_ = WayFinding::CalcDistance(id, i, j);
+                                        // Log::print("i: ", i, "j: ", j, "dis: ", WayFinding::CalcDistance(id, i, j));
+                                        if(buy_sell_frame_ >= WayFinding::INF) continue;
 
                                         if((workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 1)) { // 如果 7 只差一点，给一个更大的值
                                             money_per_distance = profit_[k] * sever_one / buy_sell_frame_;
@@ -411,6 +429,8 @@ namespace Solution1 {
                     if (fabs(mn) > 1e-5) {
                         robot[id]->workbench_buy_ = workbench_buy;
                         robot[id]->workbench_sell_ = workbench_sell;
+                        Log::print("robot_id: ", id, "workbench_buy: ", workbench_buy, "workbench_sell: ", workbench_sell, "dis: ", mn);
+                        WayFinding::GetRoute(robot[id]->pos_, robot[id]->workbench_buy_, robot[id] -> route_);
                         can_plan_to_buy_[workbench_buy] = false;
                         can_plan_to_sell_[workbench_sell][carry_id] = false;
                     }
@@ -422,6 +442,9 @@ namespace Solution1 {
                 // 控制机器人运动到某点 或者 买东西。
                 for (int id = 0; id < 4; ++id) { // 未携带物品，打算去买的。
                     if (robot[id]->carry_id_ == 0 && robot[id] -> workbench_buy_ != -1) { // 如果有则找到最优的策略，跑去买。
+                        while (robot[id] -> route_.size() && Geometry::Length(robot[id] -> pos_ - robot[id] -> route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
+                            robot[id] -> route_.erase(begin(robot[id] -> route_)); // 不能直接删除，可能需要回滚
+                        }
                         // 身边有 workbench
                         if (robot[id]->workbench_ == robot[id]->workbench_buy_) {
                             // if(workbench[robot[id] -> workbench_buy_] -> frame_remain_ > 0 && workbench[robot[id] -> workbench_buy_] -> frame_remain_ <= frame_to_wait_in_buy) continue ;
@@ -429,14 +452,23 @@ namespace Solution1 {
                             can_plan_to_buy_[robot[id] -> workbench_buy_] = true;
                             workbench[robot[id] -> workbench_sell_] -> product_status_ = 0;
                             robot[id] -> workbench_buy_ = -1;
+                            WayFinding::GetRoute(robot[id] -> pos_, robot[id] -> workbench_sell_, robot[id] -> route_);
+
+                            Log::print("robot_id: ", id, "plan_to_sell: ", robot[id] -> workbench_sell_);
+                            for(const auto& u: robot[id] -> route_) {
+                                Log::print(u.x, u.y);
+                            }
+
                             plan_[id].sell_workbench = -1;
                             continue;
                         }
-
                         double forward, rotate;
-                        Choose_To_Point(id, workbench[robot[id]->workbench_buy_]->pos_.x, workbench[robot[id]->workbench_buy_]->pos_.y, forward, rotate);
-                        movement_[id] = {forward, rotate};
-                        plan_[id].buy_workbench = robot[id] -> workbench_buy_;
+                        if(robot[id] -> route_.size()) {
+                            Choose_To_Point(id, robot[id]->route_.front().x, robot[id]->route_.front().y, forward,
+                                            rotate);
+                            movement_[id] = {forward, rotate};
+                            plan_[id].buy_workbench = robot[id]->workbench_buy_;
+                        }
                     }
 //                    else if(robot[id] -> carry_id_ == 0 && robot[id] -> workbench_buy_ == -1) { // 买不了东西，到处跑
 //                        double mn = 1e9; int workbench_id = -1;
@@ -457,11 +489,11 @@ namespace Solution1 {
             }
 
             // 防碰撞
-            if (avoidCollide) AvoidCollide();
+            // if (avoidCollide) AvoidCollide();
             for(int id = 0; id < 4; ++id) {
                 double& forward = movement_[id].first;
                 double& rotate = movement_[id].second;
-                robot[id]->AvoidToWall(forward, rotate);
+                // robot[id]->AvoidToWall(forward, rotate);
                 Output::Forward(id, forward);
                 Output::Rotate(id, rotate);
             }
@@ -471,6 +503,6 @@ namespace Solution1 {
 }
 
 int main() {
-    Solution6::Solve();
+    Solution1::Solve();
     return 0;
 }

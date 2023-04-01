@@ -13,9 +13,9 @@ using namespace Input;
 using namespace WayFinding;
 
 size_t WayFinding::N;
-int WayFinding::map_id_[map_size_][map_size_];
-std::vector<double> WayFinding::dist;
-std::vector<int> WayFinding::pre;
+int Input::map_id_[map_size_][map_size_];
+std::vector<std::vector<double> > WayFinding::dist;
+std::vector<std::vector<int> > WayFinding::pre;
 std::vector<Edge> WayFinding::edge;
 std::vector<int> WayFinding::head;
 
@@ -135,24 +135,70 @@ void WayFinding::Init() {
     int M = robot_pos.size() + workbench_pos.size();
     // Log::print(N, M);
     routes_.resize(M, std::vector<Route>(M));
+    dist.resize(M);
+    pre.resize(M);
+
     for (int s = 0; s < M; s++) {
         Dijkstra(s);
         // Log::print(s, GetGraphPoint(s).x, GetGraphPoint(s).y);
-        for (int j = 0; j < M; j++) if(dist[j] < INF) {
+        for (int j = 0; j < M; j++) if(dist[s][j] < INF) {
             int t = j;
             auto& route = routes_[s][t];
             route.clear();
             // 从终点一直添加路径到起点
-            // Log::print(s, t);
             while (t != s) {
                 route.push_back(GetGraphPoint(t));
-                t = edge[pre[t]].u;
+                t = edge[pre[s][t]].u;
             }
             std::reverse(route.begin(), route.end());
+            /*
+            Log::print("s: ", s, "sx: ", GetGraphPoint(s).x, "sy: ", GetGraphPoint(s).y, "t: ", j, "tx: ", GetGraphPoint(j).x, "ty: ", GetGraphPoint(j).y);
+            for(const auto& u: route) {
+                Log::print(u.x, u.y);
+            }
+            */
         }
     }
 
     Log::print("WayFinding Ready!");
+}
+
+/*
+ * 对于每一帧，更新机器人的状态。
+ */
+void WayFinding::Init_Frame() {
+    N = robot_pos.size() + workbench_pos.size() + joint_walk_.size();
+    for (int i = 0; i < robot_num_; i++) {
+        head[i] = -1;
+        for (int j = robot_num_; j < N; j++) {
+            auto a = GetGraphPoint(i); // 编号： 先是可以走的点，再是工作台
+            auto b = GetGraphPoint(j);
+            bool valid = true;
+            double mind = 1e18;
+            for (const auto& k: joint_obs_) {
+                double d = DistanceToSegment(k, a, b);
+                mind = std::min(mind, d);
+                // 细小问题，两点间直线，只有一个瓶颈，中间有空的，仍可以通过多辆车。no，没问题，将防碰撞提前处理了部分。
+                if (d < 0.45 + 2e-2) { // 操作误差
+                    valid = false;
+                    break;
+                }
+            }
+            double d = DistBetweenPoints(a, b);
+            // Log::print(i, j, a.x, a.y, b.x, b.y, d, mind, valid);
+            if (!valid) continue;
+            // 暂不考虑单行道，存了mind供将来判断道路宽度使用
+            Insert_Edge(i, j, d, mind);
+            Insert_Edge(j, i, d, mind);
+        }
+    }
+
+    /*
+     * 对于每个机器人跑一次 dijk
+     */
+    for (int s = 0; s < robot_num_; s++) {
+        Dijkstra(s);
+    }
 }
 
 Point WayFinding::GetGraphPoint(int i) { // 函数内部
@@ -167,33 +213,51 @@ double WayFinding::DistBetweenPoints(Point a, Point b) {
 
 void WayFinding::Dijkstra(int s) {
     // TODO：将方向放入状态
-    pre.assign(N, -1);
-    dist.assign(N, INF);
+    pre[s].assign(N, -1);
+    dist[s].assign(N, INF);
     std::priority_queue<Status> Q;
-    dist[s] = 0.0;
-    Q.push(Status{s, dist[s]});
+    dist[s][s] = 0.0;
+    Q.push(Status{s, dist[s][s]});
     while (!Q.empty()) {
         auto x = Q.top(); Q.pop();
         int u = x.u;
-        if (dist[u] != x.d) continue;
+        if (dist[s][u] != x.d) continue;
         for (int k = head[u]; k != -1; k = edge[k].nex) {
-            if (dist[edge[k].v] > dist[edge[k].u] + edge[k].dis) {
-                dist[edge[k].v] = dist[edge[k].u] + edge[k].dis;
-                pre[edge[k].v] = k;
-                Q.push(Status{edge[k].v, dist[edge[k].v]});
+            if (dist[s][edge[k].v] > dist[s][edge[k].u] + edge[k].dis) {
+                dist[s][edge[k].v] = dist[s][edge[k].u] + edge[k].dis;
+                pre[s][edge[k].v] = k;
+                Q.push(Status{edge[k].v, dist[s][edge[k].v]});
             }
         }
     }
 }
 
-bool WayFinding::GetRoute(Point cnt, int workbench_id, Route& output) {
-    int pi = int((50 - cnt.y) / 0.5), pj = int(cnt.x / 0.5);
+/*
+ * 每次到达一个点，GetRoute 一次
+ * 参数：当前机器人的位置、目的地的工作台编号、路径
+ */
+bool WayFinding::GetRoute(Point point, int workbench_id, Route& output) {
+    int pi = int((50 - point.y) / 0.5), pj = int(point.x / 0.5);
     int from = map_id_[pi][pj];
     if (from == -1) return false;
     if ('1' <= map_[pi][pj] && map_[pi][pj] <= '9')
         from += robot_pos.size();
     output = routes_[from][workbench_id + robot_pos.size()];
     return true;
+}
+
+/*
+ * 计算机器人 id -> workbench[i] -> workbench[j] 的距离。
+ */
+double WayFinding::CalcDistance(int id, int workbench_i, int workbench_j) {
+    return dist[id][robot_num_ + workbench_i] + dist[robot_num_ + workbench_i][robot_num_ + workbench_j];
+}
+
+/*
+ * 计算机器人 id -> workbench[i] -> workbench[j] 的帧数
+ */
+double WayFinding::CalcFrame(int id, int i, int j) {
+    return 1e9;
 }
 
 // double WayFinding::DistToWall(Point p, double ori) {

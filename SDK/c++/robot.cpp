@@ -4,6 +4,7 @@
 #include "robot.h"
 #include "geometry.h"
 #include "log.h"
+#include "wayfinding.h"
 #include <cmath>
 #include <algorithm>
 #include <queue>

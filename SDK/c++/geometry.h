@@ -7,7 +7,7 @@
 // double UniformVariableDist(double a, double v, double aim_v);
 
 namespace Geometry {
-    static constexpr double PI = acos(-1);
+    static constexpr double PI = M_PI;
     static constexpr double eps = 1e-10;
 
     struct Point{
