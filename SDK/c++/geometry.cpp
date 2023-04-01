@@ -3,6 +3,10 @@
 
 using namespace Geometry;
 
+std::ostream& Geometry::operator<<(std::ostream& os, const Point& p) {
+    return os<<'['<<p.x<<','<<p.y<<']';
+}
+
 int Geometry::dcmp(double x) { if (fabs(x) < eps) return 0; return x < 0 ? -1 : 1; }
 Vector Geometry::operator+(const Vector& A, const Vector& B) { return Vector{A.x + B.x, A.y + B.y}; }
 Vector Geometry::operator-(const Point& A, const Point& B) { return Vector{A.x - B.x, A.y - B.y}; }
@@ -13,6 +17,7 @@ bool Geometry::operator<(const Point& p1, const Point& p2) {
     if (p1.x != p2.x) return p1.x < p2.x;
     return p1.y < p2.y;
 }
+
 
 Vector Geometry::Rotate(Vector A, double rad) { return Vector{A.x * cos(rad) - A.y * sin(rad), A.x * sin(rad) + A.y * cos(rad)}; }
 

@@ -8,6 +8,7 @@
 #include "input.h"
 #include "output.h"
 #include "wayfinding.h"
+#include "simulator.h"
 #include <cmath>
 #include <algorithm>
 #include <queue>
@@ -25,7 +26,34 @@
 #include <memory>
 #include <climits>
 
+// 测试Simulator
+namespace Solution7 {
+    using namespace Input;
+    using namespace Output;
+    using namespace Geometry;
+    using namespace WayFinding;
+    using namespace Simulator;
 
+    void Solve() {
+        Input::ScanMap();
+        
+        while(Input::ScanFrame()) {
+            bool P = frameID < 210;
+            if (P) Log::print("frame", Input::frameID);
+            double forward = 6, rotate = 0;
+            if (Input::frameID == 1) {
+                auto robot_bak = *robot[0];
+                std::function<std::pair<double,double>()> action = [=](){return std::make_pair(forward, rotate);};
+                SimuFrames(robot_bak, action, 77, 1);
+                Log::print(robot_bak.pos_);
+            }
+            if (P) Log::print(robot[0]->pos_, Length(robot[0]->linear_velocity_), robot[0]->angular_velocity_);
+            Output::Forward(0, forward);
+            Output::Rotate(0, rotate);
+            Output::Print(Input::frameID);
+        }
+    }
+}
 // 测试wayfindding
 namespace Solution6 {
     using namespace Input;
@@ -36,13 +64,13 @@ namespace Solution6 {
     void Solve() {
         Input::ScanMap();
         int u = 0; // 表示第 0 号机器人
-        std::vector<int> v = {0, 9, 11, 15, 17, 22, 25, 26, 30, 29}; // 去第 0 号工作台
+        std::vector<int> v = {0, 1, 9, 11, 15, 17, 22, 25, 26, 30, 29}; // 去第 0 号工作台
         Route route;
 
         while(Input::ScanFrame()) {
             Log::print("frame", Input::frameID);
             if (route.empty()) {
-                if (v.empty() || !GetRoute(robot[u]->pos_, v.front(), route))
+                if (v.empty() || !GetOfflineRoute(robot[u]->pos_, v.front(), route))
                     Log::print("find route failed");
                 Log::print("routes_size: ", route.size());
                 for(const auto& point: route) {
@@ -60,7 +88,8 @@ namespace Solution6 {
 //            if (route.size() >= 2) {
 //                robot->ToPointTwoPoint(route[0], route[1], f, r);
 //            } else if (route.size() >= 1)
-            robot[0]->ToPoint_1(route.front(), forward, rotate);
+            if (route.size())
+                robot[0]->ToPoint_1(route.front(), forward, rotate);
             Output::Forward(0, forward);
             Output::Rotate(0, rotate);
             Output::Print(Input::frameID);

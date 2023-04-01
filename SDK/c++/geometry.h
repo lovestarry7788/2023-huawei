@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 // double UniformVariableDist(double a, double v, double aim_v);
 
@@ -15,6 +16,8 @@ namespace Geometry {
         Point(double x_ = 0, double y_ = 0) : x(x_), y(y_){}
     };
     using Vector = Point;
+
+    std::ostream& operator<<(std::ostream& os, const Point& p);
 
     int dcmp(double x) ;
     Vector operator+(const Vector& A, const Vector& B);

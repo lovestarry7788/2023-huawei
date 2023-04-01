@@ -6,6 +6,7 @@
 #include <vector>
 #include <string_view>
 #include <iostream>
+#include <iomanip>
 
 namespace Log {
     extern std::ofstream ofs;
@@ -13,6 +14,7 @@ namespace Log {
         #ifndef LOG_DEBUG
             return;
         #endif
+        ofs<<std::fixed<<std::setprecision(8);
         ofs<<x; (int[]){(ofs<< ' '<< a,0)...}; ofs<<'\n'; 
         ofs.flush();
     }

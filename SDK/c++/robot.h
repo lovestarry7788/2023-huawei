@@ -85,12 +85,6 @@ public:
 
     double GetLinearVelocity();
 
-    std::vector<Geometry::Point> ForecastToPoint(Geometry::Point p, int forecast_num);
-
-    std::vector<Geometry::Point> ForecastToPoint2(Geometry::Point a, Geometry::Point b, int frame_a, int forecast_num);
-
-    std::vector<Geometry::Point> ForecastFixed(double forward, double rotate, int forecast_num);
-
     friend class Workbench;
 };
 
