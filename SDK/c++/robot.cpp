@@ -279,7 +279,7 @@ double Robot::CalcMaxSlowdownDist() {
 
 void Robot::Route_Planning() {
     if (route_.empty()) {
-        if (v.empty() || !WayFinding::GetOfflineRoute(pos_, v.front(), route_))
+        if (v.empty() || !WayFinding::GetOfflineRoute(v.front().second, pos_, v.front().first, route_))
             Log::print("find route failed");
         Log::print("routes_size: ", route_.size());
         for(const auto& point: route_) {

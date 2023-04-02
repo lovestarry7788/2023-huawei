@@ -73,7 +73,7 @@ namespace Solution6 {
         while(Input::ScanFrame()) {
             Log::print("frame: ", Input::frameID, "route.size: ", route.size());
             if (route.empty()) {
-                if (v.empty() || !GetOfflineRoute(robot[u]->pos_, v.front(), route))
+                if (v.empty() || !GetOfflineRoute(0, robot[u]->pos_, v.front(), route))
                     Log::print("find route failed");
                 Log::print("routes_size: ", route.size());
                 for(const auto& point: route) {
@@ -211,7 +211,7 @@ namespace Solution1 {
     void Choose_To_Point(int id, double dx, double dy, double& forward, double& rotate) {
         switch(Input::map_number_) {
             default:
-                robot[id]->ToPoint(Geometry::Point{dx, dy}, forward, rotate);
+                robot[id]->ToPoint_1(Geometry::Point{dx, dy}, forward, rotate);
                 break;
         }
     }
@@ -341,10 +341,6 @@ namespace Solution1 {
                 if (robot[id] -> carry_id_) {
                     if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
                         should_not_plan_to_buy_[robot[id] -> workbench_sell_] = true;
-                        while (robot[id] -> route_.size() && Geometry::Length(robot[id] -> pos_ - robot[id] -> route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
-                            // Log::print("1, robot_id: ", id, "plan_to_sell: ", robot[id] -> workbench_sell_, "px: ", robot[id] -> pos_.x, "py: ", robot[id] -> pos_.y, "route.x: ", robot[id] -> route_.front().x, "route.y: ", robot[id] -> route_.front().y, "dis: ",Geometry::Length(robot[id] -> pos_ - robot[id] -> route_.front()));
-                            robot[id] -> route_.erase(begin(robot[id] -> route_)); // 不能直接删除，可能需要回滚
-                        }
                         // 身边有 workbench
                         if (robot[id]->workbench_ == robot[id] -> workbench_sell_) {
                             Output::Sell(id);
@@ -462,14 +458,7 @@ namespace Solution1 {
                     if (fabs(mn) > 1e-5) {
                         robot[id]->workbench_buy_ = workbench_buy;
                         robot[id]->workbench_sell_ = workbench_sell;
-                        /*
-                        WayFinding::GetOfflineRoute(robot[id]->pos_, robot[id]->workbench_buy_, robot[id] -> route_);
-                        Log::print("robot_id: ", id, "plan_to_buy: ", robot[id] -> workbench_buy_, "end.x: ",workbench[robot[id] -> workbench_buy_] -> pos_.x, "end.y: ",workbench[robot[id] -> workbench_buy_] -> pos_.y);
-                        for(const auto& u: robot[id] -> route_) {
-                            Log::print(u.x, u.y);
-                        }
-                        */
-                        robot[id] -> v.push_back(robot[id] -> workbench_buy_);
+                        robot[id] -> v.push_back(std::make_pair(robot[id] -> workbench_buy_, 0));
                         can_plan_to_buy_[workbench_buy] = false;
                         can_plan_to_sell_[workbench_sell][carry_id] = false;
                     }
@@ -481,9 +470,6 @@ namespace Solution1 {
                 // 控制机器人运动到某点 或者 买东西。
                 for (int id = 0; id < 4; ++id) { // 未携带物品，打算去买的。
                     if (robot[id]->carry_id_ == 0 && robot[id] -> workbench_buy_ != -1) { // 如果有则找到最优的策略，跑去买。
-                        while (robot[id] -> route_.size() && Geometry::Length(robot[id] -> pos_ - robot[id] -> route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
-                            robot[id] -> route_.erase(begin(robot[id] -> route_)); // 不能直接删除，可能需要回滚
-                        }
                         // 身边有 workbench
                         if (robot[id]->workbench_ == robot[id]->workbench_buy_) {
                             // if(workbench[robot[id] -> workbench_buy_] -> frame_remain_ > 0 && workbench[robot[id] -> workbench_buy_] -> frame_remain_ <= frame_to_wait_in_buy) continue ;
@@ -491,14 +477,7 @@ namespace Solution1 {
                             can_plan_to_buy_[robot[id] -> workbench_buy_] = true;
                             workbench[robot[id] -> workbench_sell_] -> product_status_ = 0;
                             robot[id] -> workbench_buy_ = -1;
-                            /*
-                            WayFinding::GetOfflineRoute(robot[id] -> pos_, robot[id] -> workbench_sell_, robot[id] -> route_);
-                            Log::print("robot_id: ", id, "plan_to_sell: ", robot[id] -> workbench_sell_, "end.x: ",workbench[robot[id] -> workbench_sell_] -> pos_.x, "end.y: ",workbench[robot[id] -> workbench_sell_] -> pos_.y);
-                            for(const auto& u: robot[id] -> route_) {
-                                Log::print(u.x, u.y);
-                            }
-                            */
-                            robot[id] -> v.push_back(robot[id] -> workbench_sell_);
+                            robot[id] -> v.push_back(std::make_pair(robot[id] -> workbench_sell_,1));
                             plan_[id].sell_workbench = -1;
                             continue;
                         }

@@ -30,25 +30,25 @@ namespace WayFinding {
     };
 
     extern size_t N;
-    extern std::vector<std::vector<double> > dist;
-    extern std::vector<std::vector<int> > pre;
-    extern std::vector<Edge> edge;
-    extern std::vector<int> head;
+    extern std::vector<std::vector<double> > dist[2];
+    extern std::vector<std::vector<int> > pre[2];
+    extern std::vector<Edge> edge[2];
+    extern std::vector<int> head[2];
 
     extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos, robot_pos;
-    extern std::vector<std::vector<Route>> routes_;
+    extern std::vector<std::vector<Route>> routes_[2];
 
     int FreeSpace(int x, int y, int dx, int dy, int mx);
-    void Insert_Edge(int u, int v, double dis, double dis_to_wall);
+    void Insert_Edge(int o, int u, int v, double dis, double dis_to_wall);
     void Init();
     void Init_Frame();
     Geometry::Point GetGraphPoint(int i);
     double DistBetweenPoints(Geometry::Point a, Geometry::Point b);
     double CalcDistance(int id, int workbench_i, int workbench_j);
     double CalcFrame(int id, int i, int j);
-    void Dijkstra(int s, bool(*valid)(int t) = nullptr);
-    bool GetOfflineRoute(Geometry::Point cnt, int workbench_id, Route& output);
-    Route GetOnlineRoute(int s, int t);
+    void Dijkstra(int o, int s, bool(*valid)(int t) = nullptr);
+    bool GetOfflineRoute(int o, Geometry::Point cnt, int workbench_id, Route& output);
+    Route GetOnlineRoute(int o, int s, int t);
 };
 
 #endif
