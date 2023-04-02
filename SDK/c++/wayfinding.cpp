@@ -141,7 +141,7 @@ void WayFinding::Init() {
         Dijkstra(s);
         // Log::print(s, GetGraphPoint(s).x, GetGraphPoint(s).y);
         for (int t = 0; t < M; t++) if(dist[s][t] < INF) {
-            GetOnlineRoute(s, t);
+            routes_[s][t] = GetOnlineRoute(s, t);
         }
     }
 
@@ -237,6 +237,10 @@ bool WayFinding::GetOfflineRoute(Point cnt, int workbench_id, Route& output) {
     if ('1' <= map_[pi][pj] && map_[pi][pj] <= '9')
         from += robot_pos.size();
     output = routes_[from][workbench_id + robot_pos.size()];
+    Log::print("from: ", from, "to: ", workbench_id + robot_pos.size(), "from.x: ", GetGraphPoint(from).x, "from.y: ", GetGraphPoint(from).y, "to.x: ", GetGraphPoint(workbench_id + robot_pos.size()).x, "to.y: ", GetGraphPoint(workbench_id + robot_pos.size()).y);
+    for(const auto& u: output) {
+        Log::print(u.x, u.y);
+    }
     return true;
 }
 
