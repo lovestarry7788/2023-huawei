@@ -98,6 +98,9 @@ bool Input::ScanFrame() {
     return false;
 }
 
+/*
+ * 识别地图
+ */
 void Input::Identify_Map_Number() {
     if(map_[1][49] == '1' && map_[98][1] == '2' && map_[98][98] == '3') map_number_ = 1;
     else if(map_[1][1] == '6' && map_[1][49] == '5' && map_[1][98] == '6') map_number_ = 2;

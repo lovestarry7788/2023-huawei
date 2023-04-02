@@ -19,13 +19,21 @@ std::vector<std::vector<int> > WayFinding::pre[2];
 std::vector<Edge> WayFinding::edge[2];
 std::vector<int> WayFinding::head[2];
 
-std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::joint_obs_, WayFinding::workbench_pos, WayFinding::robot_pos;
+std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::workbench_pos, WayFinding::robot_pos;
+std::vector<std::vector<int> > WayFinding::joint_obs_;
 std::vector<std::vector<Route> > WayFinding::routes_[2];
 
 void WayFinding::Insert_Edge(int o, int u, int v, double dis, double dis_to_wall) {
     edge[o].push_back(Edge{u, v, head[o][u], dis, dis_to_wall});
     int edge_num = edge[o].size() - 1;
     head[o][u] = edge_num;
+}
+
+template<typename T>
+void WayFinding::Unique(T& uni) {
+        std::sort(begin(uni), end(uni));
+        auto p = std::unique(begin(uni), end(uni));
+        uni.resize(p - begin(uni));
 }
 
 int WayFinding::FreeSpace(int x, int y, int dx, int dy, int mx) {
@@ -43,6 +51,7 @@ int WayFinding::FreeSpace(int x, int y, int dx, int dy, int mx) {
 }
 
 void WayFinding::Init() {
+    std::vector<double> joint_obs_x0_, joint_obs_y0_;
     double Radius[2] = {0.47, 0.53};
     memset(map_id_, -1, sizeof(map_id_));
     int cnt_robot = 0, cnt_workbench = 0;
@@ -60,11 +69,11 @@ void WayFinding::Init() {
             }
 
             if (map_[i][j] != '#') continue;
-            joint_obs_.push_back({px + 0.25, py + 0.25});
-            joint_obs_.push_back({px + 0.25, py - 0.25});
-            joint_obs_.push_back({px - 0.25, py + 0.25});
-            joint_obs_.push_back({px - 0.25, py - 0.25});
-            // std::vector<std::pair<int,int>> dij;
+            joint_obs_x0_.push_back(px + 0.25);
+            joint_obs_x0_.push_back(px - 0.25);
+            joint_obs_y0_.push_back(py + 0.25);
+            joint_obs_y0_.push_back(py - 0.25);
+
             for (const auto &[di, dj]: std::vector<std::pair<int, int> >{{1,  -1},
                                                                          {1,  1},
                                                                          {-1, -1},
@@ -84,23 +93,61 @@ void WayFinding::Init() {
             }
         }
     }
+
     /*
      * 对所有的点集进行去重
      */
-    auto unique = [](std::vector<Point> &uni) {
-        std::sort(begin(uni), end(uni));
-        auto p = std::unique(begin(uni), end(uni));
-        uni.resize(p - begin(uni));
-    };
+    Unique(joint_obs_x0_);
+    Unique(joint_obs_y0_);
+    Unique(joint_walk_);
 
-    unique(joint_obs_);
-    unique(joint_walk_);
+    joint_obs_.resize(joint_obs_x0_.size());
+    for (int i = 0; i < map_size_; i++) {
+        for (int j = 0; j < map_size_; j++) if(map_[i][j] == '#'){
+            double px = j * 0.5 + 0.25;
+            double py = (map_size_ - i - 1) * 0.5 + 0.25;
+            int idx, idy;
+            idx = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), px + 0.25) - joint_obs_x0_.begin();
+            idy = std::lower_bound(joint_obs_y0_.begin(), joint_obs_y0_.end(), py + 0.25) - joint_obs_y0_.begin();
+            joint_obs_[idx].push_back(idy);
+
+            idx = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), px + 0.25) - joint_obs_x0_.begin();
+            idy = std::lower_bound(joint_obs_y0_.begin(), joint_obs_y0_.end(), py - 0.25) - joint_obs_y0_.begin();
+            joint_obs_[idx].push_back(idy);
+
+            idx = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), px - 0.25) - joint_obs_x0_.begin();
+            idy = std::lower_bound(joint_obs_y0_.begin(), joint_obs_y0_.end(), py + 0.25) - joint_obs_y0_.begin();
+            joint_obs_[idx].push_back(idy);
+
+            idx = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), px - 0.25) - joint_obs_x0_.begin();
+            idy = std::lower_bound(joint_obs_y0_.begin(), joint_obs_y0_.end(), py - 0.25) - joint_obs_y0_.begin();
+            joint_obs_[idx].push_back(idy);
+        }
+    }
+
+    for(int i = 0; i < joint_obs_.size(); ++i) {
+        Unique(joint_obs_[i]);
+//        Log::print(i);
+//        for(const auto& u: joint_obs_[i])
+//            Log::print(joint_obs_x0_[i], joint_obs_y0_[u]);
+    }
 
     /*
      * 离散化的点包括：机器人初始位置 + 工作台 + 障碍的拐角所拓展的点
      * 对于所有离散化的点进行通过测试。
      */
     N = robot_pos.size() + workbench_pos.size() + joint_walk_.size();
+    /*
+    Log::print("N: ", N, "joint_obs_: ", joint_obs_.size());
+    for(const auto& obs_: joint_obs_) {
+        Log::print("x: ", obs_.x, "y: ", obs_.y);
+    }
+    */
+//    for(int i = 0; i < N; ++i) {
+//        auto a = GetGraphPoint(i);
+//        Log::print("a.x: ", a.x, "a.y: ", a.y);
+//    }
+
     for (int o = 0; o < 2; ++o) {
         head[o].assign(N, -1); // 清空邻接表
         for (int i = 0; i < N; i++) {
@@ -109,13 +156,22 @@ void WayFinding::Init() {
                 auto b = GetGraphPoint(j);
                 bool valid = true;
                 double mind = 1e18;
-                for (const auto &k: joint_obs_) {
-                    double d = DistanceToSegment(k, a, b);
-                    mind = std::min(mind, d);
-                    // 细小问题，两点间直线，只有一个瓶颈，中间有空的，仍可以通过多辆车。no，没问题，将防碰撞提前处理了部分。
-                    if (d < Radius[o] + 2e-2) { // 操作误差
-                        valid = false;
-                        break;
+                double x0 = std::min(a.x, b.x) - Radius[o], x1 = std::max(a.x, b.x) + Radius[o], y0 = std::min(a.y, b.y) - Radius[o], y1 = std::max(a.y, b.y) + Radius[o];
+                int x0_ = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), x0) - joint_obs_x0_.begin() - 1; x0_ = std::max(x0_, 0);
+                int x1_ = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), x1) - joint_obs_x0_.begin();
+
+                for (int x = x0_; x <= x1_; ++x) {
+                    int y0_ = std::lower_bound(joint_obs_[x].begin(), joint_obs_[x].end(), y0) - joint_obs_[x].begin() - 1; y0_ = std::max(y0_, 0);
+                    int y1_ = std::lower_bound(joint_obs_[x].begin(), joint_obs_[x].end(), y1) - joint_obs_[x].begin();
+                    // Log::print("a: ", a, "b: ", b, joint_obs_x0_[x0_], joint_obs_x0_[x1_], joint_obs_y0_[joint_obs_[x][y0_]], joint_obs_y0_[joint_obs_[x][y1_]]);
+                    for (int y = y0_; y <= y1_; ++y) {
+                        double d = DistanceToSegment({joint_obs_x0_[x], joint_obs_y0_[joint_obs_[x][y]]}, a, b);
+                        mind = std::min(mind, d);
+                        // 细小问题，两点间直线，只有一个瓶颈，中间有空的，仍可以通过多辆车。no，没问题，将防碰撞提前处理了部分。
+                        if (d < Radius[o] + 2e-2) { // 操作误差
+                            valid = false;
+                            break;
+                        }
                     }
                 }
                 double d = DistBetweenPoints(a, b);
@@ -156,7 +212,6 @@ void WayFinding::Init() {
 
 /*
  * 对于每一帧，更新机器人的状态。
- */
 void WayFinding::Init_Frame() {
     double Radius[2] = {0.47, 0.53};
     N = robot_pos.size() + workbench_pos.size() + joint_walk_.size();
@@ -187,16 +242,13 @@ void WayFinding::Init_Frame() {
             }
         }
     }
-
-    /*
-     * 对于每个机器人跑一次 dijk
-     */
     for (int o = 0; o < 2; ++o) {
         for (int s = 0; s < robot_num_; s++) {
             Dijkstra(o, s);
         }
     }
 }
+*/
 
 Point WayFinding::GetGraphPoint(int i) { // 函数内部
     if(i < robot_pos.size()) return robot_pos[i];
