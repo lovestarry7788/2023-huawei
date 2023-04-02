@@ -45,6 +45,7 @@ public:
     Geometry::Vector linear_velocity_;// 线速度
     WayFinding::Route route_; // 当前保存的路线
     std::vector<std::pair<int,int> > v; // 保存需要走的点，买还是卖。
+    int last_point_; // 用于在买的时候计算距离，经过的最后一个卖的点。
 
     Robot(int id, int workbench_, int carry_id, double time_coefficient, double collide_coefficient,
           double angular_velocity, double linear_velocity_x, double linear_velocity_y, double orient, double x0, double y0);
@@ -86,7 +87,7 @@ public:
 
     double GetLinearVelocity();
 
-    void Route_Planning();
+    void Robot_Control(double& forward, double& rotate);
 
     friend class Workbench;
 };

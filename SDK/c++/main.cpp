@@ -66,33 +66,15 @@ namespace Solution6 {
 
     void Solve() {
         Input::ScanMap();
-        int u = 0; // 表示第 0 号机器人
-        std::vector<int> v = {0, 9, 11, 15, 17, 22, 25, 26, 30, 29}; // 去第 0 号工作台
-        Route route;
-
+        std:: vector<int> v = {11, 19}; // 去第 0 号工作台
         while(Input::ScanFrame()) {
-            Log::print("frame: ", Input::frameID, "route.size: ", route.size());
-            if (route.empty()) {
-                if (v.empty() || !GetOfflineRoute(0, robot[u]->pos_, v.front(), route))
-                    Log::print("find route failed");
-                Log::print("routes_size: ", route.size());
-                for(const auto& point: route) {
-                    Log::print(point.x, point.y);
+            if(frameID == 1) {
+                for (const auto &u: v) {
+                    robot[0]->v.push_back({u, 0});
                 }
             }
-            Point robot_pos = robot[0] -> pos_;
-            while (route.size() && Geometry::Length(robot_pos - route.front()) < 0.1) { // 机器人到达某个点，则删掉。
-                Log::print("reach");
-                route.erase(begin(route)); // 不能直接删除，可能需要回滚
-                if (route.empty()) 
-                    v.erase(begin(v));
-            }
             double forward, rotate;
-//            if (route.size() >= 2) {
-//                robot->ToPointTwoPoint(route[0], route[1], f, r);
-//            } else if (route.size() >= 1)
-            if (route.size())
-                robot[0]->ToPoint_1(route.front(), forward, rotate);
+            robot[0] -> Robot_Control(forward, rotate);
             Output::Forward(0, forward);
             Output::Rotate(0, rotate);
             Output::Print(Input::frameID);
@@ -170,29 +152,7 @@ namespace Solution1 {
             should_not_plan_to_buy_[i] = false;
         }
 
-        /*
-        for(int idx = 0; idx < robot_num_ + K; ++idx) {
-            for(int idy = 0; idy < robot_num_ + K; ++idy) {
-                double sx, sy, dx, dy;
-                if(idx < 4) {
-                    sx = robot[idx] -> pos_.x;
-                    sy = robot[idx] -> pos_.y;
-                } else {
-                    sx = workbench[idx - robot_num_] -> pos_.x;
-                    sy = workbench[idx - robot_num_] -> pos_.y;
-                }
-                if(idy < 4) {
-                    dx = robot[idy] -> pos_.x;
-                    dy = robot[idy] -> pos_.y;
-                } else {
-                    dx = workbench[idy - robot_num_] -> pos_.x;
-                    dy = workbench[idy - robot_num_] -> pos_.y;
-                }
-                dis_[idx][idy] = Distance(sx, sy, dx, dy);
-            }
-        }
-        */
-        WayFinding::Init_Frame();
+        // WayFinding::Init_Frame();
 
         if(frameID == 1) {
             for(int i = 0; i < K; ++i) {
@@ -337,7 +297,6 @@ namespace Solution1 {
         while(Input::ScanFrame()) {
             Init();
             for(int id = 0; id < 4; ++id) { // 枚举机器人
-                robot[id] -> Route_Planning();
                 if (robot[id] -> carry_id_) {
                     if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
                         should_not_plan_to_buy_[robot[id] -> workbench_sell_] = true;
@@ -346,25 +305,17 @@ namespace Solution1 {
                             Output::Sell(id);
                             can_plan_to_sell_[robot[id] -> workbench_sell_][robot[id] -> carry_id_] = true;
                             workbench[robot[id] -> workbench_sell_] -> materials_status_ |= 1 << robot[id] -> carry_id_;
+                            robot[id] -> last_point_ = robot[id] -> workbench_sell_ + robot_num_;
+                            // Log::print("id: ", id, "last_point_: ", robot[id] -> last_point_);
                             robot[id] -> workbench_buy_ = robot[id] -> workbench_sell_ = -1;
                             plan_[id].sell_workbench = -1;
                             continue;
                         }
                         double forward, rotate;
-                        if(robot[id] -> route_.size()) {
-//                            Log::print("robot_id: ", id, "plan_to_sell: ", robot[id]->workbench_sell_, "px: ",
-//                                       robot[id]->pos_.x, "py: ", robot[id]->pos_.y, "route.x: ",
-//                                       robot[id]->route_.front().x, "route.y: ", robot[id]->route_.front().y, "dis: ",
-//                                       Geometry::Length(robot[id]->pos_ - robot[id]->route_.front()));
-//                            for (const auto &u: robot[id]->route_) {
-//                                Log::print(u.x, u.y);
-//                            }
-                            Choose_To_Point(id, robot[id]->route_.front().x, robot[id]->route_.front().y, forward,
-                                            rotate);
-                            movement_[id] = {forward, rotate};
-                            plan_[id].sell_workbench = robot[id]->workbench_sell_;
-                            robot[id]->workbench_buy_ = -1;
-                        }
+                        robot[id] -> Robot_Control(forward, rotate);
+                        movement_[id] = {forward, rotate};
+                        plan_[id].sell_workbench = robot[id]->workbench_sell_;
+                        robot[id]->workbench_buy_ = -1;
                     }
                 }
             }
@@ -422,12 +373,8 @@ namespace Solution1 {
                                         double buy_sell_frame_ = 50 * robot[id]->CalcTime(
                                                 Geometry::Point{workbench[i]->pos_.x, workbench[i]->pos_.y},
                                                 Geometry::Point{workbench[j]->pos_.x, workbench[j]->pos_.y});
-
-                                        if(map_number_ < 3)
-                                            buy_sell_frame_ = (dis_[id][i + robot_num_] + dis_[i + robot_num_][j + robot_num_]);
                                         */
                                         double buy_sell_frame_ = WayFinding::CalcDistance(id, i, j);
-                                        // Log::print("i: ", i, "j: ", j, "dis: ", WayFinding::CalcDistance(id, i, j));
                                         if(buy_sell_frame_ >= WayFinding::INF) continue;
 
                                         if((workbench[j] -> type_id_ == 7 && workbench[j] -> ItemsAreMissing() == 1)) { // 如果 7 只差一点，给一个更大的值
@@ -459,11 +406,14 @@ namespace Solution1 {
                         robot[id]->workbench_buy_ = workbench_buy;
                         robot[id]->workbench_sell_ = workbench_sell;
                         robot[id] -> v.push_back(std::make_pair(robot[id] -> workbench_buy_, 0));
+                        robot[id] -> v.push_back(std::make_pair(robot[id] -> workbench_sell_, 1));
+                        Log::print("workbench_buy: ", workbench_buy, "workbench_sell: ", workbench_sell, "mn: ", mn);
+                        Log::print("id: ", id, "workbench_id: ", robot[id] -> workbench_buy_);
+                        Log::print("id: ", id, "workbench_id: ", robot[id] -> workbench_sell_);
                         can_plan_to_buy_[workbench_buy] = false;
                         can_plan_to_sell_[workbench_sell][carry_id] = false;
                     }
                 }
-                //Log::print("\n");
                 // 给机器人买计划已完成
 
 
@@ -476,18 +426,15 @@ namespace Solution1 {
                             Output::Buy(id);
                             can_plan_to_buy_[robot[id] -> workbench_buy_] = true;
                             workbench[robot[id] -> workbench_sell_] -> product_status_ = 0;
+                            robot[id] -> last_point_ = robot[id] -> workbench_buy_ + robot_num_;
                             robot[id] -> workbench_buy_ = -1;
-                            robot[id] -> v.push_back(std::make_pair(robot[id] -> workbench_sell_,1));
                             plan_[id].sell_workbench = -1;
                             continue;
                         }
                         double forward, rotate;
-                        if(robot[id] -> route_.size()) {
-                            Choose_To_Point(id, robot[id]->route_.front().x, robot[id]->route_.front().y, forward,
-                                            rotate);
-                            movement_[id] = {forward, rotate};
-                            plan_[id].buy_workbench = robot[id]->workbench_buy_;
-                        }
+                        robot[id] -> Robot_Control(forward, rotate);
+                        movement_[id] = {forward, rotate};
+                        plan_[id].buy_workbench = robot[id]->workbench_buy_;
                     }
 //                    else if(robot[id] -> carry_id_ == 0 && robot[id] -> workbench_buy_ == -1) { // 买不了东西，到处跑
 //                        double mn = 1e9; int workbench_id = -1;
@@ -517,6 +464,7 @@ namespace Solution1 {
                 Output::Rotate(id, rotate);
             }
             Output::Print(Input::frameID);
+
         }
     }
 }

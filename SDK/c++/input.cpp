@@ -57,7 +57,7 @@ bool Input::ScanFrame() {
             if (!workbench[i]) {
                 workbench[i] = std::make_shared<Workbench>(type_id, x0, y0, frame_remain, materials_status,
                                                            product_status);
-                Log::print("i: ", i, "x: ", x0, "y: ", y0, "type_id: ",type_id);
+               // Log::print("i: ", i, "x: ", x0, "y: ", y0, "type_id: ",type_id);
             }
             else {
                 workbench[i]->type_id_ = type_id;
@@ -88,6 +88,7 @@ bool Input::ScanFrame() {
                 robot[id]->linear_velocity_ = {linear_velocity_x, linear_velocity_y};
                 robot[id]->orient_ = orient;
                 robot[id]->pos_ = {x0, y0};
+                if(frameID == 1) robot[id]->last_point_ = id;
             }
         }
 

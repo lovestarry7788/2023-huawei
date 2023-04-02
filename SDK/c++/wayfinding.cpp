@@ -56,7 +56,7 @@ void WayFinding::Init() {
                 map_id_[i][j] = cnt_robot++;
             } else if ('1' <= map_[i][j] && map_[i][j] <= '9') {
                 workbench_pos.push_back({px, py});
-                map_id_[i][j] = cnt_workbench++;
+                map_id_[i][j] = robot_num_ + cnt_workbench++;
             }
 
             if (map_[i][j] != '#') continue;
@@ -158,6 +158,7 @@ void WayFinding::Init() {
  * 对于每一帧，更新机器人的状态。
  */
 void WayFinding::Init_Frame() {
+    double Radius[2] = {0.47, 0.53};
     N = robot_pos.size() + workbench_pos.size() + joint_walk_.size();
     for (int o = 0; o < 2; ++o) {
         for (int i = 0; i < robot_num_; i++) {
@@ -171,17 +172,18 @@ void WayFinding::Init_Frame() {
                     double d = DistanceToSegment(k, a, b);
                     mind = std::min(mind, d);
                     // 细小问题，两点间直线，只有一个瓶颈，中间有空的，仍可以通过多辆车。no，没问题，将防碰撞提前处理了部分。
-                    if (d < 0.45 + 2e-2) { // 操作误差
+                    if (d < Radius[o] + 2e-2) { // 操作误差
                         valid = false;
                         break;
                     }
                 }
                 double d = DistBetweenPoints(a, b);
                 // Log::print(i, j, a.x, a.y, b.x, b.y, d, mind, valid);
-                if (!valid) continue;
                 // 暂不考虑单行道，存了mind供将来判断道路宽度使用
-                Insert_Edge(o, i, j, d, mind);
-                Insert_Edge(o, j, i, d, mind);
+                if (valid) {
+                    Insert_Edge(o, i, j, d, mind);
+                    Insert_Edge(o, j, i, d, mind);
+                }
             }
         }
     }
@@ -244,13 +246,13 @@ bool WayFinding::GetOfflineRoute(int o, Point cnt, int workbench_id, Route& outp
     int pi = int((50 - cnt.y) / 0.5), pj = int(cnt.x / 0.5);
     int from = map_id_[pi][pj];
     if (from == -1) return false;
-    if ('1' <= map_[pi][pj] && map_[pi][pj] <= '9')
-        from += robot_pos.size();
     output = routes_[o][from][workbench_id + robot_pos.size()];
-    Log::print("from: ", from, "to: ", workbench_id + robot_pos.size(), "from.x: ", GetGraphPoint(from).x, "from.y: ", GetGraphPoint(from).y, "to.x: ", GetGraphPoint(workbench_id + robot_pos.size()).x, "to.y: ", GetGraphPoint(workbench_id + robot_pos.size()).y);
+    /*
+    Log::print("frame: ", frameID, "from: ", from, "to: ", workbench_id + robot_pos.size(), "from.x: ", GetGraphPoint(from).x, "from.y: ", GetGraphPoint(from).y, "to.x: ", GetGraphPoint(workbench_id + robot_pos.size()).x, "to.y: ", GetGraphPoint(workbench_id + robot_pos.size()).y);
     for(const auto& u: output) {
         Log::print(u.x, u.y);
     }
+    */
     return true;
 }
 
@@ -258,7 +260,9 @@ bool WayFinding::GetOfflineRoute(int o, Point cnt, int workbench_id, Route& outp
  * 计算机器人 id -> workbench[i] -> workbench[j] 的距离。
  */
 double WayFinding::CalcDistance(int id, int workbench_i, int workbench_j) {
-    return dist[0][id][robot_num_ + workbench_i] + dist[1][robot_num_ + workbench_i][robot_num_ + workbench_j];
+    int pi = int((50 - robot[id] -> pos_.y) / 0.5), pj = int(robot[id] -> pos_.x / 0.5);
+    Log::print("Frame: ", frameID, "CalcDistance, id: ", id, "last_point_: ", robot[id] -> last_point_);
+    return dist[0][robot[id] -> last_point_][robot_num_ + workbench_i] + dist[1][robot_num_ + workbench_i][robot_num_ + workbench_j];
 }
 
 /*

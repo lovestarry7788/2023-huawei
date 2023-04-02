@@ -17,6 +17,7 @@ void Output::Buy(int robot_id) {
 
 void Output::Sell(int robot_id) {
     Operation.emplace_back(std::string{"sell " + std::to_string(robot_id)});
+    Log::print("Sell: ", robot_id);
 }
 
 void Output::Destroy(int robot_id) {

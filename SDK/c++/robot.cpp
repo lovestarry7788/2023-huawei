@@ -277,7 +277,7 @@ double Robot::CalcMaxSlowdownDist() {
     return Geometry::UniformVariableDist(max_force_ / GetMaxMass(), GetLinearVelocity(), 0);
 }
 
-void Robot::Route_Planning() {
+void Robot::Robot_Control(double& forward, double& rotate) {
     if (route_.empty()) {
         if (v.empty() || !WayFinding::GetOfflineRoute(v.front().second, pos_, v.front().first, route_))
             Log::print("find route failed");
@@ -288,9 +288,14 @@ void Robot::Route_Planning() {
     }
     Point robot_pos = pos_;
     while (route_.size() && Geometry::Length(robot_pos - route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
-        Log::print("reach");
+        // Log::print("reach");
         route_.erase(begin(route_)); // 不能直接删除，可能需要回滚
         if (route_.empty())
             v.erase(begin(v));
+    }
+
+    if (route_.size()) {
+        ToPoint_1(route_.front(), forward, rotate);
+        Log::print("frame: ", Input::frameID ,"id: ", id_, "forward: ",forward, "rotate: ",rotate, "pos.x: ", pos_.x, "pos.y: ", pos_.y, "to.x: ", route_.front().x, "to.y: ", route_.front().y);
     }
 }
