@@ -44,6 +44,7 @@ public:
     Geometry::Point pos_; // x坐标, y坐标
     Geometry::Vector linear_velocity_;// 线速度
     WayFinding::Route route_; // 当前保存的路线
+    std::vector<int> v; // 保存需要走的点。
 
     Robot(int id, int workbench_, int carry_id, double time_coefficient, double collide_coefficient,
           double angular_velocity, double linear_velocity_x, double linear_velocity_y, double orient, double x0, double y0);
@@ -84,6 +85,8 @@ public:
     double CalcMaxSlowdownDist();
 
     double GetLinearVelocity();
+
+    void Route_Planning();
 
     friend class Workbench;
 };

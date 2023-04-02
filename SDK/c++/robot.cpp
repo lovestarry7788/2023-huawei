@@ -276,3 +276,21 @@ double Robot::GetLinearVelocity() {
 double Robot::CalcMaxSlowdownDist() {
     return Geometry::UniformVariableDist(max_force_ / GetMaxMass(), GetLinearVelocity(), 0);
 }
+
+void Robot::Route_Planning() {
+    if (route_.empty()) {
+        if (v.empty() || !WayFinding::GetOfflineRoute(pos_, v.front(), route_))
+            Log::print("find route failed");
+        Log::print("routes_size: ", route_.size());
+        for(const auto& point: route_) {
+            Log::print(point.x, point.y);
+        }
+    }
+    Point robot_pos = pos_;
+    while (route_.size() && Geometry::Length(robot_pos - route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
+        Log::print("reach");
+        route_.erase(begin(route_)); // 不能直接删除，可能需要回滚
+        if (route_.empty())
+            v.erase(begin(v));
+    }
+}

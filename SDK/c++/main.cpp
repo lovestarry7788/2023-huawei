@@ -337,6 +337,7 @@ namespace Solution1 {
         while(Input::ScanFrame()) {
             Init();
             for(int id = 0; id < 4; ++id) { // 枚举机器人
+                robot[id] -> Route_Planning();
                 if (robot[id] -> carry_id_) {
                     if(robot[id] -> workbench_sell_ != -1) { // 找到有工作台
                         should_not_plan_to_buy_[robot[id] -> workbench_sell_] = true;
@@ -461,11 +462,14 @@ namespace Solution1 {
                     if (fabs(mn) > 1e-5) {
                         robot[id]->workbench_buy_ = workbench_buy;
                         robot[id]->workbench_sell_ = workbench_sell;
+                        /*
                         WayFinding::GetOfflineRoute(robot[id]->pos_, robot[id]->workbench_buy_, robot[id] -> route_);
                         Log::print("robot_id: ", id, "plan_to_buy: ", robot[id] -> workbench_buy_, "end.x: ",workbench[robot[id] -> workbench_buy_] -> pos_.x, "end.y: ",workbench[robot[id] -> workbench_buy_] -> pos_.y);
                         for(const auto& u: robot[id] -> route_) {
                             Log::print(u.x, u.y);
                         }
+                        */
+                        robot[id] -> v.push_back(robot[id] -> workbench_buy_);
                         can_plan_to_buy_[workbench_buy] = false;
                         can_plan_to_sell_[workbench_sell][carry_id] = false;
                     }
@@ -487,12 +491,14 @@ namespace Solution1 {
                             can_plan_to_buy_[robot[id] -> workbench_buy_] = true;
                             workbench[robot[id] -> workbench_sell_] -> product_status_ = 0;
                             robot[id] -> workbench_buy_ = -1;
+                            /*
                             WayFinding::GetOfflineRoute(robot[id] -> pos_, robot[id] -> workbench_sell_, robot[id] -> route_);
                             Log::print("robot_id: ", id, "plan_to_sell: ", robot[id] -> workbench_sell_, "end.x: ",workbench[robot[id] -> workbench_sell_] -> pos_.x, "end.y: ",workbench[robot[id] -> workbench_sell_] -> pos_.y);
                             for(const auto& u: robot[id] -> route_) {
                                 Log::print(u.x, u.y);
                             }
-
+                            */
+                            robot[id] -> v.push_back(robot[id] -> workbench_sell_);
                             plan_[id].sell_workbench = -1;
                             continue;
                         }
