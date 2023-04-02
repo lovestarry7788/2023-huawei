@@ -116,9 +116,6 @@ void WayFinding::Init() {
 
     for(int i = 0; i < joint_obs_.size(); ++i) {
         Unique(joint_obs_[i]);
-//        Log::print(i);
-//        for(const auto& u: joint_obs_[i])
-//            Log::print(joint_obs_x0_[i], joint_obs_y0_[u]);
     }
 
     /*
@@ -169,7 +166,7 @@ void WayFinding::Init() {
                 // Log::print(i, j, a.x, a.y, b.x, b.y, d, mind, valid);
                 // 暂不考虑单行道，存了mind供将来判断道路宽度使用
                 if (valid) {
-                    double d = DistBetweenPoints(a, b);
+                    d = DistBetweenPoints(a, b);
                     Insert_Edge(o, i, j, d, mind);
                     Insert_Edge(o, j, i, d, mind);
                 }
@@ -264,12 +261,13 @@ Route WayFinding::GetOnlineRoute(int o, int s, int t) {
     return route;
 }
 
+std::priority_queue<Status> Q;
 void WayFinding::Dijkstra(int o, int s, bool(*valid)(int t)) {
     // TODO：将方向放入状态
     pre[o][s].assign(N, -1);
     dist[o][s].assign(N, INF);
-    std::priority_queue<Status> Q;
     dist[o][s][s] = 0.0;
+    while(!Q.empty()) Q.pop();
     Q.push(Status{s, dist[o][s][s]});
     while (!Q.empty()) {
         auto x = Q.top(); Q.pop();
