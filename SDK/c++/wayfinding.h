@@ -36,7 +36,7 @@ namespace WayFinding {
     extern std::vector<int> head[2];
 
     extern std::vector<Geometry::Point> joint_walk_, workbench_pos, robot_pos;
-    extern std::vector<std::vector<int> > joint_obs_;
+    extern std::vector<std::vector<double> > joint_obs_;
     extern std::vector<std::vector<Route>> routes_[2];
 
     int FreeSpace(int x, int y, int dx, int dy, int mx);
