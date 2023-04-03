@@ -304,7 +304,7 @@ bool WayFinding::GetOfflineRoute(int o, Point cnt, int workbench_id, Route& outp
  */
 double WayFinding::CalcDistance(int id, int workbench_i, int workbench_j) {
     int pi = int((50 - robot[id] -> pos_.y) / 0.5), pj = int(robot[id] -> pos_.x / 0.5);
-    Log::print("Frame: ", frameID, "CalcDistance, id: ", id, "last_point_: ", robot[id] -> last_point_);
+    // Log::print("Frame: ", frameID, "CalcDistance, id: ", id, "last_point_: ", robot[id] -> last_point_);
     return dist[0][robot[id] -> last_point_][robot_num_ + workbench_i] + dist[1][robot_num_ + workbench_i][robot_num_ + workbench_j];
 }
 

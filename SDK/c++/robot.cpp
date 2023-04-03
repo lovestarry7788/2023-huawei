@@ -278,6 +278,7 @@ double Robot::CalcMaxSlowdownDist() {
 }
 
 void Robot::Robot_Control(double& forward, double& rotate) {
+//    Log::print("Robot_Control, id: ", id_, "route: ", route_.size(), "v: ", v.size());
     if (route_.empty()) {
         if (v.empty() || !WayFinding::GetOfflineRoute(v.front().second, pos_, v.front().first, route_))
             Log::print("find route failed");
@@ -296,6 +297,6 @@ void Robot::Robot_Control(double& forward, double& rotate) {
 
     if (route_.size()) {
         ToPoint_1(route_.front(), forward, rotate);
-        Log::print("frame: ", Input::frameID ,"id: ", id_, "forward: ",forward, "rotate: ",rotate, "pos.x: ", pos_.x, "pos.y: ", pos_.y, "to.x: ", route_.front().x, "to.y: ", route_.front().y);
+        // Log::print("frame: ", Input::frameID ,"id: ", id_, "forward: ",forward, "rotate: ",rotate, "pos.x: ", pos_.x, "pos.y: ", pos_.y, "to.x: ", route_.front().x, "to.y: ", route_.front().y);
     }
 }

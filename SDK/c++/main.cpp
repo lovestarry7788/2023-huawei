@@ -91,7 +91,7 @@ namespace Solution1 {
     using namespace Dispatch;
 
     static constexpr int robot_num_ = 4;
-    static constexpr int total_frame = 9000;
+    static constexpr int total_frame = 15000;
     static constexpr int can_not_buy_in_last_frame = 0;
     static constexpr double inf = 1e9;
     static constexpr int frame_to_wait_in_buy = 3;
@@ -407,9 +407,9 @@ namespace Solution1 {
                         robot[id]->workbench_sell_ = workbench_sell;
                         robot[id] -> v.push_back(std::make_pair(robot[id] -> workbench_buy_, 0));
                         robot[id] -> v.push_back(std::make_pair(robot[id] -> workbench_sell_, 1));
-                        Log::print("workbench_buy: ", workbench_buy, "workbench_sell: ", workbench_sell, "mn: ", mn);
-                        Log::print("id: ", id, "workbench_id: ", robot[id] -> workbench_buy_);
-                        Log::print("id: ", id, "workbench_id: ", robot[id] -> workbench_sell_);
+                        Log::print("Frame: ", frameID, "workbench_buy: ", workbench_buy, "workbench_sell: ", workbench_sell, "mn: ", mn);
+                        Log::print("id: ", id, "workbench_id: ", robot[id] -> workbench_buy_, "x: ", workbench[robot[id] -> workbench_buy_] -> pos_.x, "y: ", workbench[robot[id] -> workbench_buy_] -> pos_.y);
+                        Log::print("id: ", id, "workbench_id: ", robot[id] -> workbench_sell_, "x: ", workbench[robot[id] -> workbench_sell_] -> pos_.x, "y: ", workbench[robot[id] -> workbench_sell_] -> pos_.y);
                         can_plan_to_buy_[workbench_buy] = false;
                         can_plan_to_sell_[workbench_sell][carry_id] = false;
                     }
