@@ -49,6 +49,23 @@ namespace WayFinding {
     void Dijkstra(int o, int s, bool(*valid)(int t) = nullptr);
     bool GetOfflineRoute(int o, Geometry::Point cnt, int workbench_id, Route& output);
     Route GetOnlineRoute(int o, int s, int t);
+
+    const std::vector<std::vector<std::array<int,2>>> Wall = {
+            {{-1, -1}, {-2, -1}, {-1, -2}, {-2, -2}, {-3, -1}, {-1, -3}, {-3, -2}, {-2, -3}},
+            {{1, -1}, {2, -1}, {1, -2}, {2, -2}, {3, -1}, {1, -3}, {3, -2}, {2, -3}},
+            {{1, 1}, {2, 1}, {1, 2}, {2, 2}, {3, 1}, {1, 3}, {3, 2}, {2, 3}},
+            {{-1, 1}, {-2, 1}, {-1, 2}, {-2, 2}, {-3, 1}, {-1, 3}, {-3, 2}, {-2, 3}}
+    };
+    const Geometry::Point direction[] = {
+            {0.5, 0}, {0, 0}, {0, -0.5}, {0.5, -0.5}
+    };
+    const std::vector<std::vector<std::array<int,2>>> row = {
+            {{-1, 0}, {-2, 0}, {-3, 0}},
+            {{0, -1}, {0, -2}, {0, -3}},
+            {{0, 1}, {0, 2}, {0, 3}},
+            {{1, 0}, {2, 0}, {3, 0}}
+    };
+    double DistToWall(Geometry::Point p, double ori);
 };
 
 #endif
