@@ -7,6 +7,7 @@
 #include <vector>
 #include <utility>
 #include <iostream>
+#include <array>
 
 namespace WayFinding {
     using Route = std::vector<Geometry::Point>;
@@ -35,8 +36,9 @@ namespace WayFinding {
     extern std::vector<Edge> edge[2];
     extern std::vector<int> head[2];
 
-    extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos, robot_pos;
+    extern std::vector<Geometry::Point> joint_walk_, workbench_pos, robot_pos;
     extern std::vector<std::vector<Route>> routes_[2];
+    extern std::vector<std::vector<double> > joint_obs_;
 
     int FreeSpace(int x, int y, int dx, int dy, int mx);
     void Insert_Edge(int o, int u, int v, double dis, double dis_to_wall);
