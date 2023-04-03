@@ -63,7 +63,7 @@ public:
 
     void AvoidToWall(double& forward, double& rotate);
 
-    double DistToWall(Geometry::Point p, double orient);
+//    double DistToWall(Geometry::Point p, double orient);
 
     // 获取当前半径
     double GetRadius();

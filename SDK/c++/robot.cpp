@@ -163,7 +163,7 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
 
 void Robot::AvoidToWall(double &forward, double &rotate) {
     double limit = CalcMaxSlowdownDist();
-    double walld = DistToWall(pos_, GetLinearVelocity() > 0.5 ? Angle(linear_velocity_) : orient_);
+    double walld = WayFinding::DistToWall(pos_, GetLinearVelocity() > 0.5 ? Angle(linear_velocity_) : orient_);
     // if (Input::frameID == 117 && id_ == 0) {
     //     Log::print(id_, walld, limit);
     // }
@@ -173,28 +173,28 @@ void Robot::AvoidToWall(double &forward, double &rotate) {
     }
 }
 
-double Robot::DistToWall(Point p, double orient) {
-    double mind = 100;
-    Vector ori{cos(orient), sin(orient)};
-    const static std::vector<std::pair<Point, double>> wall{
-            {{0,0.40}, 0},
-            {{49.60,0}, PI/2},
-            {{50,49.60}, PI},
-            {{0.40,50}, -PI/2},
-    };
-    for (const auto& [wp, wo] : wall) {
-        Point sec = GetLineIntersection2(p, ori, wp, {cos(wo), sin(wo)});
-        // if (Input::frame)
-        if (Dot(sec - p, ori) > 0) {
-            mind = std::min(mind, Length(sec - p));
-            // if (Input::frameID == 1069 && id_ == 0) {
-            //     Log::print(id_, Length(sec - p), ori.x, ori.y);
-            //     Log::print(p.x, p.y);
-            // }
-        }
-    }
-    return mind;
-}
+//double Robot::DistToWall(Point p, double orient) {
+//    double mind = 100;
+//    Vector ori{cos(orient), sin(orient)};
+//    const static std::vector<std::pair<Point, double>> wall{
+//            {{0,0.40}, 0},
+//            {{49.60,0}, PI/2},
+//            {{50,49.60}, PI},
+//            {{0.40,50}, -PI/2},
+//    };
+//    for (const auto& [wp, wo] : wall) {
+//        Point sec = GetLineIntersection2(p, ori, wp, {cos(wo), sin(wo)});
+//        // if (Input::frame)
+//        if (Dot(sec - p, ori) > 0) {
+//            mind = std::min(mind, Length(sec - p));
+//            // if (Input::frameID == 1069 && id_ == 0) {
+//            //     Log::print(id_, Length(sec - p), ori.x, ori.y);
+//            //     Log::print(p.x, p.y);
+//            // }
+//        }
+//    }
+//    return mind;
+//}
 
 double Robot::GetRadius() {
     // return Robot::radius_with_thing_;

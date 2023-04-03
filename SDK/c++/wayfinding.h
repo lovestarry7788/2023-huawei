@@ -35,8 +35,7 @@ namespace WayFinding {
     extern std::vector<Edge> edge[2];
     extern std::vector<int> head[2];
 
-    extern std::vector<Geometry::Point> joint_walk_, workbench_pos, robot_pos;
-    extern std::vector<std::vector<double> > joint_obs_;
+    extern std::vector<Geometry::Point> joint_walk_, joint_obs_, workbench_pos, robot_pos;
     extern std::vector<std::vector<Route>> routes_[2];
 
     int FreeSpace(int x, int y, int dx, int dy, int mx);
@@ -52,6 +51,23 @@ namespace WayFinding {
     Route GetOnlineRoute(int o, int s, int t);
 
     template<typename T> void Unique(T& Uni);
+
+    const std::vector<std::vector<std::array<int,2>>> Wall = {
+            {{-1, -1}, {-2, -1}, {-1, -2}, {-2, -2}, {-3, -1}, {-1, -3}, {-3, -2}, {-2, -3}},
+            {{1, -1}, {2, -1}, {1, -2}, {2, -2}, {3, -1}, {1, -3}, {3, -2}, {2, -3}},
+            {{1, 1}, {2, 1}, {1, 2}, {2, 2}, {3, 1}, {1, 3}, {3, 2}, {2, 3}},
+            {{-1, 1}, {-2, 1}, {-1, 2}, {-2, 2}, {-3, 1}, {-1, 3}, {-3, 2}, {-2, 3}}
+    };
+    const Geometry::Point direction[] = {
+            {0.5, 0}, {0, 0}, {0, -0.5}, {0.5, -0.5}
+    };
+    const std::vector<std::vector<std::array<int,2>>> row = {
+            {{-1, 0}, {-2, 0}, {-3, 0}},
+            {{0, -1}, {0, -2}, {0, -3}},
+            {{0, 1}, {0, 2}, {0, 3}},
+            {{1, 0}, {2, 0}, {3, 0}}
+    };
+    double DistToWall(Geometry::Point p, double ori);
 };
 
 #endif
