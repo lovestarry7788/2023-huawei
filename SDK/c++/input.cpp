@@ -31,6 +31,7 @@ void Input::ScanMap() {
     for(int i = 0; i < map_size_; ++i) {
         for(int j = 0; j < map_size_; ++j) {
             scanf("\n%c",&map_[i][j]);
+            // Log::print("i: ", i, "j: ", j, "map_[i][j]: ", map_[i][j]);
             K += map_[i][j] >= '1' && map_[i][j] <= '9';
             if(map_[i][j] == '#') is_obstacle_[i][j] = true;
             else is_obstacle_[i][j] = false;
@@ -56,7 +57,7 @@ bool Input::ScanFrame() {
             if (!workbench[i]) {
                 workbench[i] = std::make_shared<Workbench>(type_id, x0, y0, frame_remain, materials_status,
                                                            product_status);
-               Log::print("i: ", i, "x: ", x0, "y: ", y0, "type_id: ",type_id);
+//               Log::print("i: ", i, "x: ", x0, "y: ", y0, "type_id: ",type_id);
             }
             else {
                 workbench[i]->type_id_ = type_id;
@@ -105,9 +106,9 @@ bool Input::ScanFrame() {
  */
 void Input::Identify_Map_Number() {
     if(map_[5][47] == '5' && map_[75][5] == '8' && map_[75][94] == '8') map_number_ = 1;
-//    else if(map_[1][1] == '6' && map_[1][49] == '5' && map_[1][98] == '6') map_number_ = 2;
-//    else if(map_[1][46] == '3' && map_[1][54] == '5') map_number_ = 3;
-//    else if(map_[7][49] == '7' && map_[97][49] == '4') map_number_ = 4;
+    else if(map_[25][50] == '6' && map_[80][34] == '7' && map_[80][65] == '8') map_number_ = 2;
+    else if(map_[39][43] == '1' && map_[41][65] == '2') map_number_ = 3;
+    else if(map_[2][3] == '6' && map_[2][36] == '5' && map_[2][77] == '4') map_number_ = 4;
     else map_number_ = -1;
     Log::print("Identify_Map_Number: ", map_number_);
 }
