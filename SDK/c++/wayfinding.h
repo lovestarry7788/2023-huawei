@@ -12,6 +12,7 @@
 namespace WayFinding {
     using Route = std::vector<Geometry::Point>;
     static constexpr double INF = 1e18;
+    static constexpr int N_ = 1001;
 
     struct Edge {
         int u, v, nex;
@@ -31,14 +32,15 @@ namespace WayFinding {
     };
 
     extern size_t N;
-    extern std::vector<std::vector<double> > dist[2];
-    extern std::vector<std::vector<int> > pre[2];
-    extern std::vector<Edge> edge[2];
-    extern std::vector<int> head[2];
+    extern double dist[2][N_][N_];
+    extern int pre[2][N_][N_];
+    extern Edge edge[2][N_ * 10];
+    extern int len[2];
+    extern int head[2][N_];
 
     extern std::vector<Geometry::Point> joint_walk_, workbench_pos, robot_pos;
-    extern std::vector<std::vector<Route>> routes_[2];
-    extern std::vector<std::vector<double> > joint_obs_;
+    extern Route routes_[2][N_][N_];
+    extern std::vector<double> joint_obs_[101];
 
     int FreeSpace(int x, int y, int dx, int dy, int mx);
     void Insert_Edge(int o, int u, int v, double dis, double dis_to_wall);

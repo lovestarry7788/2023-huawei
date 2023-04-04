@@ -14,19 +14,20 @@ using namespace WayFinding;
 
 size_t WayFinding::N;
 int Input::map_id_[map_size_][map_size_];
-std::vector<std::vector<double> > WayFinding::dist[2];
-std::vector<std::vector<int> > WayFinding::pre[2];
-std::vector<Edge> WayFinding::edge[2];
-std::vector<int> WayFinding::head[2];
+double WayFinding::dist[2][N_][N_];
+int WayFinding::pre[2][N_][N_];
+Edge WayFinding::edge[2][N_ * 10];
+int WayFinding::head[2][N_];
+int WayFinding::len[2];
 
 std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::workbench_pos, WayFinding::robot_pos;
-std::vector<std::vector<double> > WayFinding::joint_obs_;
-std::vector<std::vector<Route> > WayFinding::routes_[2];
+std::vector<double> WayFinding::joint_obs_[101];
+Route WayFinding::routes_[2][N_][N_];
 
 void WayFinding::Insert_Edge(int o, int u, int v, double dis, double dis_to_wall) {
-    edge[o].push_back(Edge{u, v, head[o][u], dis, dis_to_wall});
-    int edge_num = edge[o].size() - 1;
-    head[o][u] = edge_num;
+    len[o] ++;
+    edge[o][len[o]] = Edge{u, v, head[o][u], dis, dis_to_wall};
+    head[o][u] = len[o];
 }
 
 template<typename T>
@@ -52,7 +53,7 @@ int WayFinding::FreeSpace(int x, int y, int dx, int dy, int mx) {
 
 void WayFinding::Init() {
     std::vector<double> joint_obs_x0_, joint_obs_y0_;
-    double Radius[2] = {0.47, 0.53};
+    double Radius[2] = {0.47, 0.53}; len[0] = len[1] = 0;
     memset(map_id_, -1, sizeof(map_id_));
     int cnt_robot = 0, cnt_workbench = 0;
     for (int i = 0; i < map_size_; i++) {
@@ -97,8 +98,8 @@ void WayFinding::Init() {
      */
     Unique(joint_obs_x0_);
     Unique(joint_walk_);
+    // Log::print("x0_size: ", joint_obs_x0_.size());
 
-    joint_obs_.resize(joint_obs_x0_.size());
     for (int i = 0; i < map_size_; i++) {
         for (int j = 0; j < map_size_; j++) if(map_[i][j] == '#'){
             double px = j * 0.5 + 0.25;
@@ -114,7 +115,7 @@ void WayFinding::Init() {
         }
     }
 
-    for(int i = 0; i < joint_obs_.size(); ++i) {
+    for(int i = 0; i < joint_obs_x0_.size(); ++i) {
         Unique(joint_obs_[i]);
     }
 
@@ -139,7 +140,7 @@ void WayFinding::Init() {
     double d;
 
     for (int o = 0; o < 2; ++o) {
-        head[o].assign(N, -1); // 清空邻接表
+        for (int i = 0; i < N; ++i) head[o][i] = -1;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < i; j++) {
                 auto a = GetGraphPoint(i); // 编号： 先是可以走的点，再是工作台
@@ -181,14 +182,12 @@ void WayFinding::Init() {
      * route_[i][j] 表示从 i 到 j 的路径集合。
      */
     int M = robot_pos.size() + workbench_pos.size();
+    Log::print("N: ", N, "M: ", M, "len[0]: ", len[0], "len[1]: ", len[1]);
 
     for(int o = 0; o < 2; ++o) {
-        routes_[o].resize(M, std::vector<Route>(M));
-        dist[o].resize(M);
-        pre[o].resize(M);
-
         for (int s = 0; s < M; s++) {
             Dijkstra(o, s);
+            // Log::print("o: ", o, "s: ", s);
             // Log::print(s, GetGraphPoint(s).x, GetGraphPoint(s).y);
             for (int t = 0; t < M; t++)
                 if (dist[o][s][t] < INF) {
@@ -264,8 +263,10 @@ Route WayFinding::GetOnlineRoute(int o, int s, int t) {
 std::priority_queue<Status> Q;
 void WayFinding::Dijkstra(int o, int s, bool(*valid)(int t)) {
     // TODO：将方向放入状态
-    pre[o][s].assign(N, -1);
-    dist[o][s].assign(N, INF);
+    for(int i = 0; i < N; ++i) {
+        pre[o][s][i] = -1;
+        dist[o][s][i] = INF;
+    }
     dist[o][s][s] = 0.0;
     while(!Q.empty()) Q.pop();
     Q.push(Status{s, dist[o][s][s]});
@@ -275,6 +276,7 @@ void WayFinding::Dijkstra(int o, int s, bool(*valid)(int t)) {
         if (dist[o][s][u] != x.d) continue;
         if (valid && valid(u)) return;
         for (int k = head[o][u]; k != -1; k = edge[o][k].nex) {
+            // Log::print("o: ", o, "s: ", s, "u: ", u, "k: ", k);
             if (dist[o][s][edge[o][k].v] > dist[o][s][edge[o][k].u] + edge[o][k].dis) {
                 dist[o][s][edge[o][k].v] = dist[o][s][edge[o][k].u] + edge[o][k].dis;
                 pre[o][s][edge[o][k].v] = k;
@@ -304,7 +306,7 @@ bool WayFinding::GetOfflineRoute(int o, Point cnt, int workbench_id, Route& outp
  */
 double WayFinding::CalcDistance(int id, int workbench_i, int workbench_j) {
     int pi = int((50 - robot[id] -> pos_.y) / 0.5), pj = int(robot[id] -> pos_.x / 0.5);
-    // Log::print("Frame: ", frameID, "CalcDistance, id: ", id, "last_point_: ", robot[id] -> last_point_);
+    Log::print("Frame: ", frameID, "CalcDistance, id: ", id, "last_point_: ", robot[id] -> last_point_);
     return dist[0][robot[id] -> last_point_][robot_num_ + workbench_i] + dist[1][robot_num_ + workbench_i][robot_num_ + workbench_j];
 }
 

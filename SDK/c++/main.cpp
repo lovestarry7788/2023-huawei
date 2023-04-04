@@ -244,7 +244,7 @@ namespace Solution1 {
     bool Whether_Can_Buy(int id, int k, int i, int j) {
         if(can_plan_to_buy_[i] && workbench[i]->TryToBuy(k, -100) && !should_not_plan_to_buy_[i]) {
             if(can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k) ) {
-                if (map_number_ == 1 && workbench[j]->type_id_ == 9) return false;
+                // if (map_number_ == 1 && workbench[j]->type_id_ == 9) return false;
                 if (MissingPoint(id, i, workbench[i]->pos_.x, workbench[i]->pos_.y) ||
                     MissingPoint(id, j, workbench[j]->pos_.x, workbench[j]->pos_.y))
                     return false; // 针对地图忽略一些点
@@ -279,6 +279,13 @@ namespace Solution1 {
 
     void SetConfig() {
         switch (map_number_) {
+            case 1:
+                sever_one = 2.0;
+                four_five_six_one = 1.5;
+                sever_two = 1.2;
+                four_five_six_two = 1.2;
+                sever_three = 1.0;
+                break;
             default:
                 sever_one = 1.8;
                 four_five_six_one = 1.6;
