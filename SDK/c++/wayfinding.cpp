@@ -4,6 +4,7 @@
 #include "log.h"
 #include <algorithm>
 #include <queue>
+#include <map>
 #include <vector>
 #include <utility>
 #include <iostream>
@@ -13,12 +14,17 @@ using namespace Input;
 using namespace WayFinding;
 
 size_t WayFinding::N;
-int Input::map_id_[map_size_][map_size_];
+//int Input::map_id_[map_size_][map_size_];
+//拆点后不能用map_id_逆映射回去， 考虑使用set + lower_bound
+//std::map<std::array<int,2>, int> robot_id_;//为了防止浮点数误差， 对坐标*100后存入映射
+//std::map<std::array<int,2>, int> workbench_id_;
+std::map<std::array<int,2>, int> map_id_;
 double WayFinding::dist[2][N_][N_];
 int WayFinding::pre[2][N_][N_];
 Edge WayFinding::edge[2][N_ * 10];
 int WayFinding::head[2][N_];
 int WayFinding::len[2];
+int WayFinding::workbench_extern_id[50][9];
 
 std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::workbench_pos, WayFinding::robot_pos;
 std::vector<double> WayFinding::joint_obs_[101];
@@ -54,7 +60,10 @@ int WayFinding::FreeSpace(int x, int y, int dx, int dy, int mx) {
 void WayFinding::Init() {
     std::vector<double> joint_obs_x0_, joint_obs_y0_;
     double Radius[2] = {0.47, 0.53}; len[0] = len[1] = 0;
-    memset(map_id_, -1, sizeof(map_id_));
+//    memset(map_id_, -1, sizeof(map_id_));
+//    robot_id_.clear();
+//    workbench_id_.clear();
+    map_id_.clear();
     int cnt_robot = 0, cnt_workbench = 0;
     for (int i = 0; i < map_size_; i++) {
         for (int j = 0; j < map_size_; j++) {
@@ -63,10 +72,27 @@ void WayFinding::Init() {
 
             if (map_[i][j] == 'A') {
                 robot_pos.push_back({px, py});
-                map_id_[i][j] = cnt_robot++;
             } else if ('1' <= map_[i][j] && map_[i][j] <= '9') {
-                workbench_pos.push_back({px, py});
-                map_id_[i][j] = robot_num_ + cnt_workbench++;
+//                workbench_pos.push_back({px, py});
+                for(int k= 0; k < workbench_extern.size(); k++) {//周围的点
+                    auto [dx, dy] = workbench_extern[k];
+                    double nx = px + dx, ny = py + dy;
+                    if(nx < eps || nx > 50 - eps || ny < eps || ny > 50 - eps) {
+                        workbench_extern_id[cnt_workbench][k] = -1;
+                        continue;
+                        //如果会越出去那就没这个点的存在， 需要特别判掉
+                    } else {
+                        workbench_extern_id[cnt_workbench][k] = workbench_pos.size();
+                        workbench_pos.push_back({nx, ny});
+                        Log::print("workbench_id: ", cnt_workbench, " workbench_id_direciton: ", workbench_pos.size(), " ", k, " ", nx, " ", ny, '\n');
+                        //记录一下可以到的点对应的id
+                    }
+                }
+//                for(auto [dx, dy]: walking_extern) {//防止找不着北
+//
+//                }
+                cnt_workbench++;
+                //只能表示这个位置有人用。
             }
 
             if (map_[i][j] != '#') continue;
@@ -124,6 +150,7 @@ void WayFinding::Init() {
      * 对于所有离散化的点进行通过测试。
      */
     N = robot_pos.size() + workbench_pos.size() + joint_walk_.size();
+    Log::print("N: ", N);
     /*
     Log::print("N: ", N, "joint_obs_: ", joint_obs_.size());
     for(const auto& obs_: joint_obs_) {
@@ -134,6 +161,7 @@ void WayFinding::Init() {
 //        auto a = GetGraphPoint(i);
 //        Log::print("a.x: ", a.x, "a.y: ", a.y);
 //    }
+
 
     double x0, x1, y0, y1;
     int x0_, x1_, y0_, y1_;
@@ -164,12 +192,13 @@ void WayFinding::Init() {
                     }
                     if(!valid) break;
                 }
-                // Log::print(i, j, a.x, a.y, b.x, b.y, d, mind, valid);
+//                 Log::print(i, j, a.x, a.y, b.x, b.y, d, mind, valid);
                 // 暂不考虑单行道，存了mind供将来判断道路宽度使用
                 if (valid) {
                     d = DistBetweenPoints(a, b);
                     Insert_Edge(o, i, j, d, mind);
                     Insert_Edge(o, j, i, d, mind);
+                    Log::print("edge i: ", i, "j: ", j, "dist: ", d);
                 }
             }
         }
@@ -188,7 +217,7 @@ void WayFinding::Init() {
         for (int s = 0; s < M; s++) {
             Dijkstra(o, s);
             // Log::print("o: ", o, "s: ", s);
-            // Log::print(s, GetGraphPoint(s).x, GetGraphPoint(s).y);
+             Log::print(s, GetGraphPoint(s).x, GetGraphPoint(s).y);
             for (int t = 0; t < M; t++)
                 if (dist[o][s][t] < INF) {
                     routes_[o][s][t] = GetOnlineRoute(o, s, t);
@@ -250,6 +279,8 @@ double WayFinding::DistBetweenPoints(Point a, Point b) {
 }
 
 Route WayFinding::GetOnlineRoute(int o, int s, int t) {
+    //有没有装东西， 起点， 终点
+//    int s = workbench_extern_id[workbench_id][workbench_id_direction];
     Route route;
     while (t != s) {
         route.push_back(GetGraphPoint(t));
@@ -287,27 +318,46 @@ void WayFinding::Dijkstra(int o, int s, bool(*valid)(int t)) {
 }
 
 // 实时找躲避路径，但不实时找到工作台路径。
-bool WayFinding::GetOfflineRoute(int o, Point cnt, int workbench_id, Route& output) {
-    int pi = int((50 - cnt.y) / 0.5), pj = int(cnt.x / 0.5);
-    int from = map_id_[pi][pj];
-    if (from == -1) return false;
-    output = routes_[o][from][workbench_id + robot_pos.size()];
+bool WayFinding::GetOfflineRoute(int o, Point cnt,
+                                 int from,
+                                 int workbench_to_id, int workbench_to_direction,
+                                 Route& output) {
+//    int pi = int((50 - cnt.y) / 0.5), pj = int(cnt.x / 0.5);
+//    int from = workbench_extern_id[workbench_from_id][workbench_from_direction];
+
+    //map_id_[pi][pj];
+//    if(map_id_.find({int((cnt.x + 0.125) * 4), int((cnt.y + 0.125) * 4)}) != map_id_.end())
+//        from = map_id_[{int((cnt.x + 0.125) * 4), int((cnt.y + 0.125) * 4)}];
+//    else
+//        from = -1;
+    //from获取对应的位置， 枚举direction可以获得
+    Log::print("from: ", cnt.x, " ", cnt.y, " ", from, '\n');
+    if (from == -1)
+        return false;
+
+    int to = workbench_extern_id[workbench_to_id][workbench_to_direction] + robot_num_;
+
+    output = routes_[o][from][to];
+    Log::print("frame: ", frameID, "from: ", from, "to: ", to, "from.x: ", GetGraphPoint(from).x, "from.y: ", GetGraphPoint(from).y, "to.x: ", GetGraphPoint(to).x, "to.y: ", GetGraphPoint(to).y);
+    Log::print(workbench_to_id, " ", workbench_to_direction, " ", output.size(), '\n');
     /*
-    Log::print("frame: ", frameID, "from: ", from, "to: ", workbench_id + robot_pos.size(), "from.x: ", GetGraphPoint(from).x, "from.y: ", GetGraphPoint(from).y, "to.x: ", GetGraphPoint(workbench_id + robot_pos.size()).x, "to.y: ", GetGraphPoint(workbench_id + robot_pos.size()).y);
-    for(const auto& u: output) {
-        Log::print(u.x, u.y);
-    }
+        Log::print("frame: ", frameID, "from: ", from, "to: ", workbench_id + robot_pos.size(), "from.x: ", GetGraphPoint(from).x, "from.y: ", GetGraphPoint(from).y, "to.x: ", GetGraphPoint(workbench_id + robot_pos.size()).x, "to.y: ", GetGraphPoint(workbench_id + robot_pos.size()).y);
+        for(const auto& u: output) {
+            Log::print(u.x, u.y);
+        }
     */
-    return true;
+    return output.size() > 0;
 }
 
 /*
  * 计算机器人 id -> workbench[i] -> workbench[j] 的距离。
  */
-double WayFinding::CalcDistance(int id, int workbench_i, int workbench_j) {
+double WayFinding::CalcDistance(int id, int workbench_i, int workbench_i_direciton, int workbench_j, int workbench_j_direction) {
     int pi = int((50 - robot[id] -> pos_.y) / 0.5), pj = int(robot[id] -> pos_.x / 0.5);
     Log::print("Frame: ", frameID, "CalcDistance, id: ", id, "last_point_: ", robot[id] -> last_point_);
-    return dist[0][robot[id] -> last_point_][robot_num_ + workbench_i] + dist[1][robot_num_ + workbench_i][robot_num_ + workbench_j];
+    int id_i = robot_num_ + workbench_extern_id[workbench_i][workbench_i_direciton];
+    int id_j = robot_num_ + workbench_extern_id[workbench_j][workbench_j_direction];
+    return dist[0][robot[id] -> last_point_][id_i] + dist[1][id_i][id_j];
 }
 
 /*
@@ -352,7 +402,7 @@ double WayFinding::DistToWall(Geometry::Point p, double ori) {
     auto work = [&](int id) {
         for(auto p2: Wall[id]) {
             int i = position_i + p2[0], j = position_j + p2[1];
-            if(i < 0 || i > 99 || i < 0 || i > 99) continue;
+            if(i < 0 || i > 99 || j < 0 || j > 99) continue;
             if(Input::is_obstacle_[i][j]) {
                 Point Wall_ = {i * 0.5 + direction[id].x, 50 - j * 0.5 + direction[id].y};
                 ans = fmin(ans, Dist(p, Wall_));
@@ -364,7 +414,7 @@ double WayFinding::DistToWall(Geometry::Point p, double ori) {
     auto work_in_row = [&](int id) {
         for(auto p2: row[id]) {
             int i = position_i + p2[0], j = position_j + p2[1];
-            if(i < 0 || i > 99 || i < 0 || i > 99) continue;
+            if(i < 0 || i > 99 || j < 0 || j > 99) continue;
             if(Input::is_obstacle_[i][j]) {
                 Point Wall_ = {i * 0.5 + direction[id].x, 50 - j * 0.5 + direction[id].y};
                 ans = fmin(ans, fabs(Wall_.x - p.x));

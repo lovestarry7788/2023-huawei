@@ -47,6 +47,8 @@ void Robot::ToPoint_1(Point p, double& forward, double& rotate) {
         // 2 max
         // 2.6
         if (fabs(dif_rot) > 0.1) forward = 0; // 角度太大就停下再转，防止绕圈圈
+
+//        if (fabs(dif_rot) > eps) forward = 0; // 角度太大就停下再转，防止绕圈圈
         // else forward = max_forward_velocity_ * std::max(0.0, 3.5-1 / 0.6 * fabs(dif_rot));
         // Log::print("change rot");
         double limit = Geometry::UniformVariableDist(max_rot_force_ / GetRotInerta(), angular_velocity_, 0.0);
@@ -278,9 +280,10 @@ double Robot::CalcMaxSlowdownDist() {
 }
 
 void Robot::Robot_Control(double& forward, double& rotate) {
-//    Log::print("Robot_Control, id: ", id_, "route: ", route_.size(), "v: ", v.size());
+    Log::print("Robot_Control, id: ", id_, "route: ", route_.size(), "v: ", v.size());
+    Log::print(pos_.x, " ", pos_.y, '\n');
     if (route_.empty()) {
-        if (v.empty() || !WayFinding::GetOfflineRoute(v.front().second, pos_, v.front().first, route_))
+        if (v.empty() || !WayFinding::GetOfflineRoute(v.front()[1], pos_, last_point_, v.front()[0], v.front()[2], route_))
             Log::print("find route failed");
         Log::print("routes_size: ", route_.size());
         for(const auto& point: route_) {
@@ -291,12 +294,20 @@ void Robot::Robot_Control(double& forward, double& rotate) {
     while (route_.size() && Geometry::Length(robot_pos - route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
         // Log::print("reach");
         route_.erase(begin(route_)); // 不能直接删除，可能需要回滚
-        if (route_.empty())
+        if (route_.empty()) {
+            last_point_ = WayFinding::workbench_extern_id[v.front()[0]][v.front()[2]] + Input::robot_num_;
+            Log::print("LastPoint: ", v.front()[0], " ", v.front()[2], " ", last_point_);
             v.erase(begin(v));
+        }
     }
+    //上下左右半径0.25
+    //斜0.35
+    //
 
     if (route_.size()) {
         ToPoint_1(route_.front(), forward, rotate);
         // Log::print("frame: ", Input::frameID ,"id: ", id_, "forward: ",forward, "rotate: ",rotate, "pos.x: ", pos_.x, "pos.y: ", pos_.y, "to.x: ", route_.front().x, "to.y: ", route_.front().y);
+        return;
     }
+    forward = 0; rotate = 0;
 }

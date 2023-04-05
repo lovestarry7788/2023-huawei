@@ -13,7 +13,7 @@ namespace Input {
     static constexpr int map_size_ = 100;
     extern int frameID, coins, K;
     extern char map_[map_size_][map_size_];
-    extern int map_id_[map_size_][map_size_];
+//    extern int map_id_[map_size_][map_size_];
     extern bool is_obstacle_[map_size_][map_size_];
     extern std::vector<std::shared_ptr<Workbench> > workbench;
     extern std::vector<std::shared_ptr<Robot> > robot;

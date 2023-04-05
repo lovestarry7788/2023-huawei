@@ -38,13 +38,17 @@ public:
     static constexpr double max_rotate_velocity_ = Geometry::PI * seed_random_rate;
 
     int id_, workbench_, carry_id_; // 机器人的 id, 所属工作台id(-1不属工作台）,所携带的物品 id(0没有带物品)
-    int workbench_buy_, workbench_sell_; // 买的工作台，卖的工作台。
+    int workbench_buy_, workbench_sell_, workbench_buy_direction, workbench_sell_direction; // 买的工作台，卖的工作台。
     double time_coefficient_, collide_coefficient_; // 机器人的坐标, 时间系数, 碰撞系数
     double angular_velocity_, orient_;// 角速度, 朝向
     Geometry::Point pos_; // x坐标, y坐标
     Geometry::Vector linear_velocity_;// 线速度
     WayFinding::Route route_; // 当前保存的路线
-    std::vector<std::pair<int,int> > v; // 保存需要走的点，买还是卖。
+    std::vector<std::array<int,3> > v; // 保存需要走的点，买还是卖, 目标点的哪个方位进入。
+    //0.25太小了
+    //0.265
+    //map_id[px][py] --> x, workbench_pos[x]
+    //px,py
     int last_point_; // 用于在买的时候计算距离，经过的最后一个卖的点。
 
     Robot(int id, int workbench_, int carry_id, double time_coefficient, double collide_coefficient,

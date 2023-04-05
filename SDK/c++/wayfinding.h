@@ -12,7 +12,7 @@
 namespace WayFinding {
     using Route = std::vector<Geometry::Point>;
     static constexpr double INF = 1e18;
-    static constexpr int N_ = 1001;
+    static constexpr int N_ = 2001;
 
     struct Edge {
         int u, v, nex;
@@ -48,10 +48,13 @@ namespace WayFinding {
     // void Init_Frame();
     Geometry::Point GetGraphPoint(int i);
     double DistBetweenPoints(Geometry::Point a, Geometry::Point b);
-    double CalcDistance(int id, int workbench_i, int workbench_j);
+    double CalcDistance(int id, int workbench_i, int workbench_i_direction, int workbench_j, int workbench_j_direction);
     double CalcFrame(int id, int i, int j);
     void Dijkstra(int o, int s, bool(*valid)(int t) = nullptr);
-    bool GetOfflineRoute(int o, Geometry::Point cnt, int workbench_id, Route& output);
+    bool GetOfflineRoute(int o, Geometry::Point cnt,
+                                     int from,
+                                     int workbench_to_id, int workbench_to_direction,
+                                     Route& output);
     Route GetOnlineRoute(int o, int s, int t);
 
     template<typename T> void Unique(T& Uni);
@@ -71,6 +74,23 @@ namespace WayFinding {
             {{0, 1}, {0, 2}, {0, 3}},
             {{1, 0}, {2, 0}, {3, 0}}
     };
+    const std::vector<std::array<double, 2>> workbench_extern = {
+            {-0.25, 0.25},  {0, 0.25},  {0.25, 0.25},
+            {-0.25, 0},                     {0.25, 0},
+            {-0.25, -0.25},  {0, -0.25}, {0.25, -0.25}
+//            {-0.27, 0.27},  {0, 0.38},  {0.27, 0.27},
+//            {-0.38, 0},                     {0.38, 0},
+//            {-0.27, -0.27},  {0, -0.38}, {0.27, -0.27}//, {0.5, -0.25},
+//            {-0.25, -0.5},                            {0.25, -0.5},
+    };//工作台的扩展, 这些点可以买到货
+//    const std::vector<std::array<double, 2>> walking_extern = {
+//            {-0.5, 0.5}, {-0.25, 0.5}, {0, 0.5}, {0.25, 0.5}, {0.5, 0.5},
+//            {-0.5, 0.25},                                     {0.5, 0.25},
+//            {-0.5, 0},                                        {0.5, 0},
+//            {-0.5, -0.25},                                    {0.5, -0.25},
+//            {-0.5, -0.5}, {-0.25, -0.5}, {0, -0.5}, {0.25, 0.5}, {0.5, -0.5}
+//    };//防止被挤出来之后找不着北
+    extern int workbench_extern_id[50][9];
     double DistToWall(Geometry::Point p, double ori);
 };
 
