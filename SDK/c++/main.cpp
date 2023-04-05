@@ -195,9 +195,9 @@ namespace Solution1 {
         // WayFinding::Init_Frame();
 
         if(frameID == 1) {
-            for(int i = 0; i < K; ++i) {
-                for(int j = 0; j < K; ++j) {
-                    if(dis_[i + robot_num_][j + robot_num_] < Around_Distance) {
+            for (int i = 0; i < K; ++i) {
+                for (int j = 0; j < K; ++j) {
+                    if (dis_[i + robot_num_][j + robot_num_] < Around_Distance) {
                         around_points[i].emplace_back(j);
                         around_points[j].emplace_back(i);
                     }
@@ -412,69 +412,63 @@ namespace Solution1 {
                     for (int k = 1; k <= 7; ++k) { // 枚举要买的物品
                         for (int i = 0; i < K; ++i)
                             if(can_plan_to_buy_[i] && workbench[i]->TryToBuy(k, -100) && !should_not_plan_to_buy_[i]) { // 从哪个工作站买 优化：别人去卖的，你不能去买
-                                for(int i_direction = 0; i_direction < 8; i_direction++) {
-                                    if (WayFinding::workbench_extern_id[i][i_direction] != -1)
-                                        for (int j = 0; j < K; ++j)
-                                            if (can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k)) { // 从哪个工作站卖
-                                                for (int j_direction = 0; j_direction < 8; j_direction++)
-                                                    if (WayFinding::workbench_extern_id[j][j_direction]) {
+                                for (int j = 0; j < K; ++j)
+                                    if (can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k)) { // 从哪个工作站卖
+                                        //                                    Log::print("map_number: ", map_number_, " i: ", i , "x: ", workbench[i] -> pos_.x, "y: ", workbench[i] -> pos_.y, " MissingPoint: ", MissingPoint(i, workbench[i] -> pos_.x, workbench[i] -> pos_.y));
+                                        //                                    Log::print("map_number: ", map_number_, " j: ", j , "x: ", workbench[j] -> pos_.x, "y: ", workbench[j] -> pos_.y, " MissingPoint: ", MissingPoint(j, workbench[j] -> pos_.x, workbench[j] -> pos_.y));
 
+                                        if (!Whether_Can_Buy(id, k, i, j)) continue;
 
-                                                        //                                    Log::print("map_number: ", map_number_, " i: ", i , "x: ", workbench[i] -> pos_.x, "y: ", workbench[i] -> pos_.y, " MissingPoint: ", MissingPoint(i, workbench[i] -> pos_.x, workbench[i] -> pos_.y));
-                                                        //                                    Log::print("map_number: ", map_number_, " j: ", j , "x: ", workbench[j] -> pos_.x, "y: ", workbench[j] -> pos_.y, " MissingPoint: ", MissingPoint(j, workbench[j] -> pos_.x, workbench[j] -> pos_.y));
+                                        double money_per_distance;
+                                        /*
+                                        double buy_sell_frame_ = 50 * robot[id]->CalcTime(
+                                                Geometry::Point{workbench[i]->pos_.x, workbench[i]->pos_.y},
+                                                Geometry::Point{workbench[j]->pos_.x, workbench[j]->pos_.y});
+                                        */
+                                        auto [i_direction, j_direction] = WayFinding::dis_mn_[robot[id] -> last_point_][i][j];
+                                        Log::print("i: ", i, "j: ", j, "i_direction: ", i_direction, "j_direction: ", j_direction);
+                                        double buy_sell_frame_ = WayFinding::CalcDistance(id, i,
+                                                                                          i_direction,
+                                                                                          j,
+                                                                                          j_direction);
+                                        if (buy_sell_frame_ >= WayFinding::INF) continue;
 
-                                                        if (!Whether_Can_Buy(id, k, i, j)) continue;
-
-                                                        double money_per_distance;
-                                                        /*
-                                                        double buy_sell_frame_ = 50 * robot[id]->CalcTime(
-                                                                Geometry::Point{workbench[i]->pos_.x, workbench[i]->pos_.y},
-                                                                Geometry::Point{workbench[j]->pos_.x, workbench[j]->pos_.y});
-                                                        */
-                                                        double buy_sell_frame_ = WayFinding::CalcDistance(id, i,
-                                                                                                          i_direction,
-                                                                                                          j,
-                                                                                                          j_direction);
-                                                        if (buy_sell_frame_ >= WayFinding::INF) continue;
-
-                                                        if ((workbench[j]->type_id_ == 7 &&
-                                                             workbench[j]->ItemsAreMissing() ==
-                                                             1)) { // 如果 7 只差一点，给一个更大的值
-                                                            money_per_distance =
-                                                                    profit_[k] * sever_one / buy_sell_frame_;
-                                                        } else if ((workbench[j]->type_id_ >= 4 &&
-                                                                    workbench[j]->type_id_ <= 6) &&
-                                                                   workbench[j]->ItemsAreMissing() == 1) {
-                                                            money_per_distance =
-                                                                    profit_[k] * four_five_six_one / buy_sell_frame_;
-                                                        } else if (workbench[j]->type_id_ == 7 &&
-                                                                   workbench[j]->ItemsAreMissing() == 2) {
-                                                            money_per_distance =
-                                                                    profit_[k] * sever_two / buy_sell_frame_;
-                                                        } else if ((workbench[j]->type_id_ >= 4 &&
-                                                                    workbench[j]->type_id_ <= 6) &&
-                                                                   workbench[j]->ItemsAreMissing() == 2) {
-                                                            money_per_distance =
-                                                                    profit_[k] * four_five_six_two / buy_sell_frame_;
-                                                        } else {
-                                                            money_per_distance = profit_[k] * 1.0 / buy_sell_frame_;
-                                                        }
-
-                                                        // if(map_number_ == 1 && FindItemsAreMissingLess(id, k, i, j)) continue; // 第一张图的时候，找缺更少的物品买。
-
-                                                        money_per_distance *= premium_coefficient[premium_processing[workbench[j]->type_id_]];
-
-                                                        if (money_per_distance > mn) {
-                                                            mn = money_per_distance;
-                                                            carry_id = k;
-                                                            workbench_buy = i;
-                                                            workbench_sell = j;
-                                                            workbench_buy_direction = i_direction;
-                                                            workbench_sell_direction = j_direction;
-                                                        }
-                                                    }
-                                            }
+                                        if ((workbench[j]->type_id_ == 7 &&
+                                             workbench[j]->ItemsAreMissing() ==
+                                             1)) { // 如果 7 只差一点，给一个更大的值
+                                            money_per_distance =
+                                                    profit_[k] * sever_one / buy_sell_frame_;
+                                        } else if ((workbench[j]->type_id_ >= 4 &&
+                                                    workbench[j]->type_id_ <= 6) &&
+                                                   workbench[j]->ItemsAreMissing() == 1) {
+                                            money_per_distance =
+                                                    profit_[k] * four_five_six_one / buy_sell_frame_;
+                                        } else if (workbench[j]->type_id_ == 7 &&
+                                                   workbench[j]->ItemsAreMissing() == 2) {
+                                            money_per_distance =
+                                                    profit_[k] * sever_two / buy_sell_frame_;
+                                        } else if ((workbench[j]->type_id_ >= 4 &&
+                                                    workbench[j]->type_id_ <= 6) &&
+                                                   workbench[j]->ItemsAreMissing() == 2) {
+                                            money_per_distance =
+                                                    profit_[k] * four_five_six_two / buy_sell_frame_;
+                                        } else {
+                                            money_per_distance = profit_[k] * 1.0 / buy_sell_frame_;
                                         }
+
+                                        // if(map_number_ == 1 && FindItemsAreMissingLess(id, k, i, j)) continue; // 第一张图的时候，找缺更少的物品买。
+
+                                        money_per_distance *= premium_coefficient[premium_processing[workbench[j]->type_id_]];
+
+                                        if (money_per_distance > mn) {
+                                            mn = money_per_distance;
+                                            carry_id = k;
+                                            workbench_buy = i;
+                                            workbench_sell = j;
+                                            workbench_buy_direction = i_direction;
+                                            workbench_sell_direction = j_direction;
+                                        }
+                                    }
                             }
                     }
                     if (fabs(mn) > 1e-5) {

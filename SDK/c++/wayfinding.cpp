@@ -25,6 +25,7 @@ Edge WayFinding::edge[2][N_ * 20];
 int WayFinding::head[2][N_];
 int WayFinding::len[2];
 int WayFinding::workbench_extern_id[50][12];
+std::pair<int,int> WayFinding::dis_mn_[1210][101][101]; // 存的是 pair<direction, direction>
 
 std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::workbench_pos, WayFinding::robot_pos;
 std::vector<double> WayFinding::joint_obs_[101];
@@ -69,12 +70,11 @@ void WayFinding::Init() {
         for (int j = 0; j < map_size_; j++) {
             double px = j * 0.5 + 0.25;
             double py = (map_size_ - i - 1) * 0.5 + 0.25;
-
             if (map_[i][j] == 'A') {
                 robot_pos.push_back({px, py});
             } else if ('1' <= map_[i][j] && map_[i][j] <= '9') {
 //                workbench_pos.push_back({px, py});
-                for(int k= 0; k < workbench_extern.size(); k++) {//周围的点
+                for(int k = 0; k < workbench_extern.size(); k++) {//周围的点
                     auto [dx, dy] = workbench_extern[k];
                     double nx = px + dx, ny = py + dy;
                     if(nx < eps || nx > 50 - eps || ny < eps || ny > 50 - eps) {
@@ -222,6 +222,34 @@ void WayFinding::Init() {
                 if (dist[o][s][t] < INF) {
                     routes_[o][s][t] = GetOnlineRoute(o, s, t);
                 }
+        }
+    }
+
+    /*
+     * 预处理两点间最近的 direction
+     */
+    for(int id_s = 0; id_s <= robot_num_ + WayFinding::workbench_pos.size(); ++id_s) {
+        for (int i = 0; i < K; ++i) {
+            for (int j = 0; j < K; ++j) {
+                double mn = 1e9;
+                for (int i_direction = 0; i_direction < WayFinding::workbench_extern.size(); i_direction++) {
+                    if (WayFinding::workbench_extern_id[i][i_direction] != -1) {
+                        for (int j_direction = 0; j_direction < WayFinding::workbench_extern.size(); j_direction++) {
+                            if (WayFinding::workbench_extern_id[j][j_direction] != -1) {
+                                int id_i = robot_num_ + WayFinding::workbench_extern_id[i][i_direction];
+                                int id_j = robot_num_ + WayFinding::workbench_extern_id[j][j_direction];
+                                double buy_sell_frame_ = WayFinding::dist[0][id_s][id_i] + WayFinding::dist[1][id_i][id_j];
+                                if(mn > buy_sell_frame_) {
+                                    mn = buy_sell_frame_;
+                                    dis_mn_[id_s][i][j] = std::make_pair(i_direction, j_direction);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Log::print("i: ", i, "j: ", j, "dis_mn_: ",mn, "i_direction: ", dis_mn_[id_s][i][j].first , "j_direction: ", dis_mn_[id_s][i][j].second);
+            }
         }
     }
 
