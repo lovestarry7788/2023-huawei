@@ -67,6 +67,7 @@ Point Geometry::GetLineIntersection2(Point P, Vector v, Point Q, Vector w) {
     return P + v * t;
 }
 
+// 点到线段的距离
 double Geometry::DistanceToSegment(const Point& P, const Point& A, const Point& B) {
     if(A == B) return Length(P-A);
     Vector v1 = B - A, v2 = P - A, v3 = P - B;

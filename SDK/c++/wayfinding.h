@@ -42,13 +42,16 @@ namespace WayFinding {
     extern std::vector<Geometry::Point> joint_walk_, workbench_pos, robot_pos;
     extern Route routes_[2][N_][N_];
     extern std::vector<double> joint_obs_[101];
+    extern std::vector<double> joint_obs_x0_, joint_obs_y0_;
 
     int FreeSpace(int x, int y, int dx, int dy, int mx);
+    double CalcRouteDistance(Route route);
     void Insert_Edge(int o, int u, int v, double dis, double dis_to_wall);
     void Init();
     // void Init_Frame();
     Geometry::Point GetGraphPoint(int i);
     double DistBetweenPoints(Geometry::Point a, Geometry::Point b);
+    bool Check_Avoid_Crash_Wall(double radius, Geometry::Point s, Geometry::Point t);
     double CalcDistance(int id, int workbench_i, int workbench_i_direction, int workbench_j, int workbench_j_direction);
     double CalcFrame(int id, int i, int j);
     void Dijkstra(int o, int s, bool(*valid)(int t) = nullptr);
@@ -56,7 +59,7 @@ namespace WayFinding {
                                      int from,
                                      int workbench_to_id, int workbench_to_direction,
                                      Route& output);
-    Route GetOnlineRoute(int o, int s, int t);
+    bool GetOnlineRoute(double o, Geometry::Point s, Geometry::Point t, Route& route);
 
     template<typename T> void Unique(T& Uni);
 
@@ -92,7 +95,7 @@ namespace WayFinding {
 
             {0.1225, 0.3674}, {0.2739, 0.2739}, {0.3674, 0.1225},
             {-0.1225, 0.3674}, {-0.2739, 0.2739}, {-0.3674, 0.1225},
-            {0.1225, -0.3674}, {0.2739, -0.2739}, {0.3674, -0.1225},
+            {0.1225, -0.3674}, {0.26, -0.28}, {0.3674, -0.1225},
             {-0.1225, -0.3674}, {-0.2739, -0.2739}, {-0.3674, -0.1225}
 
 //            {0, 0}
