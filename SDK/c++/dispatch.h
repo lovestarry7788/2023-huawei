@@ -4,7 +4,25 @@
 #include "input.h"
 #include "geometry.h"
 #include "output.h"
+
+#include <cmath>
+#include <algorithm>
+#include <queue>
+#include <cstring>
+#include <cstdio>
+#include <unordered_map>
+#include <map>
+#include <iostream>
+#include <utility>
+#include <functional>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <set>
+#include <utility>
+#include <array>
+#include <memory>
+#include <climits>
 
 // 负责运送机器人过程，包含避障
 // 先购买/出售，再addplan，再调用FrameEnd交给dispatch处理topoint

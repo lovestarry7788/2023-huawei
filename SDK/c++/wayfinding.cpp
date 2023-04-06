@@ -61,9 +61,6 @@ int WayFinding::FreeSpace(int x, int y, int dx, int dy, int mx) {
 void WayFinding::Init() {
     std::vector<double> joint_obs_x0_, joint_obs_y0_;
     double Radius[2] = {0.45, 0.53}; len[0] = len[1] = 0;
-//    memset(map_id_, -1, sizeof(map_id_));
-//    robot_id_.clear();
-//    workbench_id_.clear();
     map_id_.clear();
     int cnt_robot = 0, cnt_workbench = 0;
     for (int i = 0; i < map_size_; i++) {
@@ -134,10 +131,14 @@ void WayFinding::Init() {
             idx = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), px + 0.25) - joint_obs_x0_.begin();
             joint_obs_[idx].push_back(py + 0.25);
             joint_obs_[idx].push_back(py - 0.25);
+//                joint_obs_[idx].push_back(py + 0.5);
+//            joint_obs_[idx].push_back(py - 0.5);
 
             idx = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), px - 0.25) - joint_obs_x0_.begin();
             joint_obs_[idx].push_back(py + 0.25);
             joint_obs_[idx].push_back(py - 0.25);
+//            joint_obs_[idx].push_back(py + 0.5);
+//            joint_obs_[idx].push_back(py - 0.5);
         }
     }
 
@@ -395,85 +396,85 @@ double WayFinding::CalcFrame(int id, int i, int j) {
     return 1e9;
 }
 
-double WayFinding::DistToWall(Point p, double orient) {
-    double mind = 100;
-    Vector ori{cos(orient), sin(orient)};
-    const static std::vector<std::pair<Point, double>> wall{
-            {{0,0.40}, 0},
-            {{49.60,0}, PI/2},
-            {{50,49.60}, PI},
-            {{0.40,50}, -PI/2},
-    };
-    for (const auto& [wp, wo] : wall) {
-        Point sec = GetLineIntersection2(p, ori, wp, {cos(wo), sin(wo)});
-        // if (Input::frame)
-        if (Dot(sec - p, ori) > 0) {
-            mind = std::min(mind, Length(sec - p));
-            // if (Input::frameID == 1069 && id_ == 0) {
-            //     Log::print(id_, Length(sec - p), ori.x, ori.y);
-            //     Log::print(p.x, p.y);
-            // }
-        }
-    }
-    return mind;
-}
-
-//double WayFinding::DistToWall(Geometry::Point p, double ori) {
-//    int position_i = p.x / 0.5, position_j = 100 - ceil(p.y / 0.5);
-//    //获得所在方块的坐标
-//    double ans = 2;
-//    //先根据所在象限判断， 然后再根据
-////    using Geometry::PI;
-//    double PI = Geometry::PI;
-//    double eps = Geometry::eps;
-//
-//    auto work = [&](int id) {
-//        for(auto p2: Wall[id]) {
-//            int i = position_i + p2[0], j = position_j + p2[1];
-//            if(i < 0 || i > 99 || j < 0 || j > 99) continue;
-//            if(Input::is_obstacle_[i][j]) {
-//                Point Wall_ = {i * 0.5 + direction[id].x, 50 - j * 0.5 + direction[id].y};
-//                ans = fmin(ans, Dist(p, Wall_));
-//                break;
-//            }
-//        }
+//double WayFinding::DistToWall(Point p, double orient) {
+//    double mind = 100;
+//    Vector ori{cos(orient), sin(orient)};
+//    const static std::vector<std::pair<Point, double>> wall{
+//            {{0,0.40}, 0},
+//            {{49.60,0}, PI/2},
+//            {{50,49.60}, PI},
+//            {{0.40,50}, -PI/2},
 //    };
-//
-//    auto work_in_row = [&](int id) {
-//        for(auto p2: row[id]) {
-//            int i = position_i + p2[0], j = position_j + p2[1];
-//            if(i < 0 || i > 99 || j < 0 || j > 99) continue;
-//            if(Input::is_obstacle_[i][j]) {
-//                Point Wall_ = {i * 0.5 + direction[id].x, 50 - j * 0.5 + direction[id].y};
-//                ans = fmin(ans, fabs(Wall_.x - p.x));
-//                break;
-//            }
+//    for (const auto& [wp, wo] : wall) {
+//        Point sec = GetLineIntersection2(p, ori, wp, {cos(wo), sin(wo)});
+//        // if (Input::frame)
+//        if (Dot(sec - p, ori) > 0) {
+//            mind = std::min(mind, Length(sec - p));
+//            // if (Input::frameID == 1069 && id_ == 0) {
+//            //     Log::print(id_, Length(sec - p), ori.x, ori.y);
+//            //     Log::print(p.x, p.y);
+//            // }
 //        }
-//    };
-//
-//    if(ori + PI/2 < eps && ori + PI > -eps) { // 4
-//        work(0);
 //    }
-//    if(ori < -eps && ori + PI / 2 > eps) { // 3
-//        work(1);
-//    }
-//    if(ori - PI/2 < eps && ori > -eps) { // 2
-//        work(2);
-//    }
-//    if(ori - PI / 2 > -eps && ori - PI < eps) { // 1
-//        work(3);
-//    }
-//
-//    if(fabs(ori - PI) < eps || fabs(ori + PI) < eps) {
-//        work(0); work(4); work_in_row(0);
-//    }
-//    if(fabs(ori + PI / 2) < eps) {
-//        work(0); work(1); work_in_row(1);
-//    }
-//    if(fabs(ori) < eps) {
-//        work(1); work(2); work_in_row(2);
-//    }
-//    if(fabs(ori - PI / 2) < eps) {
-//        work(2); work(3); work_in_row(3);
-//    }
+//    return mind;
 //}
+
+double WayFinding::DistToWall(Geometry::Point p, double ori) {
+    int position_i = p.x / 0.5, position_j = 100 - ceil(p.y / 0.5);
+    //获得所在方块的坐标
+    double ans = 2;
+    //先根据所在象限判断， 然后再根据
+//    using Geometry::PI;
+    double PI = Geometry::PI;
+    double eps = Geometry::eps;
+
+    auto work = [&](int id) {
+        for(auto p2: Wall[id]) {
+            int i = position_i + p2[0], j = position_j + p2[1];
+            if(i < 0 || i > 99 || j < 0 || j > 99) continue;
+            if(Input::is_obstacle_[i][j]) {
+                Point Wall_ = {i * 0.5 + direction[id].x, 50 - j * 0.5 + direction[id].y};
+                ans = fmin(ans, Dist(p, Wall_));
+                break;
+            }
+        }
+    };
+
+    auto work_in_row = [&](int id) {
+        for(auto p2: row[id]) {
+            int i = position_i + p2[0], j = position_j + p2[1];
+            if(i < 0 || i > 99 || j < 0 || j > 99) continue;
+            if(Input::is_obstacle_[i][j]) {
+                Point Wall_ = {i * 0.5 + direction[id].x, 50 - j * 0.5 + direction[id].y};
+                ans = fmin(ans, fabs(Wall_.x - p.x));
+                break;
+            }
+        }
+    };
+
+    if(ori + PI/2 < eps && ori + PI > -eps) { // 4
+        work(0);
+    }
+    if(ori < -eps && ori + PI / 2 > eps) { // 3
+        work(1);
+    }
+    if(ori - PI/2 < eps && ori > -eps) { // 2
+        work(2);
+    }
+    if(ori - PI / 2 > -eps && ori - PI < eps) { // 1
+        work(3);
+    }
+
+    if(fabs(ori - PI) < eps || fabs(ori + PI) < eps) {
+        work(0); work(4); work_in_row(0);
+    }
+    if(fabs(ori + PI / 2) < eps) {
+        work(0); work(1); work_in_row(1);
+    }
+    if(fabs(ori) < eps) {
+        work(1); work(2); work_in_row(2);
+    }
+    if(fabs(ori - PI / 2) < eps) {
+        work(2); work(3); work_in_row(3);
+    }
+}

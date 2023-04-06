@@ -12,7 +12,7 @@ using namespace std;
 
 const double EPS = 1e-7;                        // 浮点数精度
 const double FRAME_COUNT = 50;                  // 1s帧数
-const int TOTAL_FRAME = 9000;                   // 总帧数
+const int TOTAL_FRAME = 15000;                   // 总帧数
 const int LIMIT_BUY_FRAME = TOTAL_FRAME - 150;  // 终止购买物品的帧数
 const int MAP_ARRAY_SIZE = 101;                 // 地图数组大小，预留一点空间
 const int MAP_REAL_SIZE = 100;                  // 地图的真实大小
@@ -292,7 +292,6 @@ inline void Init()
                 const int type = g_map[i][j] - '0';
                 g_stations[stationIndex].type = type;
                 g_stations[stationIndex].id = stationIndex;
-
                 g_typeToStations[type].emplace_back(&g_stations[stationIndex]);
                 ++stationIndex;
             } else if (g_map[i][j] == 'A') {
@@ -300,6 +299,8 @@ inline void Init()
                 g_robots[robotIndex].p = p;
                 g_robots[robotIndex].id = robotIndex;
                 ++robotIndex;
+            } else if (g_map[i][j] == '#') {
+
             }
         }
     }

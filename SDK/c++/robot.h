@@ -21,6 +21,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
+#include <utility>
+#include <array>
 #include <memory>
 #include <climits>
 
