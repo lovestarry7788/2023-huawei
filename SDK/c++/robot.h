@@ -45,7 +45,7 @@ public:
     double angular_velocity_, orient_;// 角速度, 朝向
     Geometry::Point pos_; // x坐标, y坐标
     Geometry::Vector linear_velocity_;// 线速度
-    WayFinding::Route route_; // 当前保存的路线
+//    WayFinding::Route route_; // 当前保存的路线
     std::vector<std::array<int,3> > v; // 保存需要走的点，买还是卖, 目标点的哪个方位进入。
     //0.25太小了
     //0.265

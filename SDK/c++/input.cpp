@@ -4,7 +4,7 @@
 #include "robot.h"
 #include "workbench.h"
 
-using namespace WayFinding;
+using namespace WayFinding2;
 
 int Input::frameID, Input::coins, Input::K;
 char Input::map_[map_size_][map_size_];
