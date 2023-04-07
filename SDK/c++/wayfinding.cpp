@@ -62,7 +62,22 @@ void WayFinding2::Init() {
         for (int j = 0; j < map_size_; j++) {
             double px = j * 0.5 + 0.25;
             double py = (map_size_ - i - 1) * 0.5 + 0.25;
-//            if(map_[i][j] == 'A')
+            for(int o = 0; o < 2; o++) {//两种图判一下建边
+                for(int k = 0; k < 9; k++) {
+                    double dx = direction_x[o][k];
+                    double dy = direction_y[o][k];
+                    double nx = px + dx, ny = py + dy;
+//                    if(nx < eps || nx > 50 - eps || ny < eps || ny > 50 - eps) continue;
+                    //无脑离散化， 只要不建边就是不合法的点
+                    Unique_x[o].push_back(nx);
+                    Unique_y[o].push_back(ny);
+                }
+            }
         }
+    Unique(Unique_x[0]);
+    Unique(Unique_x[1]);
+    Unique(Unique_y[0]);
+    Unique(Unique_y[1]);
+    //初始化建图， 先将所有的点离散化之后再开始建边
 }
 void WayFinding2::Dijkstra(int o, int s);//有没有拿东西o:0/1, 起点： 工作台
