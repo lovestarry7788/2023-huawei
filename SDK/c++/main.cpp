@@ -23,6 +23,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <set>
+#include <utility>
+#include <array>
 #include <memory>
 #include <climits>
 
@@ -66,57 +68,21 @@ namespace Solution6 {
 
     void Solve() {
         Input::ScanMap();
-//        std:: vector<int> v = {0,1,2,3,4,5,6,7,8,9,10,11,12}; // 去第 0 号工作台
-//        srand(time(0));
+        std:: vector<Point> v = {{25,25}, {26, 26}}; // 去第 0 号工作台
+        reverse(v.begin(), v.end());
 
         int test_id = 0;
 
         while(Input::ScanFrame()) {
-            if(frameID == 1) {
-//                robot[test_id]->v.la
-                robot[test_id]->v.push_back({0, 0, 2});
-                robot[test_id]->v.push_back({5, 1, 3});
-                robot[test_id]->v.push_back({1, 0, 6});
-                robot[test_id]->v.push_back({5, 1, 3});
-                robot[test_id]->v.push_back({5, 0, 6});
-
-                //solution1: last_point ->
-//                for (const auto &u: v) {
-//
-//                    robot[2]->v.push_back({u, 0, int(rand() % workbench_extern.size())});
-//                }
-            }
             double forward, rotate;
             Log::print("robot_id: ", test_id, "now: ", robot[test_id]->pos_.x, " ", robot[test_id]->pos_.y);
-            robot[test_id] -> Robot_Control(forward, rotate);
-
-//            if(robot[test_id]->v.empty()) {
-//                robot[test_id]->ToPoint_1({28.50000000,23.00000000}, forward, rotate);
-//            }
+            if(!v.empty())
+                robot[test_id]->ToPoint_1(v.back(), forward, rotate);
+            if(!v.empty() && fabs(robot[test_id]->pos_.x - v.back().x) < 0.01 && fabs(robot[test_id]->pos_.y - v.back().y) < 0.01)
+                v.pop_back();
 
             Output::Forward(test_id, forward);
             Output::Rotate(test_id, rotate);
-
-            if(robot[test_id]->workbench_ == 0) {
-                Output::Buy(test_id);
-            }
-
-            if(robot[test_id]->workbench_ == 1) {
-                Output::Buy(test_id);
-            }
-
-            if(robot[test_id]->workbench_ == 5) {
-                Output::Sell(test_id);
-            }
-//
-            if(workbench[5]->product_status_ && robot[test_id]->workbench_ == 5) {
-                Output::Buy(test_id);
-                robot[test_id]->v.push_back({7, 1, 2});
-            }
-
-            if(robot[test_id]->workbench_ == 7) {
-                Output::Buy(test_id);
-            }
 
             Output::Print(Input::frameID);
         }
@@ -405,6 +371,8 @@ namespace Solution1 {
 
                 int workbench_buy_direction = 0;
                 int workbench_sell_direction = 0;
+//                for(int id = 0; id < 4; id++) {
+//                    if(!robot[id]->carry_id_) continue;
                 for(int id : ans_robot_need_to_plan_to_buy_) {
                     // 根据策略，选一个东西去买
                     double mn = 0.0; // 物品获利 / 距离
@@ -414,9 +382,6 @@ namespace Solution1 {
                             if(can_plan_to_buy_[i] && workbench[i]->TryToBuy(k, -100) && !should_not_plan_to_buy_[i]) { // 从哪个工作站买 优化：别人去卖的，你不能去买
                                 for (int j = 0; j < K; ++j)
                                     if (can_plan_to_sell_[j][k] && workbench[j]->TryToSell(k)) { // 从哪个工作站卖
-                                        //                                    Log::print("map_number: ", map_number_, " i: ", i , "x: ", workbench[i] -> pos_.x, "y: ", workbench[i] -> pos_.y, " MissingPoint: ", MissingPoint(i, workbench[i] -> pos_.x, workbench[i] -> pos_.y));
-                                        //                                    Log::print("map_number: ", map_number_, " j: ", j , "x: ", workbench[j] -> pos_.x, "y: ", workbench[j] -> pos_.y, " MissingPoint: ", MissingPoint(j, workbench[j] -> pos_.x, workbench[j] -> pos_.y));
-
                                         if (!Whether_Can_Buy(id, k, i, j)) continue;
 
                                         double money_per_distance;
@@ -467,6 +432,8 @@ namespace Solution1 {
                                             workbench_sell = j;
                                             workbench_buy_direction = i_direction;
                                             workbench_sell_direction = j_direction;
+//                                            robot[id]->route_.clear();
+//                                            robot[id]->v.clear();
                                         }
                                     }
                             }
@@ -541,6 +508,6 @@ namespace Solution1 {
 }
 
 int main() {
-    Solution1::Solve();
+    Solution6::Solve();
     return 0;
 }

@@ -8,6 +8,9 @@
 #include <memory>
 #include <iostream>
 
+#include <utility>
+#include <array>
+
 namespace Input {
     static constexpr int robot_num_ = 4;
     static constexpr int map_size_ = 100;
