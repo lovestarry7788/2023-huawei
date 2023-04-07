@@ -23,6 +23,29 @@ namespace WayFinding2 {
         Edge(int _u, int _v, int _nex, double _dis, double _dis_to_wall) : u(_u), v(_v), nex(_nex), dis(_dis), dis_to_wall(_dis_to_wall){}
     };
 
+    extern int cnt;//建边， 边的数量
+    extern int Head[2][N_];//建边, 领接表头指针
+    extern Geometry::Point Point_[2][N_];//编号对应的点的坐标
+    extern std::vector<double> Unique_x[2];//用于离散化x坐标
+    extern std::vector<double> Unique_y[2];//用于离散化y坐标
+
+    void Unique(std::vector<double> &a);//离散化a
+    int GetID(double x_, double y_);//获得x,y对应的离散化id
+    void Insert_Edge(int o, int u, int v, double dis);
+
+    const double direction_x[2][9] = {
+            //上下左右0.4没用， 碰不到够不到
+            //右下角可以选{0.28, -0.27}, 点买完之后会再被往下挤0.23左右， 也就是去到0.5
+            {0, 0.28, 0.28, -0.28, -0.28, 0.25, 0.25, -0.25, -0.25},
+            {0, 0.28, 0.28, -0.28, -0.28, 0.25, 0.25, -0.25, -0.25}
+    };
+    const double direction_y[2][9] = {
+
+            {0, -0.27, 0.27, -0.27, 0.27, 0.25, -0.25, 0.25, -0.25},
+            {0, -0.5, 0.5, -0.5, 0.5, 0.25, -0.25, 0.25, -0.25}
+
+    };
+
     extern double Dis[2][50][N_];//最短路： 初始建图的最短路
     extern double Dis2[2][50][N_];//最短路2：
     extern int From[2][50][N_][15];//状态， 工作台编号， 终点， 2^k步： 从终点出发到对应的工作台的最短路上， 走2^k到达哪个点
