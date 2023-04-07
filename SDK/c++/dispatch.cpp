@@ -179,9 +179,10 @@ std::pair<double,double> Dispatch::ChooseToPoint(int ri) {
     } else {
         forward = rotate = 0;
     }
+    Input::robot[ri] -> AvoidToWall(forward, rotate);
     return std::make_pair(forward, rotate);
 }
-/*
+
 // 输出行走
 void Dispatch::ControlWalk() {
     for (size_t ri = 0; ri < plan_.size(); ri++) {
@@ -192,14 +193,14 @@ void Dispatch::ControlWalk() {
     for (size_t ri = 0; ri < plan_.size(); ri++) {
         double& forward = movement_[ri].first;
         double& rotate = movement_[ri].second;
-        Input::robot[ri] -> AvoidToWall(forward, rotate);
+        // Input::robot[ri] -> AvoidToWall(forward, rotate);
 
         // Log::print(ri, forward, rotate);
         Output::Forward(ri, forward);
         Output::Rotate(ri, rotate);
     }
 }
- */
+
 
 double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<Point>& b, double mx_dist) {
     double mx = collide_dist_;
@@ -217,7 +218,10 @@ double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<
     return mx;
     // return false;
 }
-/*
+
+std::vector<int> route_; // 值为WayFinding中的图id
+int route_cnt_; // 下一个目标点id
+
 void Dispatch::AvoidCollide() {
     std::vector<std::vector<std::vector<Point>>> forecast(Input::robot_num_);
     // t
@@ -226,24 +230,6 @@ void Dispatch::AvoidCollide() {
             return ChooseToPoint(ri);
         };
         forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
-        // auto robot = Input::robot[ri];
-        // int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
-        // if (wi == -1) {
-        //     forecast[ri].push_back(std::vector<Point>(forecast_num_, robot->pos_));
-        // } else {
-        //     int wi2 = robot->carry_id_ == 0 ? plan_[ri].sell_workbench : plan2_[ri].buy_workbench;
-        //     if (wi2 != -1) {
-        //         int frame_reach = 0;
-        //         if (robot->carry_id_ == 0 && Input::workbench[wi]->frame_remain_ != -1 && !Input::workbench[wi]->product_status_)
-        //             frame_reach = Input::frameID + Input::workbench[wi]->frame_remain_;
-        //         else if (robot->carry_id_ != 0 && !Input::workbench[wi]->TryToSell(robot->carry_id_))
-        //             frame_reach = INT_MAX;
-        //         forecast[ri].push_back(robot->ForecastToPoint2(Input::workbench[wi]->pos_, Input::workbench[wi2]->pos_, frame_reach, forecast_num_));
-        //     }
-        //     else {
-        //         forecast[ri].push_back(robot->ForecastToPoint(Input::workbench[wi]->pos_, forecast_num_));
-        //     }
-        // }
     }
     for (int ri = 0; ri < Input::robot_num_; ri++) {
         // if (Input::frameID >= 244 && Input::frameID <= 244+50 && ri == 0) {
@@ -321,6 +307,74 @@ void Dispatch::AvoidCollide() {
             }
             return false;
         };
+        std::function<bool(int)> dfs2 = [&](int cur) {
+            if (cur == collide_robot.size()) {
+                double d_min = collide_dist_;
+                for (int i = 0; i < collide_robot.size(); i++) 
+                    for (int j = i+1; j < collide_robot.size(); j++) {
+                        double d = ForecastCollide(forecast[collide_robot[i]][dec[i]], forecast[collide_robot[j]][dec[j]], bst_dist);
+                        if (d < bst_dist) return false;
+                        d_min = std::min(d_min, d);
+                    }
+                // Log::print("not better", bst_dist, d_min);
+                if (d_min > bst_dist) {
+                    bst_dist = d_min;
+                    movement_best = movement_;
+                }
+                if (d_min < collide_dist_)
+                    return false;
+                return true;
+            }
+            int ri = collide_robot[cur];
+            auto robot = Input::robot[ri];
+            int source = route_[route_cnt_ - 1];
+            if (dfs(cur+1, dec)) return true;
+            int o = robot->carry_id_ != 0;
+            int mxsol = 10, cntsol = 0;
+
+            // 倍增dijk，每次找k个destination，从头开始判断
+            const MAX_SOL = 128;
+            for (int sol = 4; sol < MAX_SOL; sol *= 2) {
+                std::vector<int> dest;
+                std::function<bool(int)> valid = [&](int t) {
+                    dest.push_back(t);
+                    return !(dest.size() < sol);
+                };
+                WayFinding::Dijkstra(o, source, valid);
+                for (int ti = 0; ti < dest.size(); ti++) {
+                    if (forecast[ri].size() <= ti+1) {
+                        auto route = WayFinding::GetOnlineRoute(o, source, t);
+                        std::function<std::pair<double,double>()> action = [&]() {
+                            return std::make_pair(forward, rotate);
+                        };
+                        forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
+                    }
+                    // dfs2 
+                }
+            }
+            // std::function<bool(int)> valid = [&](int t) {
+            //     // dfs2
+            //     return ++cntsol < mxsol;
+            // };
+            // WayFinding::Dijkstra(o, source, valid);
+            // for (int ci = 0; ci < choose.size(); ci++) {
+            //     auto forward = choose[ci].first;
+            //     auto rotate = choose[ci].second;
+            //     // if (fabs(forward - robot->GetLinearVelocity()) < 2) continue; // 要降就降猛一点，否则到时候来不及
+            //     if (forecast[ri].size() <= ci+1) {
+            //         std::function<std::pair<double,double>()> action = [&]() {
+            //             return std::make_pair(forward, rotate);
+            //         };
+            //         forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
+            //     }
+            //     movement_[ri] = {forward, rotate};
+            //     auto dec2 = dec;
+            //     dec2[cur] = ci+1;
+            //     if (dfs(cur+1, dec2))
+            //         return true;
+            // }
+            // return false;
+        }
         if (dfs(0, std::vector<int>(collide_robot.size()))) {
             Log::print("Hav_solution");
         } else {
@@ -329,4 +383,9 @@ void Dispatch::AvoidCollide() {
         }
     }
 }
- */
+
+
+// Route route_;
+// void Dispatch::AvoidStuck() {
+
+// }

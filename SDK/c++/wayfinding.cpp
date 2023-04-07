@@ -319,15 +319,15 @@ Route WayFinding::GetOnlineRoute(int o, int s, int t) {
     return route;
 }
 
-std::priority_queue<Status> Q;
-void WayFinding::Dijkstra(int o, int s, bool(*valid)(int t)) {
+void WayFinding::Dijkstra(int o, int s, std::function<bool(int)> valid) {
+    std::priority_queue<Status> Q;
     // TODO：将方向放入状态
     for(int i = 0; i < N; ++i) {
         pre[o][s][i] = -1;
         dist[o][s][i] = INF;
     }
     dist[o][s][s] = 0.0;
-    while(!Q.empty()) Q.pop();
+    // while(!Q.empty()) Q.pop();
     Q.push(Status{s, dist[o][s][s]});
     while (!Q.empty()) {
         auto x = Q.top(); Q.pop();
