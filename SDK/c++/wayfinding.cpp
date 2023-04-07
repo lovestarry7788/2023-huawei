@@ -136,6 +136,18 @@ void WayFinding2::Init() {
                 joint_obs_[idx].push_back(py - 0.25);
             }
     }
+
+    for(int o = 0; o < 2; ++o) {
+        for (int s = 0; s < (int) workbench.size(); ++s) {
+            Dijkstra(o, s);
+            for (int j = 1; j <= 14; ++j) {
+                for (int i = 0; i < N_; ++i) {
+                    From[o][s][i][j] = From[o][s][From[o][s][i][j - 1]][j - 1];
+                }
+            }
+        }
+    }
+
 }
 
 std::priority_queue<Status> Q;
@@ -155,6 +167,7 @@ void WayFinding2::Dijkstra(int o, int s) { //有没有拿东西o:0/1, 起点： 
             // Log::print("o: ", o, "s: ", s, "u: ", u, "k: ", k);
             if (Dis[o][s][Edge_[o][k].to] > Dis[o][s][Edge_[o][k].from] + Edge_[o][k].dis) {
                 Dis[o][s][Edge_[o][k].to] = Dis[o][s][Edge_[o][k].from] + Edge_[o][k].dis;
+                From[o][s][Edge_[o][k].to][0] = Edge_[o][k].from; // 前驱点
 //                pre[o][s][Edge_[o][k].to] = k;
                 Q.push(Status{Edge_[o][k].to, Dis[o][s][Edge_[o][k].to]});
             }
