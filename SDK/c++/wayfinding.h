@@ -35,7 +35,6 @@ namespace WayFinding2 {
     };
 
     const double Radius[2] = {0.45, 0.53};
-    extern int N; // 总的点数
     extern int Edge_Num[2];//建边， 边的数量
     extern Edge Edge_[2][M_];
     extern int Head[2][N_];//建边, 领接表头指针
