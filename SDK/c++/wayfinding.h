@@ -29,6 +29,15 @@ namespace WayFinding2 {
     extern std::vector<double> Unique_x[2];//用于离散化x坐标
     extern std::vector<double> Unique_y[2];//用于离散化y坐标
 
+//    int cnt;//建边， 边的数量
+//    int Head[2][N_];//建边, 领接表头指针
+//    Geometry::Point Point_[2][N_];//编号对应的点的坐标
+//    std::vector<double> Unique_x[2];//用于离散化x坐标
+//    std::vector<double> Unique_y[2];//用于离散化y坐标
+//    double Dis[2][50][N_];//最短路： 初始建图的最短路
+//    double Dis2[2][50][N_];//最短路2：
+//    int From[2][50][N_][15];//状态， 工作台编号， 终点， 2^k步： 从终点出发到对应的工作台的最短路上， 走2^k到达哪个点
+
     void Unique(std::vector<double> &a);//离散化a
     int GetID(double x_, double y_);//获得x,y对应的离散化id
     void Insert_Edge(int o, int u, int v, double dis);
@@ -40,7 +49,7 @@ namespace WayFinding2 {
             {0, 0.28, 0.28, -0.28, -0.28, 0.25, 0.25, -0.25, -0.25}
     };
     const double direction_y[2][9] = {
-
+            //对应的方位， 机器人买完之后， 会被挤到哪里
             {0, -0.27, 0.27, -0.27, 0.27, 0.25, -0.25, 0.25, -0.25},
             {0, -0.5, 0.5, -0.5, 0.5, 0.25, -0.25, 0.25, -0.25}
 
