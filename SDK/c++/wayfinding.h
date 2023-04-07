@@ -25,22 +25,15 @@ namespace WayFinding2 {
             : from(_u), to(_v), next(_nex), dis(_dis){}
     };
 
+    const double Radius[2] = {0.45, 0.53};
     extern int Edge_Num[2];//建边， 边的数量
     extern Edge Edge_[2][M_];
     extern int Head[2][N_];//建边, 领接表头指针
     extern Geometry::Point Point_[2][N_];//编号对应的点的坐标
     extern std::vector<double> Unique_x[2];//用于离散化x坐标
     extern std::vector<double> Unique_y[2];//用于离散化y坐标
+    extern std::vector<double> joint_obs_x0_, joint_obs_[101];
     extern int map_id[N_xy][N_xy];
-
-//    int cnt;//建边， 边的数量
-//    int Head[2][N_];//建边, 领接表头指针
-//    Geometry::Point Point_[2][N_];//编号对应的点的坐标
-//    std::vector<double> Unique_x[2];//用于离散化x坐标
-//    std::vector<double> Unique_y[2];//用于离散化y坐标
-//    double Dis[2][50][N_];//最短路： 初始建图的最短路
-//    double Dis2[2][50][N_];//最短路2：
-//    int From[2][50][N_][15];//状态， 工作台编号， 终点， 2^k步： 从终点出发到对应的工作台的最短路上， 走2^k到达哪个点
 
     void Unique(std::vector<double> &a);//离散化a
     int GetID(int o, double x_, double y_);//获得x,y对应的离散化id
@@ -56,7 +49,6 @@ namespace WayFinding2 {
             //对应的方位， 机器人买完之后， 会被挤到哪里
             {0, -0.27, 0.27, -0.27, 0.27, 0.25, -0.25, 0.25, -0.25},
             {0, -0.5, 0.5, -0.5, 0.5, 0.25, -0.25, 0.25, -0.25}
-
     };
 
     extern double Dis[2][50][N_];//最短路： 初始建图的最短路
