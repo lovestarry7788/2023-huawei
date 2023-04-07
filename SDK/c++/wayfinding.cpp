@@ -153,7 +153,7 @@ void WayFinding2::Init() {
 std::priority_queue<Status> Q;
 void WayFinding2::Dijkstra(int o, int s) { //有没有拿东西o:0/1, 起点： 工作台
     for(int i = 0; i < N_; ++i) {
-//        pre[o][s][i] = -1;
+        From[o][s][i][0] = -1;
         Dis[o][s][i] = INF;
     }
     Dis[o][s][s] = 0.0;
@@ -168,7 +168,6 @@ void WayFinding2::Dijkstra(int o, int s) { //有没有拿东西o:0/1, 起点： 
             if (Dis[o][s][Edge_[o][k].to] > Dis[o][s][Edge_[o][k].from] + Edge_[o][k].dis) {
                 Dis[o][s][Edge_[o][k].to] = Dis[o][s][Edge_[o][k].from] + Edge_[o][k].dis;
                 From[o][s][Edge_[o][k].to][0] = Edge_[o][k].from; // 前驱点
-//                pre[o][s][Edge_[o][k].to] = k;
                 Q.push(Status{Edge_[o][k].to, Dis[o][s][Edge_[o][k].to]});
             }
         }
