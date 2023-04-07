@@ -25,7 +25,17 @@ namespace WayFinding2 {
             : from(_u), to(_v), next(_nex), dis(_dis){}
     };
 
+    struct Status {
+        int u;
+        double d;
+        Status(int u, double d) : u(u), d(d) {}
+        bool operator<(const Status& rhs) const {
+            return d > rhs.d;
+        }
+    };
+
     const double Radius[2] = {0.45, 0.53};
+    extern int N; // 总的点数
     extern int Edge_Num[2];//建边， 边的数量
     extern Edge Edge_[2][M_];
     extern int Head[2][N_];//建边, 领接表头指针
