@@ -107,5 +107,34 @@ void WayFinding2::Init() {
     Unique(Unique_y[0]);
     Unique(Unique_y[1]);
     //初始化建图， 先将所有的点离散化之后再开始建边
+
+    for(int i = 0; i < map_size_; ++i) {
+        for(int j = 0; j < map_size_; ++j) {
+            if(map_[i][j] == '#') {
+                double px = j * 0.5 + 0.25;
+                joint_obs_x0_.push_back(px + 0.25);
+                joint_obs_x0_.push_back(px - 0.25);
+            }
+        }
+    }
+
+    /*
+     * 对所有的障碍点集进行去重
+     */
+    Unique(joint_obs_x0_);
+    for (int i = 0; i < map_size_; i++) {
+        for (int j = 0; j < map_size_; j++) if(map_[i][j] == '#'){
+                double px = j * 0.5 + 0.25;
+                double py = (map_size_ - i - 1) * 0.5 + 0.25;
+                int idx;
+                idx = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), px + 0.25) - joint_obs_x0_.begin();
+                joint_obs_[idx].push_back(py + 0.25);
+                joint_obs_[idx].push_back(py - 0.25);
+
+                idx = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), px - 0.25) - joint_obs_x0_.begin();
+                joint_obs_[idx].push_back(py + 0.25);
+                joint_obs_[idx].push_back(py - 0.25);
+            }
+    }
 }
 void WayFinding2::Dijkstra(int o, int s);//有没有拿东西o:0/1, 起点： 工作台
