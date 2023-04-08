@@ -27,36 +27,6 @@ double WayFinding2::Dis[2][400][N_];//最短路： 初始建图的最短路
 int WayFinding2::From[2][400][N_][Binary_Limit];//状态， 工作台编号， 终点， 2^k步： 从终点出发到对应的工作台的最短路上， 走2^k到达哪个点
 
 bool WayFinding2::Check_Avoid_Crash_Wall(int o, int A, int B) { //测试沿着AB连线走会不会撞墙
-    auto a = GetGraphPoint(A); // 编号： 先是可以走的点，再是工作台
-    auto b = GetGraphPoint(B);
-    bool valid = true;
-    double mind = 1e18;
-    x0 = std::min(a.x, b.x) - Radius[o], x1 = std::max(a.x, b.x) + Radius[o], y0 = std::min(a.y, b.y) - Radius[o], y1 = std::max(a.y, b.y) + Radius[o];
-    x0_ = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), x0) - joint_obs_x0_.begin() - 1; x0_ = std::max(x0_, 0);
-    x1_ = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), x1) - joint_obs_x0_.begin();
-    for (int x = x0_; x <= x1_; ++x) if(!joint_obs_[x].empty()){
-        y0_ = std::lower_bound(joint_obs_[x].begin(), joint_obs_[x].end(), y0) - joint_obs_[x].begin() - 1; y0_ = std::max(y0_, 0);
-        y1_ = std::lower_bound(joint_obs_[x].begin(), joint_obs_[x].end(), y1) - joint_obs_[x].begin();
-        for (int y = y0_; y <= y1_; ++y) {
-            d = DistanceToSegment({joint_obs_x0_[x], joint_obs_[x][y]}, a, b);
-            mind = std::min(mind, d);
-            // 细小问题，两点间直线，只有一个瓶颈，中间有空的，仍可以通过多辆车。no，没问题，将防碰撞提前处理了部分。
-            if (d < Radius[o] + 2e-2) { // 操作误差
-                valid = false;
-                break;
-            }
-        }
-        if(!valid) break;
-    }
-    return valid;
-//                 Log::print(i, j, a.x, a.y, b.x, b.y, d, mind, valid);
-    // 暂不考虑单行道，存了mind供将来判断道路宽度使用
-    // if (valid) {
-    //     d = DistBetweenPoints(a, b);
-    //     Insert_Edge(o, i, j, d, mind);
-    //     Insert_Edge(o, j, i, d, mind);
-    //     Log::print("edge i: ", i, "j: ", j, "dist: ", d);
-    // }
     double x0, x1, y0, y1;
     int x0_, x1_, y0_, y1_;
     double d;
@@ -66,6 +36,8 @@ bool WayFinding2::Check_Avoid_Crash_Wall(int o, int A, int B) { //测试沿着AB
     double mind = 1e18;
     double radius = Radius[o];
     x0 = std::min(a.x, b.x) - radius, x1 = std::max(a.x, b.x) + radius, y0 = std::min(a.y, b.y) - radius, y1 = std::max(a.y, b.y) + radius;
+    if(A == 3679 && B == 3921)
+        Log::print(y0, y1);
     x0_ = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), x0) - joint_obs_x0_.begin() - 1; x0_ = std::max(x0_, 0);
     x1_ = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), x1) - joint_obs_x0_.begin();
     for (int x = x0_; x <= x1_; ++x) if(!joint_obs_[x].empty()){
@@ -73,16 +45,20 @@ bool WayFinding2::Check_Avoid_Crash_Wall(int o, int A, int B) { //测试沿着AB
             y1_ = std::lower_bound(joint_obs_[x].begin(), joint_obs_[x].end(), y1) - joint_obs_[x].begin();
             for (int y = y0_; y <= y1_; ++y) {
                 d = DistanceToSegment({joint_obs_x0_[x], joint_obs_[x][y]}, a, b);
-                //                        if(j == 71) Log::print("Radius: ", Radius[o], "i: ", i, "j: ", j, "a.x: ", a.x, "a.y: ", a.y, "b.x: ", b.x, "b.y: ",b.y, "x0: ",joint_obs_x0_[x], "y0: ", joint_obs_[x][y], "d: ", d);
+                if(A == 3679 && B == 3921)
+//                    Log::print("Block: ", joint_obs_x0_[x], joint_obs_[x][y]),
+                    Log::print("Radius: ", Radius[o], "i: ", A, "j: ", B, "a.x: ", a.x, "a.y: ", a.y, "b.x: ", b.x, "b.y: ",b.y, "x0: ", joint_obs_x0_[x], "y0: ", joint_obs_[x][y], "d: ", d);
                 mind = std::min(mind, d);
                 // 细小问题，两点间直线，只有一个瓶颈，中间有空的，仍可以通过多辆车。no，没问题，将防碰撞提前处理了部分。
-                if (d < radius + 2e-2) { // 操作误差
+                if (mind < radius + 2e-2) { // 操作误差
                     valid = false;
                     break;
                 }
             }
             if(!valid) break;
         }
+    if(A == 3679 && B == 3921)
+        Log::print("Radius: ", Radius[o], "i: ", A, "j: ", B, "a.x: ", a.x, "a.y: ", a.y, "b.x: ", b.x, "b.y: ",b.y,  "d: ", mind);
     return valid;
 }//测试沿着AB连线走会不会撞墙
 
@@ -127,7 +103,10 @@ void WayFinding2::Init() {
         for (int j = 0; j < map_size_; j++) {
             double px = j * 0.5 + 0.25;
             double py = (map_size_ - i - 1) * 0.5 + 0.25;
-            if(map_[i][j] == '#') continue;//障碍的话不需要建点
+            if(map_[i][j] == '#') {
+                Log::print("Block: ", i, j, px, py);
+                continue;//障碍的话不需要建点
+            }
             if(map_[i][j] == '.' || map_[i][j] == 'A') {
                 Unique_x.push_back(px);
                 Unique_y.push_back(py);
@@ -183,6 +162,7 @@ void WayFinding2::Init() {
                 double px = j * 0.5 + 0.25;
                 joint_obs_x0_.push_back(px + 0.25);
                 joint_obs_x0_.push_back(px - 0.25);
+                continue;
             }//是障碍做拓展
             if(map_[i][j] == 'A' || map_[i][j] == '.') continue;
             if(map_[i][j] >= '1' && map_[i][j] <= '9') {
@@ -237,6 +217,10 @@ void WayFinding2::Init() {
                 joint_obs_[idx].push_back(py + 0.25);
                 joint_obs_[idx].push_back(py - 0.25);
             }
+    }
+
+    for(int i = 0; i < joint_obs_x0_.size(); ++i) {
+        Unique(joint_obs_[i]);
     }
 //
 //    Log::print(Unique_x.size());
