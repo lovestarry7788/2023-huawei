@@ -27,6 +27,36 @@ double WayFinding2::Dis[2][400][N_];//最短路： 初始建图的最短路
 int WayFinding2::From[2][400][N_][Binary_Limit];//状态， 工作台编号， 终点， 2^k步： 从终点出发到对应的工作台的最短路上， 走2^k到达哪个点
 
 bool WayFinding2::Check_Avoid_Crash_Wall(int o, int A, int B) { //测试沿着AB连线走会不会撞墙
+    auto a = GetGraphPoint(A); // 编号： 先是可以走的点，再是工作台
+    auto b = GetGraphPoint(B);
+    bool valid = true;
+    double mind = 1e18;
+    x0 = std::min(a.x, b.x) - Radius[o], x1 = std::max(a.x, b.x) + Radius[o], y0 = std::min(a.y, b.y) - Radius[o], y1 = std::max(a.y, b.y) + Radius[o];
+    x0_ = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), x0) - joint_obs_x0_.begin() - 1; x0_ = std::max(x0_, 0);
+    x1_ = std::lower_bound(joint_obs_x0_.begin(), joint_obs_x0_.end(), x1) - joint_obs_x0_.begin();
+    for (int x = x0_; x <= x1_; ++x) if(!joint_obs_[x].empty()){
+        y0_ = std::lower_bound(joint_obs_[x].begin(), joint_obs_[x].end(), y0) - joint_obs_[x].begin() - 1; y0_ = std::max(y0_, 0);
+        y1_ = std::lower_bound(joint_obs_[x].begin(), joint_obs_[x].end(), y1) - joint_obs_[x].begin();
+        for (int y = y0_; y <= y1_; ++y) {
+            d = DistanceToSegment({joint_obs_x0_[x], joint_obs_[x][y]}, a, b);
+            mind = std::min(mind, d);
+            // 细小问题，两点间直线，只有一个瓶颈，中间有空的，仍可以通过多辆车。no，没问题，将防碰撞提前处理了部分。
+            if (d < Radius[o] + 2e-2) { // 操作误差
+                valid = false;
+                break;
+            }
+        }
+        if(!valid) break;
+    }
+    return valid;
+//                 Log::print(i, j, a.x, a.y, b.x, b.y, d, mind, valid);
+    // 暂不考虑单行道，存了mind供将来判断道路宽度使用
+    // if (valid) {
+    //     d = DistBetweenPoints(a, b);
+    //     Insert_Edge(o, i, j, d, mind);
+    //     Insert_Edge(o, j, i, d, mind);
+    //     Log::print("edge i: ", i, "j: ", j, "dist: ", d);
+    // }
     double x0, x1, y0, y1;
     int x0_, x1_, y0_, y1_;
     double d;
