@@ -31,6 +31,22 @@ std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::workbench_pos,
 std::vector<double> WayFinding::joint_obs_[101];
 Route WayFinding::routes_[2][N_][N_];
 
+int tot_N_;
+std::vector<int> dist_order_[tot_N_];
+// wb在图中的id
+int get_workbench_id(int wb_id) {
+    return 0;
+}
+// 随机点在此序列中的id
+int get_random_id(Point cnt) {
+    return 0;
+}
+Point nxt_point(int o, Point cnt, int graph_id) {
+    return {0,0};
+}
+
+
+
 std::vector<Dijkstra> WayFinding::MultiDijk;
 
 void WayFinding::Insert_Edge(int o, int u, int v, double dis, double dis_to_wall) {
