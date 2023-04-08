@@ -29,7 +29,7 @@ std::vector<std::pair<double, double>> Dispatch::movement_;
 std::vector<Plan> Dispatch::plan_, Dispatch::plan2_;
 
 // 当前目标在wayfindding中的id，临时的目标（-1表示无）
-std::vector<int> Dispatch::graph_id, Dispatch::temporal_graph_id; 
+std::vector<int> Dispatch::graph_id_, Dispatch::temporal_graph_id_; 
 
 std::vector<Occupy> Dispatch::occupy_;
 
@@ -47,8 +47,8 @@ void Dispatch::init(void (*RobotReplan)(int), int robot_num, int workbench_num) 
     movement_.resize(Input::robot_num_);
     plan_.resize(robot_num);
     plan2_.resize(robot_num);
-    graph_id.resize(robot_num);
-    original_graph_id.resize(robot_num);
+    graph_id_.resize(robot_num);
+    original_graph_id_.resize(robot_num);
     occupy_.resize(workbench_num);
 }
 
@@ -139,19 +139,21 @@ void Dispatch::ManagePlan(int robot_id, Plan& plan) {
     }
 }
 
-std::pair<double,double> Dispatch::ChooseToPoint(int ri) {
-
+std::pair<double,double> Dispatch::ChooseToPointFix(int ri, int graphid) {
+    double forward, rotate;
+    if (graphid == -1) {
+        forward = rotate = 0;
+    } else {
+        robot->ToPoint(WayFinding::nxt_point(robot->carry_id_ != 0, robot->pos_, graphid) , forward, rotate);
+    }
+    return std::make_pair(forward, rotate);
 }
 std::pair<double,double> Dispatch::ChooseToPoint(int ri) {
     auto robot = Input::robot[ri];
     double forward, rotate;
     // 修改成依赖graph_id而非plan
-    int toid = temporal_graph_id[ri] != -1 ? temporal_graph_id[ri] : graph_id[ri];
-    if (toid != -1) {
-        robot->ToPoint(WayFinding::nxt_point(robot->carry_id_ != 0, robot->pos_, toid) , forward, rotate);
-    } else {
-        forward = rotate = 0;
-    }
+    int toid = temporal_graph_id_[ri] != -1 ? temporal_graph_id_[ri] : graph_id_[ri];
+    return ChooseToPointFix(ri, toid);
 
     // int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
     // Log::print("ControlWalk", ri, plan_[ri].buy_workbench, plan_[ri].sell_workbench);
@@ -186,7 +188,7 @@ void Dispatch::ControlWalk() {
     
     for (size_t ri = 0; ri < plan_.size(); ri++) {
         int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
-        graph_id[ri] = WayFinding::get_workbench_id(wi);
+        graph_id_[ri] = WayFinding::get_workbench_id(wi);
     }
     if (avoidCollide) AvoidCollide();
     for (size_t ri = 0; ri < plan_.size(); ri++) {
@@ -230,7 +232,7 @@ void Dispatch::AvoidCollide() {
     // t
     for (int ri = 0; ri < Input::robot_num_; ri++) {
         std::function<std::pair<double,double>(Robot&)> action = [&](Robot&) {
-            return ChooseToPoint(ri);
+            return ChooseToPointFix(ri, graph_id_[ri]); // 强制按原来的计划试试
         };
         forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
     }
@@ -250,8 +252,13 @@ void Dispatch::AvoidCollide() {
             }
         }
         // Log::print("bst_dist", bst_dist);
-        if (collide_robot.empty()) continue;
-        
+        if (collide_robot.empty()) {
+            temporal_graph_id_[ri] = -1; // 去掉临时目标
+            continue;
+        }
+        if (temporal_graph_id_[ri] != -1) { // 已设置计划
+            // continue?
+        }
         // 对robot排序，从重到轻
         collide_robot.push_back(ri);
         std::sort(begin(collide_robot), end(collide_robot), [&](int l, int r) {
@@ -261,12 +268,12 @@ void Dispatch::AvoidCollide() {
         // 延长检测为安全确保的时间
         for (auto i : collide_robot) {
             std::function<std::pair<double,double>()> action = [&]() {
-                return ChooseToPoint(i);
+                return ChooseToPoint(i); // 按目前计划走
             };
             forecast[i][0] = Simulator::SimuFrames(*Input::robot[i], action, forecast_oneway_safe_num_, forecast_sampling_);
         }
 
-        auto movement_best = movement_;
+        auto temporal_graph_id_best = temporal_graph_id_;
         std::function<bool(int,std::vector<int>)> dfs = [&](int cur, std::vector<int> dec) {
             if (cur == collide_robot.size()) {
                 double d_min = collide_dist_;
@@ -332,7 +339,7 @@ void Dispatch::AvoidCollide() {
                 // Log::print("not better", bst_dist, d_min);
                 if (d_min > bst_dist) {
                     bst_dist = d_min;
-                    movement_best = movement_;
+                    temporal_graph_id_best = temporal_graph_id_;
                 }
                 if (d_min < collide_dist_)
                     return false;
@@ -344,14 +351,14 @@ void Dispatch::AvoidCollide() {
             if (dfs2(cur+1, dec)) return true;
             int o = robot->carry_id_ != 0;
             // 从重要到轻，每次层的上限为上层的2（可调参数）倍。暂定优先级最高的不搜路径。
-            auto& dist_order = dist_order_[WayFinding::get_random_id(robot->pos_)];
+            const auto& dist_order = dist_order_[o][WayFinding::get_random_id(robot->pos_)];
             int maxci = std::min(cur == 0 ? 1ull : forecast[cur-1].size() * 2, dist_order.size());
             for (int ci = 0; ci < maxci; ci++) {
+                temporal_graph_id_[ri] = dist_order[ci];
                 if (forecast[ri].size() <= ci+1) {
-                    int graph_id = dist_order[ci];
                     std::function<std::pair<double,double>(Robot&)> action = [&](Robot& robot) {
                         double forward, rotate;
-                        robot->ToPoint(WayFinding::nxt_point(robot->carry_id_ != 0, robot->pos_, graph_id) , forward, rotate);
+                        robot->ToPoint(WayFinding::nxt_point(robot->carry_id_ != 0, robot->pos_, temporal_graph_id_[ri]) , forward, rotate);
                         return std::make_pair(forward, rotate);
                     };
                     forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_oneway_safe_num_, forecast_sampling_));
@@ -364,7 +371,7 @@ void Dispatch::AvoidCollide() {
         if (dfs2(0, std::vector<int>(collide_robot.size()))) {
             Log::print("Hav_solution");
         } else {
-            swap(movement_, movement_best); // 不换决策，以改变最大的决策作为最终状态，往往能让最小碰撞 变大。不采用
+            swap(temporal_graph_id_, temporal_graph_id_best);
             Log::print("No_solution");
         }
     }

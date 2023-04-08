@@ -32,7 +32,7 @@ std::vector<double> WayFinding::joint_obs_[101];
 Route WayFinding::routes_[2][N_][N_];
 
 int tot_N_;
-std::vector<int> dist_order_[tot_N_];
+std::vector<int> dist_order_[o][tot_N_];
 // wb在图中的id
 int get_workbench_id(int wb_id) {
     return 0;
