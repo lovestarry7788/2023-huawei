@@ -81,6 +81,7 @@ namespace Solution6 {
                 Log::print(A, " ", B, " ", WayFinding2::Dis[0][B][A], " ", WayFinding2::From[0][B][A][0]);
             }
 //
+            Log::print(A, " ", B, " ", WayFinding2::Dis[0][B][A], " ", WayFinding2::From[0][B][A][0]);
             double forward, rotate;
             if(A != B) {
                 Log::print(robot[test_id]->pos_.x, robot[test_id]->pos_.y);
@@ -89,7 +90,7 @@ namespace Solution6 {
                         A = Goal, Goal = -1;
                 }
                 if(Goal == -1){
-                    Log::print("qwq");
+//                    Log::print("qwq");
                     Goal = FindRoute(0, A, B);//测试没有带东西的
                     // Goal = FindRoute(1, A, B);//测试带了东西了
                 }
@@ -100,12 +101,19 @@ namespace Solution6 {
                     robot[test_id]->ToPoint_1(WayFinding2::Point_[0][Goal], forward, rotate);
                 }
             }
+
+            if(A == B) {
+//                if(B == 0)
+//                    B = GetID(0, 32.75000000, 29.25);
+//                else
+                    B = 220;
+            }
 //            Log::print("robot_id: ", test_id, "now: ", robot[test_id]->pos_.x, " ", robot[test_id]->pos_.y);
 //
             Output::Forward(test_id, forward);
             Output::Rotate(test_id, rotate);
             Output::Print(Input::frameID);
-            Log::print("\n");
+//            Log::print("\n");
 
         }
     }
@@ -340,7 +348,7 @@ namespace Solution6 {
 //                            Output::Sell(id);
 //                            can_plan_to_sell_[robot[id] -> workbench_sell_][robot[id] -> carry_id_] = true;
 //                            workbench[robot[id] -> workbench_sell_] -> materials_status_ |= 1 << robot[id] -> carry_id_;
-//                            robot[id] -> last_point_ = WayFinding::workbench_extern_id[robot[id] -> workbench_sell_][robot[id] -> workbench_sell_direction] + robot_num_;
+//                            // robot[id] -> last_point_ = WayFinding::workbench_extern_id[robot[id] -> workbench_sell_][robot[id] -> workbench_sell_direction] + robot_num_;
 //                            // Log::print("id: ", id, "last_point_: ", robot[id] -> last_point_);
 //                            robot[id] -> workbench_buy_ = robot[id] -> workbench_sell_ = -1;
 //                            plan_[id].sell_workbench = -1;
@@ -412,13 +420,13 @@ namespace Solution6 {
 //                                                Geometry::Point{workbench[i]->pos_.x, workbench[i]->pos_.y},
 //                                                Geometry::Point{workbench[j]->pos_.x, workbench[j]->pos_.y});
 //                                        */
-//                                        auto [i_direction, j_direction] = WayFinding::dis_mn_[robot[id] -> last_point_][i][j];
+//                                        //auto [i_direction, j_direction] = WayFinding2::dis_mn_[robot[id] -> last_point_][i][j];
 //                                        Log::print("i: ", i, "j: ", j, "i_direction: ", i_direction, "j_direction: ", j_direction);
-//                                        double buy_sell_frame_ = WayFinding::CalcDistance(id, i,
+//                                        double buy_sell_frame_ = WayFinding2::CalcDistance(id, i,
 //                                                                                          i_direction,
 //                                                                                          j,
 //                                                                                          j_direction);
-//                                        if (buy_sell_frame_ >= WayFinding::INF) continue;
+//                                        if (buy_sell_frame_ >= WayFinding2::INF) continue;
 //
 //                                        if ((workbench[j]->type_id_ == 7 &&
 //                                             workbench[j]->ItemsAreMissing() ==
