@@ -10,6 +10,8 @@
 #include <utility>
 #include <iostream>
 #include <array>
+#include <ctime>
+#include <cassert>
 
 namespace WayFinding {
     using Route = std::vector<Geometry::Point>;
@@ -40,9 +42,49 @@ namespace WayFinding {
     };
     // extern int test[Input::map_size_][map_size_]; // 先每个点中心离散化
 
+    struct Dimension2query {
+        std::vector<std::vector<double>> val;
+        std::vector<double> x;
+        void init(const std::vector<Point> &a) {
+            for (auto i : a) x.push_back(i.x);
+            Unique(x);
+            val.resize(x.size());
+            for (auto i : a) 
+                val[std::lower_bound(begin(x), end(x), i.x) - begin(x)].push_back(i.y);
+            
+            for (auto& i : val) std::sort(begin(i), end(i));
+        }
+        // 区间查询在其中的所有点
+        template<class T>
+        void query(Point a, Point b, T op_rep) {
+            static const double mov = 0.54;
+
+            double minx = a.x, maxx = b.x;
+            if (minx > maxx) std::swap(minx, maxx);
+            minx -= mov, maxx += mov;
+
+            int x0 = std::lower_bound(begin(x), end(x), minx) - begin(x);
+            int x1 = std::upper_bound(begin(x), end(x), maxx) - begin(x);
+
+            double miny = a.y, maxy = b.y;
+            if (miny > maxy) std::swap(miny, maxy);
+            miny -= mov, maxy += mov;
+
+            for (int xi = x0; xi < x1; xi++) {
+                int y0 = std::lower_bound(begin(val[xi]), end(val[xi]), miny) - begin(val[xi]);
+                int y1 = std::upper_bound(begin(val[xi]), end(val[xi]), maxy) - begin(val[xi]);
+                for (int yi = y0; yi < y1; yi++) {
+                    if (!op_rep(Point{x[xi], val[xi][yi]}))
+                        return;
+                }
+            }
+        }
+    };
+
     struct WayFinding {
         static constexpr double INF = 1e18;
-        const double radius = 0.53;
+        double radius;
+        static const bool init_random = false; 
         // const int map_size_ = 100;
         size_t N1, N2;
 
@@ -51,6 +93,7 @@ namespace WayFinding {
         std::vector<int> workbench_to_gid;
 
         std::vector<Point> joint_obs;
+        Dimension2query obs_query;
 
         std::vector<std::vector<double>> dist1; // n1 to n1
         std::vector<std::vector<double>> dist2; // n2 to n1
@@ -70,9 +113,27 @@ namespace WayFinding {
             return random_pos_to_id[pi][pj];
         }
         Point nxt_point(Point cnt, int graph_id) {
-            int random_id = get_random_id(cnt);
-            Log::print("nxt_point", random_id, nxt2[random_id][graph_id]);
-            return vertex[nxt2[random_id][graph_id]];
+            if (init_random) {
+                int random_id = get_random_id(cnt);
+                Log::print("nxt_point", random_id, nxt2[random_id][graph_id]);
+                return vertex[nxt2[random_id][graph_id]];
+            }
+            
+            if (!IsCollideRouteToWall(cnt, vertex[graph_id])) // 理论上这句也不用。
+                return vertex[graph_id];
+            std::vector<double> dist(N1, INF);
+            int ans = -1;
+            for (size_t j = 0; j < N1; j++) {
+                if (IsCollideRouteToWall(cnt, vertex[j])) continue;
+                double d = DistBetweenPoints(cnt, vertex[j]);
+                dist[j] = d;
+                if (dist[graph_id] > dist[j] + dist1[j][graph_id]) {
+                    dist[graph_id] = dist[j] + dist1[j][graph_id];
+                    ans = j;
+                }
+            }
+            assert(ans != -1);
+            return vertex[ans];
         }
         double DistBetweenPoints(Point a, Point b) {
             return Length(a - b) + 1e-1;
@@ -84,7 +145,7 @@ namespace WayFinding {
                 for (int j = 0; j < map_size_; j++) {
                     double px = j * 0.5 + 0.25;
                     double py = (map_size_ - i - 1) * 0.5 + 0.25;
-                    random_pos.push_back(Point{px, py});
+                    random_pos.push_back(Point{px + 0.249, py + 0.249});
                     if (map_[i][j] == 'A') 
                         continue;
                     if ('1' <= map_[i][j] && map_[i][j] <= '9') {
@@ -117,6 +178,7 @@ namespace WayFinding {
             }
             Unique(vertex);
             Unique(joint_obs);
+            obs_query.init(joint_obs);
             // Unique(random_pos);
             N1 = vertex.size();
             N2 = random_pos.size();
@@ -128,7 +190,7 @@ namespace WayFinding {
                     random_pos_to_id[i][j] = i * map_size_ + j;
                 }
             }
-            Log::print(131);
+            Log::print(131, clock());
             // build edges and E
             E.resize(N1);
             for (int i = 0; i < N1; i++) {
@@ -145,7 +207,7 @@ namespace WayFinding {
             }
             Log::print("N is", N1, N2, joint_obs.size(), edges.size());
 
-            Log::print(146);
+            Log::print(146, clock());
 
             // calc dist1
             dist1.resize(N1);
@@ -153,14 +215,17 @@ namespace WayFinding {
                 dist1[i].resize(N1, INF);
                 Dijkstra(i, dist1[i]);
             }
-            Log::print(154);
+            Log::print(154, clock());
             
             // calc dist2 and nxt2
+            if (!init_random) {
+                return;
+            }
             dist2.resize(N2);
             nxt2.resize(N2);
             order2.resize(N2);
             for (size_t i = 0; i < N2; i++) {
-                if (__builtin_popcount(i)== 1) Log::print(i);
+                if (__builtin_popcount(i)== 1) Log::print(i, clock(), IsCollideRouteToWallAim / IsCollideRouteToWallCount, 1.0 * IsCollideRouteToWallNum / IsCollideRouteToWallCount);
                 dist2[i].resize(N1, INF);
                 nxt2[i].resize(N1, -1);
                 for (size_t j = 0; j < N1; j++)
@@ -172,7 +237,7 @@ namespace WayFinding {
                 // std::priority_queue<Status> Q;
                 auto& dist = dist2[i];
                 for (size_t j = 0; j < N1; j++) {
-                    // if (IsCollideRouteToWall(random_pos[i], vertex[j])) continue;
+                    if (IsCollideRouteToWall(random_pos[i], vertex[j])) continue;
                     double d = DistBetweenPoints(random_pos[i], vertex[j]);
                     dist[j] = d;
                     // Q.push({int(j), d});
@@ -211,12 +276,12 @@ namespace WayFinding {
                 });
                 while (order2[i].size() && dist[order2[i].back()] == INF)
                     order2[i].pop_back();
+
             }
         }
         int FreeSpace(int x, int y, int dx, int dy, int mx) {
             int ans = 0;
             bool valid = true;
-            bool P = x == 45 && y ==2;
             for (int ta = 1; ta <= mx && valid; ta++) {
                 valid = 0 <= x+ta*dx && x+ta*dx < map_size_ && 0 <= y+ta*dy && y+ta*dy < map_size_ &&
                     map_[x+ta*dx][y+ta*dy] != '#';
@@ -226,12 +291,27 @@ namespace WayFinding {
             }
             return ans;
         }
+        int IsCollideRouteToWallNum = 0, IsCollideRouteToWallCount = 0;
+        double IsCollideRouteToWallAim = 0;
         bool IsCollideRouteToWall(Point a, Point b) {
-            for (auto obs : joint_obs) {
-                if (DistanceToSegment(obs, a, b) < radius + 1e-4)
-                    return true;
-            }
-            return false;
+            // for (auto obs : joint_obs) {
+            //     if (DistanceToSegment(obs, a, b) < radius + 1e-6) {
+            //         return true;
+            //     }
+            // }
+            // return false;
+            bool valid = true;
+            IsCollideRouteToWallCount++;
+            IsCollideRouteToWallAim += Length(a - b);
+            obs_query.query(a, b, [&](const Point& obs) {
+                IsCollideRouteToWallNum++;
+                if (DistanceToSegment(obs, a, b) < radius + 1e-6) {
+                    valid = false;
+                    return false;
+                }
+                return true;
+            });
+            return !valid;
         }
         void Dijkstra(int s, std::vector<double> &dist) {
             std::priority_queue<Status> Q;
@@ -252,7 +332,7 @@ namespace WayFinding {
         }
     };
 
-    extern WayFinding Way;
+    extern WayFinding Way[2];
 
 
     // const std::vector<std::vector<std::array<int,2>>> Wall = {

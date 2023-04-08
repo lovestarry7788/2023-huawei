@@ -25,6 +25,7 @@
 #include <set>
 #include <memory>
 #include <climits>
+#include <ctime>
 
 /*
 // 测试Simulator
@@ -66,20 +67,29 @@ namespace Solution6 {
 
     void Solve() {
         Input::ScanMap();
-        Way.init();
-        int aim_gid = Way.workbench_to_gid[0];
+        Log::print("clock",clock());
+        Way[0].radius = 0.45, Way[0].init();
+        Way[1].radius = 0.53, Way[1].init();
+
+        int aim_wb = 8;
+        Point aim;
+        int robot_id = 2;
+        Log::print("clock",clock());
         while(Input::ScanFrame()) {
             Log::enable = Input::frameID < 3000 || true;
             Log::print("frame", Input::frameID);
-            auto rbt = robot[0];
-            Point aim = Way.nxt_point(rbt->pos_, aim_gid);
+            auto rbt = robot[robot_id];
+            if (Input::frameID == 1 || Length(aim - rbt->pos_) < 2e-1) {
+                auto& w = Way[rbt->carry_id_ != 0];
+                aim = w.nxt_point(rbt->pos_, w.workbench_to_gid[aim_wb]);
+            }
             Log::print("aim", aim);
 
             double forward, rotate;
             rbt->ToPoint_1(aim, forward, rotate);
 
-            Output::Forward(0, forward);
-            Output::Rotate(0, rotate);
+            Output::Forward(robot_id, forward);
+            Output::Rotate(robot_id, rotate);
 
             Output::Print(Input::frameID);
         }

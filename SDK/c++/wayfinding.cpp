@@ -12,4 +12,4 @@
 using namespace Geometry;
 using namespace Input;
 
-WayFinding::WayFinding WayFinding::Way;
+WayFinding::WayFinding WayFinding::Way[2];
