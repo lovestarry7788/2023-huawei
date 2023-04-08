@@ -31,6 +31,8 @@ std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::workbench_pos,
 std::vector<double> WayFinding::joint_obs_[101];
 Route WayFinding::routes_[2][N_][N_];
 
+std::vector<Dijkstra> WayFinding::MultiDijk;
+
 void WayFinding::Insert_Edge(int o, int u, int v, double dis, double dis_to_wall) {
     len[o] ++;
     edge[o][len[o]] = Edge{u, v, head[o][u], dis, dis_to_wall};
@@ -252,7 +254,9 @@ void WayFinding::Init() {
             }
         }
     }
-
+    MultiDijk.resize(Input::robot_num_);
+    for (auto dijk : MultiDijk) dijk.init();
+    
     Log::print("WayFinding Ready!");
 }
 
@@ -319,6 +323,39 @@ Route WayFinding::GetOnlineRoute(int o, int s, int t) {
     return route;
 }
 
+void WayFinding::Dijkstra::dijkstra(int o, int s, std::function<int(int)> control) {
+    timecnt++;
+    auto get_pre = [&](int i) {return timepre[o][i] != timecnt ? -1 : pre[o][i];};
+    auto get_dist = [&](int i) {return timedist[o][i] != timecnt ? INF : dist[o][i];};
+    auto set_pre = [&](int i, int v) { timepre[o][i] = timecnt, pre[o][i] = v;};
+    auto set_dist = [&](int i, double v) { timedist[o][i] = timecnt, dist[o][i] = v;};
+    std::priority_queue<Status> Q;
+    set_dist(s, 0.0);
+    Q.push(Status{s, get_dist(s)});
+    while (!Q.empty()) {
+        auto x = Q.top(); Q.pop();
+        int u = x.u;
+        if (get_dist(u) != x.d) continue;
+        if (control) {
+            int ct = control(u);
+            if (ct == 1) { // 不搜其子
+                continue;
+            } else if (ct == 2) { // 整体不搜
+                return;
+            } else if (ct == 0) { // 继续搜
+                
+            }
+        }
+        for (int k = head[o][u]; k != -1; k = edge[o][k].nex) {
+            // Log::print("o: ", o, "s: ", s, "u: ", u, "k: ", k);
+            if (get_dist(edge[o][k].v) > get_dist(edge[o][k].u) + edge[o][k].dis) {
+                set_dist(edge[o][k].v, get_dist(edge[o][k].u) + edge[o][k].dis);
+                set_pre(edge[o][k].v, k);
+                Q.push(Status{edge[o][k].v, get_dist(edge[o][k].v)});
+            }
+        }
+    }
+}
 void WayFinding::Dijkstra(int o, int s, std::function<bool(int)> valid) {
     std::priority_queue<Status> Q;
     // TODO：将方向放入状态

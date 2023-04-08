@@ -43,6 +43,20 @@ namespace WayFinding {
     extern Route routes_[2][N_][N_];
     extern std::vector<double> joint_obs_[101];
 
+    struct Dijkstra {
+        int pre[2][N_];
+        double dist[2][N_];
+        int timepre[2][N_], timedist[2][N_], timecnt;
+        void init() {
+            timecnt = 0;
+            memset(timepre, 0, sizeof(timepre));
+            memset(timedist, 0, sizeof(timedist));
+        }
+        void dijkstra(int o, int s, std::function<int(int)> control);
+    };
+
+    extern std::vector<Dijkstra> MultiDijk;
+    
     int FreeSpace(int x, int y, int dx, int dy, int mx);
     void Insert_Edge(int o, int u, int v, double dis, double dis_to_wall);
     void Init();

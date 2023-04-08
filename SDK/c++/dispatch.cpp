@@ -248,11 +248,21 @@ void Dispatch::AvoidCollide() {
         }
         // Log::print("bst_dist", bst_dist);
         if (collide_robot.empty()) continue;
+        
         // 对robot排序，从重到轻
         collide_robot.push_back(ri);
         std::sort(begin(collide_robot), end(collide_robot), [&](int l, int r) {
             return Input::robot[l]->carry_id_ > Input::robot[r]->carry_id_;
         });
+
+        // 延长检测为安全确保的时间
+        for (auto i : collide_robot) 
+            std::function<std::pair<double,double>()> action = [&]() {
+                return ChooseToPoint(i);
+            };
+            forecast[i][0] = Simulator::SimuFrames(*Input::robot[i], action, forecast_oneway_safe_num_, forecast_sampling_);
+        }
+
         auto movement_best = movement_;
         std::function<bool(int,std::vector<int>)> dfs = [&](int cur, std::vector<int> dec) {
             if (cur == collide_robot.size()) {
@@ -307,7 +317,7 @@ void Dispatch::AvoidCollide() {
             }
             return false;
         };
-        std::function<bool(int)> dfs2 = [&](int cur) {
+        std::function<bool(int)> dfs2 = [&](int cur, std::vector<int> dec) {
             if (cur == collide_robot.size()) {
                 double d_min = collide_dist_;
                 for (int i = 0; i < collide_robot.size(); i++) 
@@ -332,50 +342,34 @@ void Dispatch::AvoidCollide() {
             int o = robot->carry_id_ != 0;
             int mxsol = 10, cntsol = 0;
 
-            // 倍增dijk，每次找k个destination，从头开始判断
-            const MAX_SOL = 128;
-            for (int sol = 4; sol < MAX_SOL; sol *= 2) {
-                std::vector<int> dest;
-                std::function<bool(int)> valid = [&](int t) {
+            // 从重要到轻，每次层的上限为上层的2（可调参数）倍。暂定优先级最高的不搜路径。
+            for (int ci = 0, mxci = cur == 0 ? 1 : forecast[cur-1].size() * 2; ci < mxci; ci++) {
+                if (forecast[ri].size() > ci+1) {
+                    dec[ri] = ci+1; // ?
+                    dfs2();
+                    continue;
+                }
+
+                std::function<int(int)> control = [&](int t) {
+                    // route
+                    // push_back
+                    // dfs2
+                    // dfs2返回运行碰撞还是等待碰撞
+                    // 运行碰撞 return 1；dfs2 true return 2; 等待碰撞 return 0
+                    // control 位置逻辑在考虑
+                    auto route = WayFinding::GetOnlineRoute(o, source, t);
+                    std::function<std::pair<double,double>()> action = [&]() {
+                        return std::make_pair(forward, rotate);
+                    };
+                    forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
                     dest.push_back(t);
                     return !(dest.size() < sol);
                 };
                 WayFinding::Dijkstra(o, source, valid);
-                for (int ti = 0; ti < dest.size(); ti++) {
-                    if (forecast[ri].size() <= ti+1) {
-                        auto route = WayFinding::GetOnlineRoute(o, source, t);
-                        std::function<std::pair<double,double>()> action = [&]() {
-                            return std::make_pair(forward, rotate);
-                        };
-                        forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
-                    }
-                    // dfs2 
-                }
             }
-            // std::function<bool(int)> valid = [&](int t) {
-            //     // dfs2
-            //     return ++cntsol < mxsol;
-            // };
-            // WayFinding::Dijkstra(o, source, valid);
-            // for (int ci = 0; ci < choose.size(); ci++) {
-            //     auto forward = choose[ci].first;
-            //     auto rotate = choose[ci].second;
-            //     // if (fabs(forward - robot->GetLinearVelocity()) < 2) continue; // 要降就降猛一点，否则到时候来不及
-            //     if (forecast[ri].size() <= ci+1) {
-            //         std::function<std::pair<double,double>()> action = [&]() {
-            //             return std::make_pair(forward, rotate);
-            //         };
-            //         forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
-            //     }
-            //     movement_[ri] = {forward, rotate};
-            //     auto dec2 = dec;
-            //     dec2[cur] = ci+1;
-            //     if (dfs(cur+1, dec2))
-            //         return true;
-            // }
-            // return false;
-        }
-        if (dfs(0, std::vector<int>(collide_robot.size()))) {
+
+        };
+        if (dfs2(0, std::vector<int>(collide_robot.size()))) {
             Log::print("Hav_solution");
         } else {
             swap(movement_, movement_best); // 不换决策，以改变最大的决策作为最终状态，往往能让最小碰撞 变大。不采用

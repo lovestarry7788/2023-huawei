@@ -11,7 +11,8 @@
 namespace Dispatch {
     using namespace Geometry;
     // extern std::vector<std::vector<Geometry::Point>> forecast_;
-    constexpr int forecast_num_ = 75;
+    constexpr int forecast_num_ = 100;
+    constexpr int forecast_oneway_safe_num_ = 400;
     constexpr int forecast_per_ = 8;
     constexpr int forecast_sampling_ = 1; // 高了精度误差
     constexpr double collide_dist_ = 1.7;
