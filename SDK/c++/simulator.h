@@ -10,7 +10,7 @@
 // 9k帧，0.1m误差
 namespace Simulator {
     void SimuAFrame(Robot& robot, double forward, double rotate, double per);
-    std::vector<Geometry::Point> SimuFrames(Robot robot, std::function<std::pair<double,double>(Robot&)> action, int frames, int sampling = 1);
+    std::vector<Geometry::Point> SimuFrames(Robot robot, std::function<std::pair<double,double>(const Robot&)> action, int frames, int sampling = 1);
 }
 
 

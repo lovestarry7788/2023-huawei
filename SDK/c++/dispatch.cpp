@@ -21,6 +21,8 @@
 #include <memory>
 #include <climits>
 
+#ifdef FALSE
+
 using namespace Dispatch;
 using namespace Geometry;
 // std::vector<std::vector<Geometry::Point>> Dispatch::forecast_;
@@ -48,7 +50,7 @@ void Dispatch::init(void (*RobotReplan)(int), int robot_num, int workbench_num) 
     plan_.resize(robot_num);
     plan2_.resize(robot_num);
     graph_id_.resize(robot_num);
-    original_graph_id_.resize(robot_num);
+    temporal_graph_id_.resize(robot_num);
     occupy_.resize(workbench_num);
 }
 
@@ -144,6 +146,7 @@ std::pair<double,double> Dispatch::ChooseToPointFix(int ri, int graphid) {
     if (graphid == -1) {
         forward = rotate = 0;
     } else {
+        auto robot = Input::robot[ri];
         robot->ToPoint(WayFinding::nxt_point(robot->carry_id_ != 0, robot->pos_, graphid) , forward, rotate);
     }
     return std::make_pair(forward, rotate);
@@ -382,3 +385,5 @@ void Dispatch::AvoidCollide() {
 // void Dispatch::AvoidStuck() {
 
 // }
+
+#endif

@@ -45,14 +45,14 @@ void Simulator::SimuAFrame(Robot& robot, double forward, double rotate, double p
     robot.angular_velocity_ = angularV;
     robot.linear_velocity_ = Vector{cos(orient), sin(orient)} * linearV;
 }
-std::vector<Geometry::Point> Simulator::SimuFrames(Robot robot, std::function<std::pair<double,double>(Robot&)> action, int frames, int sampling) {
+std::vector<Geometry::Point> Simulator::SimuFrames(Robot robot, std::function<std::pair<double,double>(const Robot&)> action, int frames, int sampling) {
     std::vector<Geometry::Point> ans;
-    for (int i = 0; i < frames; i++) {
+    for (int i = 0; i < frames; i += sampling) {
         auto [forward, rotate] = action(robot);
         forward = std::min(robot.max_forward_velocity_, std::max(robot.max_backward_velocity_, forward));
         rotate = std::min(robot.max_rotate_velocity_, std::max(-robot.max_rotate_velocity_, rotate));
-        SimuAFrame(robot, forward, rotate, 1.0 / 50);
-        if (i % sampling == 0) ans.push_back(robot.pos_);
+        SimuAFrame(robot, forward, rotate, 1.0 / 50 * sampling);
+        ans.push_back(robot.pos_);
     }
     return ans;
 }

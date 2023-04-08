@@ -165,6 +165,7 @@ void Robot::ToPointTwoPoint(Point a, Point b, double& forward, double& rotate, i
 
 void Robot::AvoidToWall(double &forward, double &rotate) {
     double limit = CalcMaxSlowdownDist();
+    /*
     double walld = WayFinding::DistToWall(pos_, GetLinearVelocity() > 0.5 ? Angle(linear_velocity_) : orient_);
     // if (Input::frameID == 117 && id_ == 0) {
     //     Log::print(id_, walld, limit);
@@ -173,6 +174,7 @@ void Robot::AvoidToWall(double &forward, double &rotate) {
     if (limit >= walld - 0.58) {
         forward = 0;
     }
+    */
 }
 
 //double Robot::DistToWall(Point p, double orient) {
@@ -279,35 +281,35 @@ double Robot::CalcMaxSlowdownDist() {
     return Geometry::UniformVariableDist(max_force_ / GetMaxMass(), GetLinearVelocity(), 0);
 }
 
-void Robot::Robot_Control(double& forward, double& rotate) {
-    Log::print("Robot_Control, id: ", id_, "route: ", route_.size(), "v: ", v.size());
-    Log::print(pos_.x, " ", pos_.y, '\n');
-    if (route_.empty()) {
-        if (v.empty() || !WayFinding::GetOfflineRoute(v.front()[1], pos_, last_point_, v.front()[0], v.front()[2], route_))
-            Log::print("find route failed");
-        Log::print("routes_size: ", route_.size());
-        for(const auto& point: route_) {
-            Log::print(point.x, point.y);
-        }
-    }
-    Point robot_pos = pos_;
-    while (route_.size() && Geometry::Length(robot_pos - route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
-        // Log::print("reach");
-        route_.erase(begin(route_)); // 不能直接删除，可能需要回滚
-        if (route_.empty()) {
-            last_point_ = WayFinding::workbench_extern_id[v.front()[0]][v.front()[2]] + Input::robot_num_;
-            Log::print("LastPoint: ", v.front()[0], " ", v.front()[2], " ", last_point_);
-            v.erase(begin(v));
-        }
-    }
-    //上下左右半径0.25
-    //斜0.35
-    //
+// void Robot::Robot_Control(double& forward, double& rotate) {
+//     Log::print("Robot_Control, id: ", id_, "route: ", route_.size(), "v: ", v.size());
+//     Log::print(pos_.x, " ", pos_.y, '\n');
+//     if (route_.empty()) {
+//         if (v.empty() || !WayFinding::GetOfflineRoute(v.front()[1], pos_, last_point_, v.front()[0], v.front()[2], route_))
+//             Log::print("find route failed");
+//         Log::print("routes_size: ", route_.size());
+//         for(const auto& point: route_) {
+//             Log::print(point.x, point.y);
+//         }
+//     }
+//     Point robot_pos = pos_;
+//     while (route_.size() && Geometry::Length(robot_pos - route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
+//         // Log::print("reach");
+//         route_.erase(begin(route_)); // 不能直接删除，可能需要回滚
+//         if (route_.empty()) {
+//             last_point_ = WayFinding::workbench_extern_id[v.front()[0]][v.front()[2]] + Input::robot_num_;
+//             Log::print("LastPoint: ", v.front()[0], " ", v.front()[2], " ", last_point_);
+//             v.erase(begin(v));
+//         }
+//     }
+//     //上下左右半径0.25
+//     //斜0.35
+//     //
 
-    if (route_.size()) {
-        ToPoint_1(route_.front(), forward, rotate);
-        // Log::print("frame: ", Input::frameID ,"id: ", id_, "forward: ",forward, "rotate: ",rotate, "pos.x: ", pos_.x, "pos.y: ", pos_.y, "to.x: ", route_.front().x, "to.y: ", route_.front().y);
-        return;
-    }
-    forward = 0; rotate = 0;
-}
+//     if (route_.size()) {
+//         ToPoint_1(route_.front(), forward, rotate);
+//         // Log::print("frame: ", Input::frameID ,"id: ", id_, "forward: ",forward, "rotate: ",rotate, "pos.x: ", pos_.x, "pos.y: ", pos_.y, "to.x: ", route_.front().x, "to.y: ", route_.front().y);
+//         return;
+//     }
+//     forward = 0; rotate = 0;
+// }

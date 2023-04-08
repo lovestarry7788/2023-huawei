@@ -66,63 +66,27 @@ namespace Solution6 {
 
     void Solve() {
         Input::ScanMap();
-//        std:: vector<int> v = {0,1,2,3,4,5,6,7,8,9,10,11,12}; // 去第 0 号工作台
-//        srand(time(0));
-
-        int test_id = 0;
-
+        Way.init();
+        int aim_gid = Way.workbench_to_gid[0];
         while(Input::ScanFrame()) {
-            if(frameID == 1) {
-//                robot[test_id]->v.la
-                robot[test_id]->v.push_back({0, 0, 2});
-                robot[test_id]->v.push_back({5, 1, 3});
-                robot[test_id]->v.push_back({1, 0, 6});
-                robot[test_id]->v.push_back({5, 1, 3});
-                robot[test_id]->v.push_back({5, 0, 6});
+            Log::enable = Input::frameID < 3000 || true;
+            Log::print("frame", Input::frameID);
+            auto rbt = robot[0];
+            Point aim = Way.nxt_point(rbt->pos_, aim_gid);
+            Log::print("aim", aim);
 
-                //solution1: last_point ->
-//                for (const auto &u: v) {
-//
-//                    robot[2]->v.push_back({u, 0, int(rand() % workbench_extern.size())});
-//                }
-            }
             double forward, rotate;
-            Log::print("robot_id: ", test_id, "now: ", robot[test_id]->pos_.x, " ", robot[test_id]->pos_.y);
-            robot[test_id] -> Robot_Control(forward, rotate);
+            rbt->ToPoint_1(aim, forward, rotate);
 
-//            if(robot[test_id]->v.empty()) {
-//                robot[test_id]->ToPoint_1({28.50000000,23.00000000}, forward, rotate);
-//            }
-
-            Output::Forward(test_id, forward);
-            Output::Rotate(test_id, rotate);
-
-            if(robot[test_id]->workbench_ == 0) {
-                Output::Buy(test_id);
-            }
-
-            if(robot[test_id]->workbench_ == 1) {
-                Output::Buy(test_id);
-            }
-
-            if(robot[test_id]->workbench_ == 5) {
-                Output::Sell(test_id);
-            }
-//
-            if(workbench[5]->product_status_ && robot[test_id]->workbench_ == 5) {
-                Output::Buy(test_id);
-                robot[test_id]->v.push_back({7, 1, 2});
-            }
-
-            if(robot[test_id]->workbench_ == 7) {
-                Output::Buy(test_id);
-            }
+            Output::Forward(0, forward);
+            Output::Rotate(0, rotate);
 
             Output::Print(Input::frameID);
         }
     }
 }
 
+#ifdef FALSE
 
 namespace Solution1 {
     using namespace Input;
@@ -540,7 +504,9 @@ namespace Solution1 {
     }
 }
 
+#endif
+
 int main() {
-    Solution1::Solve();
+    Solution6::Solve();
     return 0;
 }

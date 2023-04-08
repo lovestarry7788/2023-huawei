@@ -39,7 +39,7 @@ void Input::ScanMap() {
     }
     readUntilOK();
     Log::print("Input ScanMap OK!");
-    WayFinding::Init();
+    // WayFinding::Init();
     puts("OK");
     fflush(stdout);
     Identify_Map_Number();
@@ -80,7 +80,7 @@ bool Input::ScanFrame() {
                 robot[id] = std::make_shared<Robot>(id, workbench, carry_id, time_coefficient, collide_coefficient,
                                                     angular_velocity, linear_velocity_x, linear_velocity_y, orient, x0,
                                                     y0);
-                robot[id] -> last_point_ = id;
+                // robot[id] -> last_point_ = id;
             }
             else {
                 robot[id]->id_ = id;

@@ -10,11 +10,13 @@
 
 namespace Log {
     extern std::ofstream ofs;
+    extern bool enable;
     template<class T, class... A> void print(T&& x, A&&... a){ 
         #ifndef LOG_DEBUG
             return;
         #endif
-        ofs<<std::fixed<<std::setprecision(8);
+        if (!enable) return;
+        ofs<<std::fixed<<std::setprecision(6);
         ofs<<x; (int[]){(ofs<< ' '<< a,0)...}; ofs<<'\n'; 
         ofs.flush();
     }

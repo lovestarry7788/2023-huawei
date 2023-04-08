@@ -6,6 +6,8 @@
 #include "output.h"
 #include <vector>
 
+#ifdef FALSE
+
 // 负责运送机器人过程，包含避障
 // 先购买/出售，再addplan，再调用FrameEnd交给dispatch处理topoint
 namespace Dispatch {
@@ -32,6 +34,9 @@ namespace Dispatch {
     extern std::vector<Occupy> occupy_;
     extern bool avoidCollide;
     extern bool enableTwoPlan;
+    extern std::vector<int> graph_id_, temporal_graph_id_; 
+
+    std::pair<double,double> ChooseToPointFix(int ri, int graphid);
 
     // 完成Plan时调用委托。单独(延迟)规划用
     extern void (*RobotReplan_)(int);
@@ -66,5 +71,7 @@ namespace Dispatch {
     double ForecastCollide(const std::vector<Point>& a, const std::vector<Point>& b, double mx_dist);
     // 外部主循环中，manageplan(), controlwalk()。决策中，如果是完成任务再规划，则robotReplan_调用addplan；如果要每时每刻重新单独规划，则在manageplan前调用一遍robotReplan_；如果每时每刻整体规划，则直接调用UpdatePlan；如果固定时间规划一次，则固定时间调用
 }
+
+#endif
 
 #endif
