@@ -67,30 +67,46 @@ namespace Solution6 {
     using namespace WayFinding2;
 
     void Solve() {
+        Log::print(time(0), "ms");
         Input::ScanMap();
-        //std:: vector<Point> v = {{21.50,29.8}, {26.25, 25.75}, {28.52, 23.52}, {32.75, 29.25}, {28.53, 22.97}}; // 去第 0 号工作台
-//        reverse(v.begin(), v.end());
 
         int test_id = 0;
 
-        int A, B, Goal;//A是当前点的编号， B是工作台的编号， Goal是目标点的编号
+        int A, B = GetID(0, 21.75, 30.25), Goal = -1;//A是当前点的编号， B是工作台拆出来点的编号， Goal是中间点的编号
 
         while(Input::ScanFrame()) {
 
+            if(frameID == 1) {
+                A = GetID(0, robot[test_id]->pos_.x, robot[test_id]->pos_.y);
+                Log::print(A, " ", B, " ", WayFinding2::Dis[0][B][A], " ", WayFinding2::From[0][B][A][0]);
+            }
+//
             double forward, rotate;
             if(A != B) {
+                Log::print(robot[test_id]->pos_.x, robot[test_id]->pos_.y);
+                if(Goal != -1) {
+                    if(fabs(WayFinding2::Point_[0][Goal].x - robot[test_id]->pos_.x) < 0.01 && fabs(WayFinding2::Point_[0][Goal].y - robot[test_id]->pos_.y) < 0.01)
+                        A = Goal, Goal = -1;
+                }
                 if(Goal == -1){
+                    Log::print("qwq");
                     Goal = FindRoute(0, A, B);//测试没有带东西的
                     // Goal = FindRoute(1, A, B);//测试带了东西了
                 }
-                robot[test_id]->ToPoint_1(WayFinding2::Point_[0][Goal], forward, rotate);
+                Log::print(Goal);
+//                Log::print(WayFinding2::Point_[0][Goal].x, " ", WayFinding2::Point_[0][Goal].y);
+                if(Goal != -1){
+                    Log::print(WayFinding2::Point_[0][Goal].x, WayFinding2::Point_[0][Goal].y);
+                    robot[test_id]->ToPoint_1(WayFinding2::Point_[0][Goal], forward, rotate);
+                }
             }
-            Log::print("robot_id: ", test_id, "now: ", robot[test_id]->pos_.x, " ", robot[test_id]->pos_.y);
-
+//            Log::print("robot_id: ", test_id, "now: ", robot[test_id]->pos_.x, " ", robot[test_id]->pos_.y);
+//
             Output::Forward(test_id, forward);
             Output::Rotate(test_id, rotate);
-
             Output::Print(Input::frameID);
+            Log::print("\n");
+
         }
     }
 }
