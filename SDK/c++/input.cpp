@@ -31,7 +31,7 @@ void Input::ScanMap() {
     for(int i = 0; i < map_size_; ++i) {
         for(int j = 0; j < map_size_; ++j) {
             scanf("\n%c",&map_[i][j]);
-            // Log::print("i: ", i, "j: ", j, "map_[i][j]: ", map_[i][j]);
+            Log::print("i: ", i, "j: ", j, "map_[i][j]: ", map_[i][j]);
             K += map_[i][j] >= '1' && map_[i][j] <= '9';
             if(map_[i][j] == '#') is_obstacle_[i][j] = true;
             else is_obstacle_[i][j] = false;
@@ -40,12 +40,14 @@ void Input::ScanMap() {
     readUntilOK();
     Log::print("Input ScanMap OK!");
     // WayFinding::Init();
-    Way[0].radius = 0.45, Way[0].init();
-    Way[1].radius = 0.53, Way[1].init();
+    Identify_Map_Number();
+    if (map_number_ == 2) {
+        WayFinding2::Way[0].radius = 0.45, WayFinding2::Way[0].init();
+        WayFinding2::Way[1].radius = 0.53, WayFinding2::Way[1].init();
+    }
 
     puts("OK");
     fflush(stdout);
-    Identify_Map_Number();
 }
 
 bool Input::ScanFrame() { 
@@ -108,10 +110,8 @@ bool Input::ScanFrame() {
  * 识别地图
  */
 void Input::Identify_Map_Number() {
-    if(map_[5][47] == '5' && map_[75][5] == '8' && map_[75][94] == '8') map_number_ = 1;
-    else if(map_[25][50] == '6' && map_[80][34] == '7' && map_[80][65] == '8') map_number_ = 2;
-    else if(map_[39][43] == '1' && map_[41][65] == '2') map_number_ = 3;
-    else if(map_[2][3] == '6' && map_[2][36] == '5' && map_[2][77] == '4') map_number_ = 4;
+    if(map_[2][8] == '1' && map_[2][90] == '7') map_number_ = 1;
+    else if(map_[2][2] == '8' && map_[2][61] == '1') map_number_ = 2;
     else map_number_ = -1;
     Log::print("Identify_Map_Number: ", map_number_);
 }

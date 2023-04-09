@@ -21,6 +21,7 @@
 #include <set>
 #include <memory>
 #include <climits>
+#include <array>
 
 using namespace Geometry;
 
@@ -281,35 +282,140 @@ double Robot::CalcMaxSlowdownDist() {
     return Geometry::UniformVariableDist(max_force_ / GetMaxMass(), GetLinearVelocity(), 0);
 }
 
-// void Robot::Robot_Control(double& forward, double& rotate) {
-//     Log::print("Robot_Control, id: ", id_, "route: ", route_.size(), "v: ", v.size());
-//     Log::print(pos_.x, " ", pos_.y, '\n');
-//     if (route_.empty()) {
-//         if (v.empty() || !WayFinding::GetOfflineRoute(v.front()[1], pos_, last_point_, v.front()[0], v.front()[2], route_))
-//             Log::print("find route failed");
-//         Log::print("routes_size: ", route_.size());
-//         for(const auto& point: route_) {
-//             Log::print(point.x, point.y);
-//         }
-//     }
-//     Point robot_pos = pos_;
-//     while (route_.size() && Geometry::Length(robot_pos - route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
-//         // Log::print("reach");
-//         route_.erase(begin(route_)); // 不能直接删除，可能需要回滚
-//         if (route_.empty()) {
-//             last_point_ = WayFinding::workbench_extern_id[v.front()[0]][v.front()[2]] + Input::robot_num_;
-//             Log::print("LastPoint: ", v.front()[0], " ", v.front()[2], " ", last_point_);
-//             v.erase(begin(v));
-//         }
-//     }
-//     //上下左右半径0.25
-//     //斜0.35
-//     //
 
-//     if (route_.size()) {
-//         ToPoint_1(route_.front(), forward, rotate);
-//         // Log::print("frame: ", Input::frameID ,"id: ", id_, "forward: ",forward, "rotate: ",rotate, "pos.x: ", pos_.x, "pos.y: ", pos_.y, "to.x: ", route_.front().x, "to.y: ", route_.front().y);
-//         return;
-//     }
-//     forward = 0; rotate = 0;
-// }
+void Robot::Robot_Control(double& forward, double& rotate) {
+    Log::print("Robot_Control, id: ", id_, "route: ", route_.size(), "v: ", v.size());
+    Log::print(pos_.x, " ", pos_.y, '\n');
+    if (route_.empty()) {
+        if (v.empty() || !WayFinding::GetOfflineRoute(v.front()[1], pos_, last_point_, v.front()[0], v.front()[2], route_))
+            Log::print("find route failed");
+        Log::print("routes_size: ", route_.size());
+        for(const auto& point: route_) {
+            Log::print(point.x, point.y);
+        }
+    }
+    Point robot_pos = pos_;
+    while (route_.size() && Geometry::Length(robot_pos - route_.front()) < 0.1) { // 机器人到达某个点，则删掉。
+        // Log::print("reach");
+        route_.erase(begin(route_)); // 不能直接删除，可能需要回滚
+        if (route_.empty()) {
+            last_point_ = WayFinding::workbench_extern_id[v.front()[0]][v.front()[2]] + Input::robot_num_;
+            Log::print("LastPoint: ", v.front()[0], " ", v.front()[2], " ", last_point_);
+            v.erase(begin(v));
+        }
+    }
+    //上下左右半径0.25
+    //斜0.35
+    //
+
+    if (route_.size()) {
+        ToPoint_1(route_.front(), forward, rotate);
+        // Log::print("frame: ", Input::frameID ,"id: ", id_, "forward: ",forward, "rotate: ",rotate, "pos.x: ", pos_.x, "pos.y: ", pos_.y, "to.x: ", route_.front().x, "to.y: ", route_.front().y);
+        return;
+    }
+    forward = 0; rotate = 0;
+}
+
+std::vector<Geometry::Point> Robot::ForecastToPoint(double dx, double dy, int forecast_num){
+    // bool P = Input::frameID == 926 && (id_ == 2 && fabs(rotate - 0) < 1e-6 && fabs(forward - 0) < 1e-6 || id_ == 3);
+    // bool P = false;
+
+    // 假设：加速度总是满
+    std::vector<Point> forecast(forecast_num, Point{0,0});
+    double linearV = GetLinearVelocity();
+    double angularV = angular_velocity_;
+    double x0 = pos_.x, y0 = pos_.y;
+    double orient = orient_;
+    // if (P) Log::print("ForecastFixed", x0, y0, orient, linearV, angularV);
+    for (int i = 0; i < forecast_num; i++) {
+
+        linearV = std::max(1e-8, linearV);
+        angularV = std::max(1e-8, fabs(angularV)) * (angularV > 0 ? 1 : -1);
+
+        double cir = linearV / fabs(angularV);
+        Point center = {x0, y0};
+        Vector mov = Vector{-sin(orient), cos(orient)} * cir;
+        center = center + mov;
+        forecast[i] = center - Rotate(mov, 1 / 50.0 * linearV / cir);
+        // if (P) Log::print(forecast_[ri][i].x, forecast_[ri][i].y);
+
+        double forward, rotate;
+        ToPoint({dx, dy}, forward, rotate);
+        // update
+        if (fabs(linearV - forward) > 1e-3) {
+            double add = (forward - linearV > 0 ? 1 : -1) * 1 / 50.0 * max_force_ / GetMass();
+            if ((linearV - forward) * (linearV + add - forward) < 0) {
+                linearV = 0;
+            } else {
+                linearV += add;
+                linearV = std::min(linearV, max_forward_velocity_);
+            }
+        }
+        if (fabs(angularV - rotate) > 1e-3) {
+            double add = (rotate - angularV > 0 ? 1 : -1) * 1 / 50.0 * max_rot_force_ / GetRotInerta();
+            if ((angularV - rotate) * (angularV + add - rotate) < 0) {
+                angularV = 0;
+            } else {
+                angularV += add;
+                angularV = std::min(max_rotate_velocity_, fabs(angularV)) * (angularV > 0 ? 1 : -1);
+            }
+        }
+
+        x0 = forecast[i].x;
+        y0 = forecast[i].y;
+        orient += angularV * 1 / 50.0;
+        // if (P) Log::print(x0, y0, cir, orient, center.x, center.y, linearV, angularV);
+    }
+    return forecast;
+}
+
+std::vector<Geometry::Point> Robot::ForecastFixed(double forward, double rotate, int forecast_num) {
+    bool P = Input::frameID == 926 && (id_ == 2 && fabs(rotate - 0) < 1e-6 && fabs(forward - 0) < 1e-6 || id_ == 3);
+
+    if (P) Log::print("Forecast", id_, forward, rotate);
+    // 假设：加速度总是满
+    std::vector<Point> forecast(forecast_num, Point{0,0});
+    double linearV = GetLinearVelocity();
+    double angularV = angular_velocity_;
+    double x0 = pos_.x, y0 = pos_.y;
+    double orient = orient_;
+    if (P) Log::print("ForecastFixed", x0, y0, orient, linearV, angularV);
+    for (int i = 0; i < forecast_num; i++) {
+
+        linearV = std::max(1e-8, linearV);
+        angularV = std::max(1e-8, fabs(angularV)) * (angularV > 0 ? 1 : -1);
+
+        double cir = linearV / fabs(angularV);
+        Point center = {x0, y0};
+        Vector mov = Vector{-sin(orient), cos(orient)} * cir;
+        center = center + mov;
+        forecast[i] = center - Rotate(mov, 1 / 50.0 * linearV / cir);
+        // if (P) Log::print(forecast_[ri][i].x, forecast_[ri][i].y);
+
+        // update
+        if (fabs(linearV - forward) > 1e-3) {
+            double add = (forward - linearV > 0 ? 1 : -1) * 1 / 50.0 * max_force_ / GetMass();
+            if ((linearV - forward) * (linearV + add - forward) < 0) {
+                linearV = 0;
+            } else {
+                linearV += add;
+                linearV = std::min(linearV, max_forward_velocity_);
+            }
+        }
+        if (fabs(angularV - rotate) > 1e-3) {
+            double add = (rotate - angularV > 0 ? 1 : -1) * 1 / 50.0 * max_rot_force_ / GetRotInerta();
+            if ((angularV - rotate) * (angularV + add - rotate) < 0) {
+                angularV = 0;
+            } else {
+                angularV += add;
+                angularV = std::min(max_rotate_velocity_, fabs(angularV)) * (angularV > 0 ? 1 : -1);
+            }
+        }
+
+        x0 = forecast[i].x;
+        y0 = forecast[i].y;
+        orient += angularV * 1 / 50.0;
+        if (P) Log::print(x0, y0, cir, orient, center.x, center.y, linearV, angularV);
+    }
+    return forecast;
+}

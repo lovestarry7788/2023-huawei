@@ -130,7 +130,7 @@ namespace Solution6 {
     using namespace Input;
     using namespace Output;
     using namespace Geometry;
-    using namespace WayFinding;
+    using namespace WayFinding2;
 
     void Solve() {
         Input::ScanMap();
@@ -187,7 +187,7 @@ namespace Solution3 {
     }
     double CalcTime(int o, Point from, int to_workbench) {
         // return Length(from - workbench[to_workbench]->pos_) / 4;
-        auto& w = WayFinding::Way[o];
+        auto& w = WayFinding2::Way[o];
         double dist;
         int wbpid;
         w.nxt_point_wb(from, to_workbench, dist, wbpid);
@@ -287,8 +287,6 @@ namespace Solution3 {
     }
 }
 
-#ifdef FALSE
-
 namespace Solution1 {
     using namespace Input;
     using namespace Output;
@@ -329,14 +327,6 @@ namespace Solution1 {
     int fac[5];
 
     void Init() {
-
-        // 防碰撞初始化
-        switch(map_number_) {
-            default:
-                Dispatch::avoidCollide = false;
-                Dispatch::init(nullptr, robot_num_, K);
-                break;
-        }
 
         // 第一帧开始初始化的
         if(frameID == 1) {
@@ -387,6 +377,10 @@ namespace Solution1 {
             case 1:
                 break;
             case 2:
+                if(robot_id == 0 || robot_id == 1) return 0;
+//                else if(robot_id == 2) return workbench[id]->type_id_ == 6;
+//                else if(robot_id == 3) return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
+                return 1;
                 break;
             case 3:
                 break;
@@ -490,6 +484,17 @@ namespace Solution1 {
                 sever_two = 1.2;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
+                Dispatch::avoidCollide = false;
+                Dispatch::init(nullptr, robot_num_, K);
+                break;
+            case 2:
+                sever_one = 2.0;
+                four_five_six_one = 1.5;
+                sever_two = 1.2;
+                four_five_six_two = 1.2;
+                sever_three = 1.0;
+                Dispatch::avoidCollide = false;
+                Dispatch::init(nullptr, robot_num_, K);
                 break;
             default:
                 sever_one = 1.8;
@@ -497,6 +502,8 @@ namespace Solution1 {
                 sever_two = 1.3;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
+                Dispatch::avoidCollide = false;
+                Dispatch::init(nullptr, robot_num_, K);
                 break;
         }
     }
@@ -691,11 +698,11 @@ namespace Solution1 {
             }
 
             // 防碰撞
-            // if (avoidCollide) AvoidCollide();
+            if (avoidCollide) AvoidCollide();
             for(int id = 0; id < 4; ++id) {
                 double& forward = movement_[id].first;
                 double& rotate = movement_[id].second;
-                // robot[id]->AvoidToWall(forward, rotate);
+//                robot[id]->AvoidToWall(forward, rotate);
                 Output::Forward(id, forward);
                 Output::Rotate(id, rotate);
             }
@@ -705,9 +712,7 @@ namespace Solution1 {
     }
 }
 
-#endif
-
 int main() {
-    Solution4::Solve();
+    Solution1::Solve();
     return 0;
 }

@@ -29,8 +29,8 @@ public:
     static constexpr double seed_random_rate = 1 + 1.1e-4;
     static constexpr double radius_ = 0.45;
     static constexpr double radius_with_thing_ = 0.53;
-    static constexpr double max_forward_velocity_ = 6 * seed_random_rate;
-    static constexpr double max_backward_velocity_ = -2 * seed_random_rate;
+    static constexpr double max_forward_velocity_ = 7 * seed_random_rate;
+    static constexpr double max_backward_velocity_ = -3 * seed_random_rate;
     static constexpr double density_ = 50;
     static constexpr double max_force_ = 250;
     static constexpr double max_rot_force_ = 50;
@@ -43,6 +43,13 @@ public:
     double angular_velocity_, orient_;// 角速度, 朝向
     Geometry::Point pos_; // x坐标, y坐标
     Geometry::Vector linear_velocity_;// 线速度
+    std::vector<Geometry::Point> route_; // 当前保存的路线
+    std::vector<std::array<int,3> > v; // 保存需要走的点，买还是卖, 目标点的哪个方位进入。
+    //0.25太小了
+    //0.265
+    //map_id[px][py] --> x, workbench_pos[x]
+    //px,py
+    int last_point_; // 用于在买的时候计算距离，经过的最后一个卖的点。
 
     Robot(int id, int workbench_, int carry_id, double time_coefficient, double collide_coefficient,
           double angular_velocity, double linear_velocity_x, double linear_velocity_y, double orient, double x0, double y0);
@@ -84,7 +91,11 @@ public:
 
     double GetLinearVelocity();
 
-    // void Robot_Control(double& forward, double& rotate);
+    void Robot_Control(double& forward, double& rotate);
+
+    std::vector<Geometry::Point> ForecastToPoint(double dx, double dy, int forecast_num);
+
+    std::vector<Geometry::Point> ForecastFixed(double forward, double rotate, int forecast_num);
 
     friend class Workbench;
 };
