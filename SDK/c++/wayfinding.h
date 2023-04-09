@@ -38,6 +38,7 @@ namespace WayFinding {
     extern int len[2];
     extern int head[2][N_];
     extern std::pair<int,int> dis_mn_[1210][101][101]; // 存的是 pair<direction, direction>
+    extern double mn_[1210][101][101];
 
     extern std::vector<Geometry::Point> joint_walk_, workbench_pos, robot_pos;
     extern Route routes_[2][N_][N_];

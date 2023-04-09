@@ -26,6 +26,7 @@ int WayFinding::head[2][N_];
 int WayFinding::len[2];
 int WayFinding::workbench_extern_id[50][12];
 std::pair<int,int> WayFinding::dis_mn_[1210][101][101]; // 存的是 pair<direction, direction>
+double WayFinding::mn_[1210][101][101];
 
 std::vector<Geometry::Point> WayFinding::joint_walk_, WayFinding::workbench_pos, WayFinding::robot_pos;
 std::vector<double> WayFinding::joint_obs_[101];
@@ -84,13 +85,10 @@ void WayFinding::Init() {
                     } else {
                         workbench_extern_id[cnt_workbench][k] = workbench_pos.size();
                         workbench_pos.push_back({nx, ny});
-                        Log::print("workbench_id: ", cnt_workbench, " workbench_id_direciton: ", workbench_pos.size() + robot_num_, " ", k, " ", nx, " ", ny, '\n');
+//                        Log::print("workbench_id: ", cnt_workbench, " workbench_id_direciton: ", workbench_pos.size() + robot_num_, " ", k, " ", nx, " ", ny, '\n');
                         //记录一下可以到的点对应的id
                     }
                 }
-//                for(auto [dx, dy]: walking_extern) {//防止找不着北
-//
-//                }
                 cnt_workbench++;
                 //只能表示这个位置有人用。
             }
@@ -198,12 +196,11 @@ void WayFinding::Init() {
                     d = DistBetweenPoints(a, b);
                     Insert_Edge(o, i, j, d, mind);
                     Insert_Edge(o, j, i, d, mind);
-                    Log::print("edge i: ", i, "j: ", j, "dist: ", d);
                 }
             }
         }
     }
-    Log::print("Insert_Edge Done!");
+//    Log::print("Insert_Edge Done!");
 
     /*
      * M 表示 机器人 + 工作台 的数量
@@ -225,30 +222,33 @@ void WayFinding::Init() {
         }
     }
 
+//    Log::print("Dijkstra Done");
     /*
      * 预处理两点间最近的 direction
      */
+    int workbench_size = WayFinding::workbench_pos.size();
+    for(int id_s = 0; id_s <= robot_num_ + workbench_size; ++id_s)
+        for(int i = 0; i < K; ++i)
+            for(int j = 0; j < K; ++j) mn_[id_s][i][j] = 1e9;
+
     for(int id_s = 0; id_s <= robot_num_ + WayFinding::workbench_pos.size(); ++id_s) {
         for (int i = 0; i < K; ++i) {
-            for (int j = 0; j < K; ++j) {
-                double mn = 1e9;
-                for (int i_direction = 0; i_direction < WayFinding::workbench_extern.size(); i_direction++) {
-                    if (WayFinding::workbench_extern_id[i][i_direction] != -1) {
+            for (int i_direction = 0; i_direction < WayFinding::workbench_extern.size(); i_direction++) {
+                if (WayFinding::workbench_extern_id[i][i_direction] != -1) {
+                    int id_i = robot_num_ + WayFinding::workbench_extern_id[i][i_direction];
+                    for (int j = 0; j < K; ++j) {
                         for (int j_direction = 0; j_direction < WayFinding::workbench_extern.size(); j_direction++) {
                             if (WayFinding::workbench_extern_id[j][j_direction] != -1) {
-                                int id_i = robot_num_ + WayFinding::workbench_extern_id[i][i_direction];
                                 int id_j = robot_num_ + WayFinding::workbench_extern_id[j][j_direction];
                                 double buy_sell_frame_ = WayFinding::dist[0][id_s][id_i] + WayFinding::dist[1][id_i][id_j];
-                                if(mn > buy_sell_frame_) {
-                                    mn = buy_sell_frame_;
+                                if(mn_[id_s][i][j] > buy_sell_frame_) {
+                                    mn_[id_s][i][j] = buy_sell_frame_;
                                     dis_mn_[id_s][i][j] = std::make_pair(i_direction, j_direction);
                                 }
                             }
                         }
                     }
                 }
-
-                Log::print("i: ", i, "j: ", j, "dis_mn_: ",mn, "i_direction: ", dis_mn_[id_s][i][j].first , "j_direction: ", dis_mn_[id_s][i][j].second);
             }
         }
     }
