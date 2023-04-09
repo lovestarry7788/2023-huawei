@@ -21,6 +21,7 @@
 #include <set>
 #include <memory>
 #include <climits>
+#include <array>
 
 using namespace Geometry;
 

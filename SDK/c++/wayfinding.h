@@ -18,6 +18,7 @@
 #include <set>
 #include <memory>
 #include <climits>
+#include <array>
 
 namespace WayFinding {
     using Route = std::vector<Geometry::Point>;

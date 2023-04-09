@@ -25,6 +25,7 @@
 #include <set>
 #include <memory>
 #include <climits>
+#include <array>
 
 /*
 // 测试Simulator
@@ -214,6 +215,10 @@ namespace Solution1 {
             case 1:
                 break;
             case 2:
+                if(robot_id == 0 || robot_id == 1) return 0;
+//                else if(robot_id == 2) return workbench[id]->type_id_ == 6;
+//                else if(robot_id == 3) return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
+                return 1;
                 break;
             case 3:
                 break;
