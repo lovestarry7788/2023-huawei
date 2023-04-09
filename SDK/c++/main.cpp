@@ -165,14 +165,6 @@ namespace Solution1 {
 
     void Init() {
 
-        // 防碰撞初始化
-        switch(map_number_) {
-            default:
-                Dispatch::avoidCollide = false;
-                Dispatch::init(nullptr, robot_num_, K);
-                break;
-        }
-
         // 第一帧开始初始化的
         if(frameID == 1) {
             for(int id = 0; id < 4; ++id) {
@@ -325,6 +317,17 @@ namespace Solution1 {
                 sever_two = 1.2;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
+                Dispatch::avoidCollide = false;
+                Dispatch::init(nullptr, robot_num_, K);
+                break;
+            case 2:
+                sever_one = 2.0;
+                four_five_six_one = 1.5;
+                sever_two = 1.2;
+                four_five_six_two = 1.2;
+                sever_three = 1.0;
+                Dispatch::avoidCollide = false;
+                Dispatch::init(nullptr, robot_num_, K);
                 break;
             default:
                 sever_one = 1.8;
@@ -332,6 +335,8 @@ namespace Solution1 {
                 sever_two = 1.3;
                 four_five_six_two = 1.2;
                 sever_three = 1.0;
+                Dispatch::avoidCollide = false;
+                Dispatch::init(nullptr, robot_num_, K);
                 break;
         }
     }
@@ -526,11 +531,11 @@ namespace Solution1 {
             }
 
             // 防碰撞
-            // if (avoidCollide) AvoidCollide();
+            if (avoidCollide) AvoidCollide();
             for(int id = 0; id < 4; ++id) {
                 double& forward = movement_[id].first;
                 double& rotate = movement_[id].second;
-                // robot[id]->AvoidToWall(forward, rotate);
+//                robot[id]->AvoidToWall(forward, rotate);
                 Output::Forward(id, forward);
                 Output::Rotate(id, rotate);
             }
