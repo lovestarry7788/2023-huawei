@@ -57,18 +57,14 @@ namespace WayFinding {
         // 区间查询在其中的所有点
         template<class T>
         void query(Point a, Point b, T op_rep) {
-            static const double mov = 0.54;
-
             double minx = a.x, maxx = b.x;
             if (minx > maxx) std::swap(minx, maxx);
-            minx -= mov, maxx += mov;
 
             int x0 = std::lower_bound(begin(x), end(x), minx) - begin(x);
             int x1 = std::upper_bound(begin(x), end(x), maxx) - begin(x);
 
             double miny = a.y, maxy = b.y;
             if (miny > maxy) std::swap(miny, maxy);
-            miny -= mov, maxy += mov;
 
             for (int xi = x0; xi < x1; xi++) {
                 int y0 = std::lower_bound(begin(val[xi]), end(val[xi]), miny) - begin(val[xi]);
@@ -303,7 +299,10 @@ namespace WayFinding {
             bool valid = true;
             IsCollideRouteToWallCount++;
             IsCollideRouteToWallAim += Length(a - b);
-            obs_query.query(a, b, [&](const Point& obs) {
+            Point a2{std::min(a.x, b.x) - radius, std::min(a.y, b.y) - radius};
+            Point b2{std::max(a.x, b.x) + radius, std::max(a.y, b.y) + radius};
+            
+            obs_query.query(a2, b2, [&](const Point& obs) {
                 IsCollideRouteToWallNum++;
                 if (DistanceToSegment(obs, a, b) < radius + 1e-6) {
                     valid = false;

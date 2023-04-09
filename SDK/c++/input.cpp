@@ -40,6 +40,9 @@ void Input::ScanMap() {
     readUntilOK();
     Log::print("Input ScanMap OK!");
     // WayFinding::Init();
+    Way[0].radius = 0.45, Way[0].init();
+    Way[1].radius = 0.53, Way[1].init();
+
     puts("OK");
     fflush(stdout);
     Identify_Map_Number();

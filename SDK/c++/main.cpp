@@ -68,9 +68,7 @@ namespace Solution6 {
     void Solve() {
         Input::ScanMap();
         Log::print("clock",clock());
-        Way[0].radius = 0.45, Way[0].init();
-        Way[1].radius = 0.53, Way[1].init();
-
+        
         int aim_wb = 8;
         Point aim;
         int robot_id = 2;
