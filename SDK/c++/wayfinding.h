@@ -86,7 +86,7 @@ namespace WayFinding {
 
         std::vector<Point> random_pos;
         int random_pos_to_id[map_size_][map_size_]; // 先每个点中心离散化
-        std::vector<int> workbench_to_gid;
+        std::vector<std::vector<int>> workbench_to_gid;
 
         std::vector<Point> joint_obs;
         Dimension2query obs_query;
@@ -108,15 +108,61 @@ namespace WayFinding {
             int pi = int((50 - cnt.y) / 0.5), pj = int(cnt.x / 0.5);
             return random_pos_to_id[pi][pj];
         }
-        Point nxt_point(Point cnt, int graph_id) {
+        // 找cnt到所有N1点的距离
+        std::vector<int> dist_order(Point cnt) {
+            std::priority_queue<Status> Q;
+            std::vector<double> dist(N1, INF);
+            for (size_t j = 0; j < N1; j++) {
+                if (IsCollideRouteToWall(cnt, vertex[j])) continue;
+                double d = DistBetweenPoints(cnt, vertex[j]);
+                Q.push({int(j), d});
+                dist[j] = d;
+            }
+            // mlogn vs n^2
+            while (Q.size()) {
+                auto [u, du] = Q.top(); Q.pop();
+                if (dist[u] != du) continue;
+                for (int ei : E[u]) {
+                    auto [_, v, d] = edges[ei];
+                    if (dist[v] > dist[u] + d) {
+                        dist[v] = dist[u] + d;
+                        Q.push({v, dist[v]});
+                    }
+                }
+            }
+            std::vector<int> order(N1);
+            for (int i = 0; i < N1; i++) order[i] = i;
+            std::sort(begin(order), end(order), [&](int l, int r) {
+                return dist[l] < dist[r];
+            });
+            return order;
+        }
+        Point nxt_point_wb(Point cnt, int wb_id, double& outdist, int& graph_id) {
+            Point ansp;
+            outdist = INF;
+            for (auto gid : workbench_to_gid[wb_id]) {
+                double tmp;
+                auto tmpp = nxt_point(cnt, gid, tmp);
+                Log::print("tryed", gid, tmp, tmpp);
+                if (tmp < outdist) {
+                    outdist = tmp;
+                    ansp = tmpp;
+                    graph_id = gid;
+                }
+            }
+            return ansp;
+        }
+        Point nxt_point(Point cnt, int graph_id, double& outdist) {
             if (init_random) {
                 int random_id = get_random_id(cnt);
-                Log::print("nxt_point", random_id, nxt2[random_id][graph_id]);
+                // Log::print("nxt_point", random_id, nxt2[random_id][graph_id]);
                 return vertex[nxt2[random_id][graph_id]];
             }
-            
             if (!IsCollideRouteToWall(cnt, vertex[graph_id])) // 理论上这句也不用。
+            {
+                outdist = Length(vertex[graph_id] - cnt);
                 return vertex[graph_id];
+            }
             std::vector<double> dist(N1, INF);
             int ans = -1;
             for (size_t j = 0; j < N1; j++) {
@@ -128,14 +174,19 @@ namespace WayFinding {
                     ans = j;
                 }
             }
-            assert(ans != -1);
-            return vertex[ans];
+            // assert(ans != -1);
+            outdist = dist[graph_id];
+            // Log::print("nxt_point", graph_id, cnt, vertex[graph_id], outdist);
+            if (ans != -1)
+                return vertex[ans];
+            else
+                return Point{-1, -1};
         }
         double DistBetweenPoints(Point a, Point b) {
             return Length(a - b) + 1e-1;
         }
         void init() {
-            std::vector<Point> workbench_pos;
+            std::vector<std::vector<Point>> workbench_pos;
             // random_pos.resize(map_size_, std::vector<Point>(map_size_));
             for (int i = 0; i < map_size_; i++) {
                 for (int j = 0; j < map_size_; j++) {
@@ -145,8 +196,23 @@ namespace WayFinding {
                     if (map_[i][j] == 'A') 
                         continue;
                     if ('1' <= map_[i][j] && map_[i][j] <= '9') {
-                        workbench_pos.push_back({px, py});
-                        vertex.push_back({px, py});
+                        std::vector<Point> wbp;
+                        for (const auto &[di, dj]: std::vector<std::pair<double, double> >{
+                            // {cos(PI/4),  -cos(PI/4)},
+                            // {cos(PI/4),  cos(PI/4)},
+                            // {-cos(PI/4), -cos(PI/4)},
+                            // {-cos(PI/4), cos(PI/4)},
+                            // {1,0},
+                            // {-1, 0},
+                            // {0, 1},
+                            // {0, -1},
+                            {0,0},
+                            }) {
+                            static const double mov = 0.41;
+                            wbp.push_back({px + di * mov, py + dj * mov});
+                            vertex.push_back({px + di * mov, py + dj * mov});
+                        }
+                        workbench_pos.push_back(wbp);
                         continue;
                     }
                     if (map_[i][j] != '#') continue;
@@ -185,8 +251,11 @@ namespace WayFinding {
             N1 = vertex.size();
             N2 = random_pos.size();
 
-            for (auto i : workbench_pos)  
-                workbench_to_gid.push_back(lower_bound(begin(vertex), end(vertex), i) - begin(vertex));
+            for (auto i : workbench_pos) {
+                std::vector<int> wbpid;
+                for (auto j : i) wbpid.push_back(lower_bound(begin(vertex), end(vertex), j) - begin(vertex));
+                workbench_to_gid.push_back(wbpid);
+            }
             for (int i = 0; i < map_size_; i++) {
                 for (int j = 0; j < map_size_; j++) {
                     random_pos_to_id[i][j] = i * map_size_ + j;
@@ -247,7 +316,7 @@ namespace WayFinding {
                     // if (dist2[i][j] <= d) continue;
                     // dist2[i][j] = d;
                     // nxt2[i][j] = j;
-                    for (int wb : workbench_to_gid) {
+                    for (auto wbv : workbench_to_gid) for (int wb : wbv) {
                         if (dist[wb] > dist[j] + dist1[j][wb]) {
                             dist[wb] = dist[j] + dist1[j][wb];
                             nxt2[i][wb] = j;

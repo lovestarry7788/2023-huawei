@@ -27,6 +27,64 @@
 #include <climits>
 #include <ctime>
 
+
+// 手玩方法，呆滞数据
+namespace Solution4 {
+    // 走路略快，有些许错配
+    std::vector<std::vector<std::pair<int,int>>> route =
+    {
+        {
+            {15, 13},
+            {14, 13},
+            {}
+        },
+        {
+
+        },
+        {
+
+        },
+        {
+
+        },
+    };
+    using namespace Input;
+    Dispatch::Plan RobotReplan(int robot_id) {
+        Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
+        if (route[robot_id].size()) {
+            auto p = route[robot_id].front();
+            bst.buy_workbench = p.first;
+            bst.sell_workbench = p.second;
+            route[robot_id].erase(begin(route[robot_id]));
+        }
+        Dispatch::Plan bst2; bst2.buy_workbench = bst2.sell_workbench = -1;
+        if (route[robot_id].size()) {
+            auto p = route[robot_id].front();
+            bst2.buy_workbench = p.first;
+            bst2.sell_workbench = p.second;
+        }
+//        Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+        return bst;
+        // Dispatch::UpdatePlan(robot_id, bst);
+        // Dispatch::plan2_[robot_id] = bst2;
+    }
+    void Solve() {
+        Input::ScanMap();
+        Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
+        Dispatch::avoidCollide = false;
+        while (Input::ScanFrame()) {
+            Log::print("frame", Input::frameID);
+            Dispatch::UpdateCompleted();
+            // Dispatch::UpdateAll();
+            Dispatch::ManagePlan();
+            Dispatch::ControlWalk();
+            Output::Print(Input::frameID);
+            assert(Input::frameID < 2000);
+        }
+    }
+}
+
+
 /*
 // 测试Simulator
 namespace Solution7 {
@@ -69,9 +127,11 @@ namespace Solution6 {
         Input::ScanMap();
         Log::print("clock",clock());
         
-        int aim_wb = 8;
+        int aim_wb_gid; double dist;
+        Way[0].nxt_point_wb({10,10}, 13, dist, aim_wb_gid);
+        // Way[0].workbench_to_gid[13][0];
         Point aim;
-        int robot_id = 2;
+        int robot_id = 0;
         Log::print("clock",clock());
         while(Input::ScanFrame()) {
             Log::enable = Input::frameID < 3000 || true;
@@ -79,7 +139,8 @@ namespace Solution6 {
             auto rbt = robot[robot_id];
             if (Input::frameID == 1 || Length(aim - rbt->pos_) < 2e-1) {
                 auto& w = Way[rbt->carry_id_ != 0];
-                aim = w.nxt_point(rbt->pos_, w.workbench_to_gid[aim_wb]);
+                double dist;
+                aim = w.nxt_point(rbt->pos_, aim_wb_gid, dist);
             }
             Log::print("aim", aim);
 
@@ -89,6 +150,129 @@ namespace Solution6 {
             Output::Forward(robot_id, forward);
             Output::Rotate(robot_id, rotate);
 
+            Output::Print(Input::frameID);
+        }
+    }
+}
+
+namespace Solution3 {
+    using namespace Input;
+    using namespace Geometry;
+
+    constexpr int profit_[8] = {0, 3000, 3200, 3400, 7100, 7800, 8300, 29000};
+    constexpr double wait_ratio_ = 20;
+    constexpr int sell_limit_frame_ = 8960;
+    int award_buy(int robot_id, int workbench_id) {
+        return 0;
+    }
+    int award_sell(int robot_id, int workbench_id, int materials) {
+        return 0;
+    }
+    int workbench_remain_num(int workbench_id) {
+        int mat_id = Input::workbench[workbench_id]->type_id_;
+        if (mat_id <= 3) return 0;
+        int num = __builtin_popcount(Input::workbench[workbench_id]->materials_status_) +
+                __builtin_popcount(Dispatch::occupy_[workbench_id].sell_occupy);
+        if (mat_id <= 6) return 2 - num;
+        return 3 - num;
+    }
+    double CalcTime(int o, Point from, int to_workbench) {
+        // return Length(from - workbench[to_workbench]->pos_) / 4;
+        auto& w = WayFinding::Way[o];
+        double dist;
+        int wbpid;
+        w.nxt_point_wb(from, to_workbench, dist, wbpid);
+        // Log::print("CalcTime", o, from, to_workbench, dist);
+        return dist / 4;
+    }
+    Dispatch::Plan RobotReplan(int robot_id) {
+        Log::print("RobotReplan", robot_id, Input::frameID);
+        auto rb = robot[robot_id];
+
+        Dispatch::Plan bst; bst.buy_workbench = bst.sell_workbench = -1;
+        double bst_award_pf = 0; // per frame
+        for (int buy_wb_id = 0; buy_wb_id < K; buy_wb_id++) {
+            auto buy_wb = workbench[buy_wb_id];
+            if (!buy_wb->product_status_ && buy_wb-> frame_remain_ == -1) continue; // 暂不考虑后后运送上的
+            if (Dispatch::occupy_[buy_wb_id].buy_occupy) continue;
+            int mat_id = buy_wb->type_id_; // 购买与出售物品id
+            if (rb->carry_id_ != 0 && rb->carry_id_ != mat_id) continue;
+            // 仅在搭上了顺风车才买
+            // bool P = Input::frameID == 2011;
+            // if (P) Log::print(mat_id, Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_));
+            // if (mat_id >= 4 && Geometry::Dist(rb->x0_, rb->y0_, buy_wb->x0_, buy_wb->y0_) > 1)
+            //     continue;
+
+            double buy_time = 0;
+            double actual_time = 0;
+            if (rb->carry_id_ == 0) {
+                // actual_time = buy_time = rb->CalcTime(buy_wb->pos_);
+                actual_time = buy_time = CalcTime(0, rb->pos_, buy_wb_id);
+                if (!buy_wb->product_status_) // 有产品了也可以在生产时间中，故必须要此判断
+                    buy_time += std::max(0.0, buy_wb-> frame_remain_ / 50.0 - buy_time) * wait_ratio_; // 等待生产
+            }
+            for (int sell_wb_id = 0; sell_wb_id < K; sell_wb_id++) {
+                auto sell_wb = workbench[sell_wb_id];
+                if (!sell_wb->TryToSell(mat_id)) continue; // 暂时只考虑能直接卖的，不考虑产品被拿走可以重新生产的
+                double sell_time = 0;
+                if (rb->carry_id_ == 0) {
+                    // if (!sell_wb->product_status_ && sell_wb-> > 0) 
+                    // TODO: 在生产，且填上当前物品就满了，则结束时间为max{到达，生产完成}。这样来到达送且拿。
+                    // sell_time = rb->CalcTime(buy_wb->pos_, sell_wb->pos_);
+                    sell_time = CalcTime(1, buy_wb->pos_, sell_wb_id);
+                    if (false && workbench_remain_num(sell_wb_id) == 1 && !sell_wb->product_status_) {
+                        // if (sell_wb->frame_remain_ / 50.0 - sell_time > 0) continue;
+                        sell_time += std::max(0.0, sell_wb->frame_remain_ / 50.0 - sell_time) * wait_ratio_;
+                        // 还要保证到了sellwb，能有地方需求该物品。即对占用的预测，不光有占用，还有清除的预测。
+                    }
+                    // sell_time -= rb->CalcTime(buy_wb->pos_);
+                    actual_time += sell_time;
+                    if (Input::frameID + actual_time * 50 > sell_limit_frame_) continue;
+                } else {
+                    sell_time = CalcTime(1, rb->pos_, sell_wb_id);
+                    // sell_time = rb->CalcTime(sell_wb->pos_);
+                }
+
+                if (Dispatch::occupy_[sell_wb_id].sell_occupy >> mat_id & 1) continue;
+
+                int award = award_buy(robot_id, buy_wb_id) +
+                            award_sell(robot_id, sell_wb_id, mat_id) +
+                            profit_[mat_id];
+
+                double award_pf = award / (buy_time + sell_time);
+                if (award_pf > bst_award_pf) {
+                    bst_award_pf = award_pf;
+                    bst.buy_workbench = buy_wb_id;
+                    bst.sell_workbench = sell_wb_id;
+                    bst.mat_id = mat_id;
+                }
+            }
+
+        }
+        if (bst.buy_workbench == bst.sell_workbench && bst.sell_workbench == -1) {
+           Log::print("NoPlan", robot_id);
+        } else {
+           Log::print("UpdatePlan", robot_id, workbench[bst.buy_workbench]->type_id_, workbench[bst.sell_workbench]->type_id_);
+        }
+        return bst;
+        // Dispatch::UpdatePlan(robot_id, bst);
+    }
+    void Solve() {
+        Input::ScanMap();
+        Dispatch::init(RobotReplan, Input::robot_num_, Input::K);
+        Dispatch::avoidCollide = false;
+        Dispatch::enableTwoPlan = false;
+        // occupy.resize(K);
+        // ScanFrame才初始化
+        // for (size_t ri = 0; ri < Input::robot_num_; ri++) {
+        //     RobotReplan(ri); // 开始规划
+        // }
+        while (Input::ScanFrame()) {
+           Log::print("frame", Input::frameID);
+            Dispatch::UpdateCompleted();
+            // Dispatch::UpdateAll();
+            Dispatch::ManagePlan();
+            Dispatch::ControlWalk();
             Output::Print(Input::frameID);
         }
     }
@@ -515,6 +699,6 @@ namespace Solution1 {
 #endif
 
 int main() {
-    Solution6::Solve();
+    Solution4::Solve();
     return 0;
 }

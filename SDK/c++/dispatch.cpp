@@ -4,6 +4,7 @@
 #include "log.h"
 #include "geometry.h"
 #include "simulator.h"
+#include "wayfinding.h"
 #include <cmath>
 #include <algorithm>
 #include <queue>
@@ -21,8 +22,6 @@
 #include <memory>
 #include <climits>
 
-#ifdef FALSE
-
 using namespace Dispatch;
 using namespace Geometry;
 // std::vector<std::vector<Geometry::Point>> Dispatch::forecast_;
@@ -33,6 +32,8 @@ std::vector<Plan> Dispatch::plan_, Dispatch::plan2_;
 // 当前目标在wayfindding中的id，临时的目标（-1表示无）
 std::vector<int> Dispatch::graph_id_, Dispatch::temporal_graph_id_; 
 
+std::vector<Point> Dispatch::aim_point_;
+
 std::vector<Occupy> Dispatch::occupy_;
 
 bool Dispatch::avoidCollide = false;
@@ -40,29 +41,29 @@ bool Dispatch::avoidCollide = false;
 bool Dispatch::enableTwoPlan = false;
 
 // std::function<void(int)> Dispatch::RobotReplan_;
-void (*Dispatch::RobotReplan_)(int);
+Plan (*Dispatch::RobotReplan_)(int);
 
-bool fakeUpdatePlan = false;
-
-void Dispatch::init(void (*RobotReplan)(int), int robot_num, int workbench_num) {
+void Dispatch::init(Plan (*RobotReplan)(int), int robot_num, int workbench_num) {
     RobotReplan_ = RobotReplan;
     movement_.resize(Input::robot_num_);
     plan_.resize(robot_num);
     plan2_.resize(robot_num);
-    graph_id_.resize(robot_num);
-    temporal_graph_id_.resize(robot_num);
+    graph_id_.resize(robot_num, -1);
+    temporal_graph_id_.resize(robot_num, -1);
     occupy_.resize(workbench_num);
+    aim_point_.resize(robot_num, {-1, -1});
 }
 
 // 被robotReplan_调用。更新plan，否则默认继承上帧plan
-void Dispatch::UpdatePlan(int robot_id, Plan plan) {
-    if (fakeUpdatePlan) {
-        plan2_[robot_id] = plan;
-        Log::print("updatefake");
-        return;
-    }
+void Dispatch::UpdatePlan(int robot_id) {
+    // if (fakeUpdatePlan) {
+    //     plan2_[robot_id] = plan;
+    //     Log::print("updatefake");
+    //     return;
+    // }
     // occpuy plan，可只有buy or sell
     // Log::print("UpdatePlan", robot_id, plan.buy_workbench, plan.sell_workbench);
+    Plan plan = RobotReplan_(robot_id);
     if (plan.buy_workbench != -1)
         occupy_[plan.buy_workbench].buy_occupy = true;
     if (plan.sell_workbench != -1)
@@ -75,17 +76,16 @@ void Dispatch::UpdateFake(int robot_id) {
     if (!enableTwoPlan) return;
     int i = robot_id;
     if (plan_[i].sell_workbench == -1) return;
-    fakeUpdatePlan = true;
     Robot robot_bak = *(Input::robot[i]);
     auto robot = Input::robot[i];
     robot->carry_id_ = 0;
     auto wb = Input::workbench[plan_[i].sell_workbench];
     robot->pos_ = wb->pos_;
     // 对速度与方向暂时不调整
-    RobotReplan_(i);
+    plan2_[robot_id] = RobotReplan_(i);
     Input::robot[i] = std::make_shared<Robot>(robot_bak);
-    fakeUpdatePlan = false;
 }
+
 void Dispatch::UpdateAll() {
     // unoccupy all not -1 plan
     for (size_t i = 0; i < plan_.size(); i++) {
@@ -99,7 +99,7 @@ void Dispatch::UpdateAll() {
     for (int i = 0; i < ord.size(); i++) ord[i] = i;
     std::sort(begin(ord), end(ord), [&](int l, int r) {return Input::robot[l]->carry_id_ > Input::robot[r]->carry_id_;});
     for (size_t i = 0; i < plan_.size(); i++) {
-        RobotReplan_(ord[i]);// 手上有东西则更新sell
+        UpdatePlan(ord[i]);// 手上有东西则更新sell
         UpdateFake(ord[i]);
     }
 }
@@ -107,7 +107,7 @@ void Dispatch::UpdateCompleted() {
     for (size_t i = 0; i < plan_.size(); i++) {
         auto plan = plan_[i];
         if (plan.buy_workbench == -1 && plan.sell_workbench == -1 && RobotReplan_) {
-            RobotReplan_(i);
+            UpdatePlan(i);
             UpdateFake(i);
         }
     }
@@ -123,7 +123,8 @@ void Dispatch::ManagePlan(int robot_id, Plan& plan) {
 
     auto robot = Input::robot[robot_id];
     int wi = robot->carry_id_ == 0 ? plan.buy_workbench : plan.sell_workbench;
-    Log::print("ManagePlan", robot_id, robot->workbench_, plan.buy_workbench, plan.sell_workbench);
+    if (wi != -1)
+        Log::print("ManagePlan", robot_id, robot->workbench_, plan.buy_workbench, plan.sell_workbench, Length(Input::workbench[wi]->pos_ - robot->pos_), Input::workbench[wi]->pos_);
     if (robot->workbench_ == wi && wi != -1) { // 距离可以进行买卖
         if (robot->carry_id_ == 0 && Input::workbench[wi]->product_status_) {
             Output::Buy(robot_id);
@@ -131,23 +132,34 @@ void Dispatch::ManagePlan(int robot_id, Plan& plan) {
             // Plan out = plan; out.sell_workbench = -1;
             // unoccupy_queue_.push(out);
             plan.buy_workbench = -1;
+            graph_id_[robot_id] = -1;
         } else if (robot->carry_id_ != 0 && Input::workbench[wi]->TryToSell(robot->carry_id_)) {
             Output::Sell(robot_id);
             occupy_[wi].sell_occupy &= ((unsigned)1 << 31) - 1 - (1<<robot->carry_id_);
             // Plan out = plan; out.buy_workbench = -1;
             // unoccupy_queue_.push(out);
             plan.sell_workbench = -1;
+            graph_id_[robot_id] = -1;
         } 
     }
 }
 
 std::pair<double,double> Dispatch::ChooseToPointFix(int ri, int graphid) {
+    // Log::print("ChooseToPoint", ri, graphid);
     double forward, rotate;
     if (graphid == -1) {
         forward = rotate = 0;
     } else {
         auto robot = Input::robot[ri];
-        robot->ToPoint(WayFinding::nxt_point(robot->carry_id_ != 0, robot->pos_, graphid) , forward, rotate);
+        if (aim_point_[ri] == Point{-1, -1} || Length(robot->pos_ - aim_point_[ri]) < 2e-1) {
+            auto& w = WayFinding::Way[robot->carry_id_ != 0];
+            double dist;
+            aim_point_[ri] = w.nxt_point(robot->pos_, graphid, dist);
+            if (aim_point_[ri] == Point{-1, -1})
+                Log::print("hav goal can't goto", ri);
+        }
+        robot->ToPoint_1(aim_point_[ri], forward, rotate);
+        // robot->ToPoint(WayFinding::nxt_point(robot->carry_id_ != 0, robot->pos_, graphid) , forward, rotate);
     }
     return std::make_pair(forward, rotate);
 }
@@ -190,13 +202,19 @@ std::pair<double,double> Dispatch::ChooseToPoint(int ri) {
 void Dispatch::ControlWalk() {
     
     for (size_t ri = 0; ri < plan_.size(); ri++) {
+        auto robot = Input::robot[ri];
         int wi = robot->carry_id_ == 0 ? plan_[ri].buy_workbench : plan_[ri].sell_workbench;
-        graph_id_[ri] = WayFinding::get_workbench_id(wi);
+        if (wi != -1 && graph_id_[ri] == -1) {
+            Log::print("ControlWalk graph_id_[ri] == -1", ri);
+            auto& w = WayFinding::Way[robot->carry_id_ != 0];
+            double dist;
+            w.nxt_point_wb(robot->pos_, wi, dist, graph_id_[ri]);
+        }
     }
     if (avoidCollide) AvoidCollide();
     for (size_t ri = 0; ri < plan_.size(); ri++) {
         movement_[ri] = ChooseToPoint(ri);
-        Log::print("ControlWalk", ri, movement_[ri].first, movement_[ri].second);
+        // Log::print("ControlWalk", ri, movement_[ri].first, movement_[ri].second);
     }
     for (size_t ri = 0; ri < plan_.size(); ri++) {
         double& forward = movement_[ri].first;
@@ -231,10 +249,11 @@ double Dispatch::ForecastCollide(const std::vector<Point>& a, const std::vector<
 // int route_cnt_; // 下一个目标点id
 
 void Dispatch::AvoidCollide() {
+#ifdef FALSE
     std::vector<std::vector<std::vector<Point>>> forecast(Input::robot_num_);
     // t
     for (int ri = 0; ri < Input::robot_num_; ri++) {
-        std::function<std::pair<double,double>(Robot&)> action = [&](Robot&) {
+        std::function<std::pair<double,double>(const Robot&)> action = [&](const Robot&) {
             return ChooseToPointFix(ri, graph_id_[ri]); // 强制按原来的计划试试
         };
         forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
@@ -271,7 +290,7 @@ void Dispatch::AvoidCollide() {
         // 延长检测为安全确保的时间
         for (auto i : collide_robot) {
             std::function<std::pair<double,double>()> action = [&]() {
-                return ChooseToPoint(i); // 按目前计划走
+                return ChooseToPoint(i); // 按目前计划走，默认不改变当前计划（避让计划）
             };
             forecast[i][0] = Simulator::SimuFrames(*Input::robot[i], action, forecast_oneway_safe_num_, forecast_sampling_);
         }
@@ -289,7 +308,7 @@ void Dispatch::AvoidCollide() {
                 // Log::print("not better", bst_dist, d_min);
                 if (d_min > bst_dist) {
                     bst_dist = d_min;
-                    movement_best = movement_;
+                    temporal_graph_id_best = temporal_graph_id_;
                 }
                 if (d_min < collide_dist_)
                     return false;
@@ -317,7 +336,7 @@ void Dispatch::AvoidCollide() {
                 auto rotate = choose[ci].second;
                 // if (fabs(forward - robot->GetLinearVelocity()) < 2) continue; // 要降就降猛一点，否则到时候来不及
                 if (forecast[ri].size() <= ci+1) {
-                    std::function<std::pair<double,double>()> action = [&]() {
+                    std::function<std::pair<double,double>(const Robot&)> action = [&](const Robot&) {
                         return std::make_pair(forward, rotate);
                     };
                     forecast[ri].push_back(Simulator::SimuFrames(*Input::robot[ri], action, forecast_num_, forecast_sampling_));
@@ -348,18 +367,18 @@ void Dispatch::AvoidCollide() {
                     return false;
                 return true;
             }
+            if (dfs2(cur+1, dec)) return true;
             int ri = collide_robot[cur];
             auto robot = Input::robot[ri];
-            // int source = route_[route_cnt_ - 1];
-            if (dfs2(cur+1, dec)) return true;
-            int o = robot->carry_id_ != 0;
+            auto& way = WayFinding::Way[robot->carry_id_ != 0];
+
             // 从重要到轻，每次层的上限为上层的2（可调参数）倍。暂定优先级最高的不搜路径。
-            const auto& dist_order = dist_order_[o][WayFinding::get_random_id(robot->pos_)];
+            auto dist_order = way.dist_order(robot->pos_);
             int maxci = std::min(cur == 0 ? 1ull : forecast[cur-1].size() * 2, dist_order.size());
             for (int ci = 0; ci < maxci; ci++) {
                 temporal_graph_id_[ri] = dist_order[ci];
                 if (forecast[ri].size() <= ci+1) {
-                    std::function<std::pair<double,double>(Robot&)> action = [&](Robot& robot) {
+                    std::function<std::pair<double,double>(const Robot&)> action = [&](const Robot& robot) {
                         double forward, rotate;
                         robot->ToPoint(WayFinding::nxt_point(robot->carry_id_ != 0, robot->pos_, temporal_graph_id_[ri]) , forward, rotate);
                         return std::make_pair(forward, rotate);
@@ -378,6 +397,7 @@ void Dispatch::AvoidCollide() {
             Log::print("No_solution");
         }
     }
+#endif
 }
 
 
@@ -385,5 +405,3 @@ void Dispatch::AvoidCollide() {
 // void Dispatch::AvoidStuck() {
 
 // }
-
-#endif
