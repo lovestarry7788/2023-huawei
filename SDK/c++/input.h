@@ -4,9 +4,22 @@
 #include "geometry.h"
 #include "workbench.h"
 #include "robot.h"
+#include <algorithm>
+#include <queue>
 #include <vector>
-#include <memory>
+#include <utility>
 #include <iostream>
+#include <array>
+#include <cmath>
+#include <cstring>
+#include <cstdio>
+#include <unordered_map>
+#include <map>
+#include <functional>
+#include <unordered_set>
+#include <set>
+#include <memory>
+#include <climits>
 
 namespace Input {
     static constexpr int robot_num_ = 4;

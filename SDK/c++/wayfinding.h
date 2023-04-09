@@ -8,6 +8,16 @@
 #include <utility>
 #include <iostream>
 #include <array>
+#include <cmath>
+#include <cstring>
+#include <cstdio>
+#include <unordered_map>
+#include <map>
+#include <functional>
+#include <unordered_set>
+#include <set>
+#include <memory>
+#include <climits>
 
 namespace WayFinding {
     using Route = std::vector<Geometry::Point>;
