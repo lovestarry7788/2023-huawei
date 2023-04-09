@@ -2,18 +2,18 @@
 #define HW2023_WAYFINDING_H
 
 #include "geometry.h"
+#include <cmath>
 #include <algorithm>
 #include <queue>
-#include <vector>
-#include <utility>
-#include <iostream>
-#include <array>
-#include <cmath>
 #include <cstring>
 #include <cstdio>
 #include <unordered_map>
 #include <map>
+#include <iostream>
+#include <utility>
 #include <functional>
+#include <vector>
+#include <unordered_map>
 #include <unordered_set>
 #include <set>
 #include <memory>
