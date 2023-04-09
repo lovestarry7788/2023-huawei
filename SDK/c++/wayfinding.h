@@ -141,7 +141,7 @@ namespace WayFinding {
                 for (int j = 0; j < map_size_; j++) {
                     double px = j * 0.5 + 0.25;
                     double py = (map_size_ - i - 1) * 0.5 + 0.25;
-                    random_pos.push_back(Point{px + 0.249, py + 0.249});
+                    random_pos.push_back(Point{px, py});
                     if (map_[i][j] == 'A') 
                         continue;
                     if ('1' <= map_[i][j] && map_[i][j] <= '9') {
@@ -154,10 +154,16 @@ namespace WayFinding {
                                                                                 {1,  1},
                                                                                 {-1, -1},
                                                                                 {-1, 1}}) {
-                        joint_obs.push_back({px + dj * 0.25, py - di * 0.25});
+                        
 
                         int ni = di + i, nj = dj + j;
                         if (ni < 0 || ni >= map_size_ || nj < 0 || nj >= map_size_) continue;
+                        
+                        // 仅在周围生成点
+                        if (map_[ni][nj] != '#')
+                            joint_obs.push_back({px + dj * 0.25, py - di * 0.25});
+                        
+                        // 选取到拐点
                         if (!(map_[ni][nj] != '#' && map_[ni][j] != '#' && map_[i][nj] != '#')) continue;
                         int minsp = FreeSpace(i, j, di, dj, 3); // 自动计算过道大小.
                         if (minsp < 2) continue;
