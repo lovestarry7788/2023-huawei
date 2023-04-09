@@ -31,8 +31,8 @@ void Input::ScanMap() {
     for(int i = 0; i < map_size_; ++i) {
         for(int j = 0; j < map_size_; ++j) {
             scanf("\n%c",&map_[i][j]);
-            Log::print("i: ", i, "j: ", j, "map_[i][j]: ", map_[i][j]);
             K += map_[i][j] >= '1' && map_[i][j] <= '9';
+//            if(map_[i][j] >= '1' && map_[i][j] <= '9') Log::print("K: ", K, "i: ", i, "j: ", j, "map_[i][j]: ", map_[i][j]);
             if(map_[i][j] == '#') is_obstacle_[i][j] = true;
             else is_obstacle_[i][j] = false;
         }

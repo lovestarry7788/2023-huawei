@@ -29,8 +29,8 @@ public:
     static constexpr double seed_random_rate = 1 + 1.1e-4;
     static constexpr double radius_ = 0.45;
     static constexpr double radius_with_thing_ = 0.53;
-    static constexpr double max_forward_velocity_ = 6 * seed_random_rate;
-    static constexpr double max_backward_velocity_ = -2 * seed_random_rate;
+    static constexpr double max_forward_velocity_ = 7 * seed_random_rate;
+    static constexpr double max_backward_velocity_ = -3 * seed_random_rate;
     static constexpr double density_ = 50;
     static constexpr double max_force_ = 250;
     static constexpr double max_rot_force_ = 50;

@@ -216,7 +216,7 @@ namespace Solution1 {
                 break;
             case 2:
                 if(robot_id == 0 || robot_id == 1) return 0;
-//                else if(robot_id == 2) return workbench[id]->type_id_ == 6;
+//                else if(robot_id == 3) return workbench[id]->type_id_ == 5 || workbench[id] -> type_id_ == 6 || workbench[id] -> type_id_ == 7;
 //                else if(robot_id == 3) return workbench[id]->type_id_ == 5 || workbench[id]->type_id_ == 6;
                 return 1;
                 break;
@@ -500,6 +500,15 @@ namespace Solution1 {
 
                 // 控制机器人运动到某点 或者 买东西。
                 for (int id = 0; id < 4; ++id) { // 未携带物品，打算去买的。
+                    if(map_number_ == 2) {
+                        double forward, rotate;
+                        if(id == 2) {
+                            if(robot[2] -> v.empty())
+                                robot[2] -> v.push_back({K-2, 0 , 0});
+                            robot[id] -> Robot_Control(forward, rotate);
+                            movement_[id] = {forward, rotate};
+                        }
+                    }
                     if (robot[id]->carry_id_ == 0 && robot[id] -> workbench_buy_ != -1) { // 如果有则找到最优的策略，跑去买。
                         // 身边有 workbench
                         if (robot[id]->workbench_ == robot[id]->workbench_buy_) {
